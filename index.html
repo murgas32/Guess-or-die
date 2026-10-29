@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guess or Die</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main id="setup" class="screen">
+  <h1 class="title">Guess or Die</h1>
+  <p class="tag">One wrong answer sends you back to the start.</p>
+  <p id="setupLabel">How many players?</p>
+  <div class="count" role="group" aria-labelledby="setupLabel">
+    <button data-n="1">1</button>
+    <button data-n="2">2</button>
+    <button data-n="3">3</button>
+    <button data-n="4">4</button>
+  </div>
+  <p class="note">Everyone plays on this computer, taking turns. First back to the start wins.</p>
+</main>
+
+<main id="game" class="screen" hidden>
+  <button id="menuBtn" class="menu-btn">Main menu</button>
+  <div id="stage">
+  <div id="board" aria-label="Game board">
+    <section id="center">
+      <h2 class="title small">Guess or Die</h2>
+      <p id="msg" aria-live="polite"></p>
+      <div id="dice" aria-label="Die"><div class="cube" id="cube"></div></div>
+      <button id="rollBtn" disabled>Roll the die</button>
+      <ol id="order"></ol>
+      <ul id="log" aria-label="Game log"></ul>
+    </section>
+  </div>
+  </div>
+  <section id="front" class="front" hidden>
+    <div class="front-card" id="frontCard">
+      <div id="frontIcon" class="front-icon" aria-hidden="true"></div>
+      <h2 id="frontTitle"></h2>
+      <p id="frontText" aria-live="polite"></p>
+      <div id="frontBody"></div>
+      <button id="frontBtn">Continue</button>
+    </div>
+  </section>
+</main>
+
+<div id="end" class="screen overlay" hidden>
+  <h2 id="endTitle" class="title"></h2>
+  <p id="endText"></p>
+  <button id="again">Play again</button>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
