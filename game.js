@@ -168,12 +168,14 @@ async function land(p, index) {
   front.hidden = false;
   void front.offsetWidth; // register the start state before animating
   stage.classList.add("to-front");
+  $("game").classList.add("to-front");
   front.classList.add("show");
   $("frontBtn").focus({ preventScroll: true });
   await new Promise((res) => $("frontBtn").addEventListener("click", res, { once: true }));
 
   front.classList.remove("show");
   stage.classList.remove("to-front");
+  $("game").classList.remove("to-front");
   await sleep(500);
   front.hidden = true;
 }

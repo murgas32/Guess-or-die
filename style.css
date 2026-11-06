@@ -65,7 +65,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 #game { padding: .75rem; overflow: hidden; }
 #stage { perspective: 1500px; perspective-origin: 50% 30%; }
 #board {
-  --size: min(96vw, 92vh, 720px);
+  --size: min(88vw, 84vh, 680px);
   width: var(--size);
   height: var(--size);
   display: grid;
@@ -211,7 +211,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(10, 5, 6, .97), rgba(10, 5, 6, .88) 65%, rgba(10, 5, 6, .35));
+  background: linear-gradient(to bottom, rgba(10, 5, 6, .35), rgba(10, 5, 6, .6));
   opacity: 0;
   transition: opacity .4s;
 }
@@ -244,4 +244,111 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   #board, .front, .front-card { transition-duration: .01s; }
+}
+
+#stage { position: relative; z-index: 1; }
+
+/* Wooden table (same 3D space as the board, so it tilts and moves with it) */
+#board { position: relative; }
+#board::before { /* table top */
+  content: "";
+  position: absolute;
+  inset: -6%;
+  border-radius: 7px;
+  border: 1px solid #5a3a24;
+  background:
+    linear-gradient(115deg, transparent 28%, rgba(255, 235, 200, .13) 44%, transparent 58%),
+    radial-gradient(ellipse at 88% 18%, rgba(255, 170, 80, .22), transparent 55%),
+    repeating-linear-gradient(90deg, transparent 0 118px, rgba(0, 0, 0, .35) 118px 120px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.18' numOctaves='4' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.04  0 0 0 0 0.02  0 0 0 2.4 -0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23w%29'/%3E%3C/svg%3E"),
+    #4b2d1b;
+  box-shadow:
+    0 2px 0 #3a2314, 0 4px 0 #2e1b10, 0 6px 0 #24150c, 0 8px 0 #1a0f09, 0 10px 0 #120a06,
+    0 40px 60px rgba(0, 0, 0, .85),
+    inset 0 0 0 2px rgba(255, 220, 170, .08), inset 0 0 50px rgba(0, 0, 0, .55);
+  transform: translateZ(-18px);
+}
+
+/* Skybox: a living room built from six CSS 3D planes around the camera.
+   The camera pitch (rotateX) animates in sync with the board: looking down at the
+   table by default, looking up at the room while an encounter is shown. */
+#room { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #0d0807; perspective: 900px; }
+#roomBox {
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(-52deg);
+  transition: transform .45s cubic-bezier(.5, 0, .2, 1);
+}
+#game.to-front #roomBox { transform: rotateX(-3deg); }
+.rf { position: absolute; overflow: hidden; backface-visibility: hidden; }
+.rf i { position: absolute; display: block; }
+.vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(5, 2, 3, .85) 100%); }
+
+.wall {
+  width: 1600px; height: 900px; left: -800px; top: -450px;
+  border-bottom: 40px solid #160d0a; /* baseboard */
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, .55), transparent 130px),
+    linear-gradient(to top, #2b1c16 0 330px, #4a3329 330px 338px, transparent 338px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .035) 0 3px, transparent 3px 64px),
+    #4a3330;
+}
+.wall::before { /* wainscot panels */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 290px;
+  background: repeating-linear-gradient(90deg, transparent 0 240px, rgba(0, 0, 0, .4) 240px 246px);
+}
+.back  { transform: translate3d(0, -100px, -800px); }
+.left  { transform: translate3d(-800px, -100px, 0) rotateY(90deg); }
+.right { transform: translate3d(800px, -100px, 0) rotateY(-90deg); }
+
+.floor, .ceiling { width: 1600px; height: 1600px; left: -800px; top: -800px; }
+.floor {
+  transform: translateY(350px) rotateX(90deg);
+  background:
+    radial-gradient(circle at 50% 78%, rgba(255, 170, 80, .22), transparent 40%),
+    repeating-linear-gradient(90deg, transparent 0 160px, rgba(0, 0, 0, .55) 160px 164px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.12' numOctaves='4' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.04  0 0 0 0 0.02  0 0 0 2.0 -0.55'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23w%29'/%3E%3C/svg%3E"),
+    #4d3120;
+}
+.ceiling { transform: translateY(-550px) rotateX(-90deg); background: repeating-linear-gradient(90deg, #1b1210 0 380px, #120b09 380px 400px); }
+.rug {
+  width: 900px; height: 640px; left: -450px; top: -320px;
+  transform: translate3d(0, 348px, -300px) rotateX(90deg);
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, .035) 0 2px, transparent 2px 7px),
+    radial-gradient(ellipse, #6a2830 0 50%, #4c1820 100%);
+  box-shadow: inset 0 0 0 22px #2b1014, inset 0 0 0 28px #b8975a, inset 0 0 0 44px #5a1d26;
+  overflow: visible;
+}
+
+/* Back wall: fireplace and a portrait */
+.mantel { left: 590px; bottom: 0; width: 420px; height: 330px; background: #2a1d18; border: 14px solid #3d2a20; border-bottom: 0; box-shadow: 0 -14px 0 8px #4a3329, 0 0 30px rgba(0, 0, 0, .7); }
+.mantel::after { content: ""; position: absolute; inset: 40px 40px 0; background: radial-gradient(ellipse at 50% 100%, #ffb04a, #a8401a 38%, #140805 78%); box-shadow: inset 0 0 30px #000; }
+.fire { inset: 0; background: radial-gradient(ellipse at 50% 88%, rgba(255, 140, 50, .38), transparent 46%); animation: flame 4s ease-in-out infinite alternate; }
+@keyframes flame { from { opacity: .65; } to { opacity: 1; } }
+.portrait { left: 700px; top: 170px; width: 200px; height: 270px; border: 12px solid #5a3b22; box-shadow: 0 8px 16px rgba(0, 0, 0, .7), inset 0 0 18px rgba(0, 0, 0, .7);
+  background: radial-gradient(circle at 50% 34%, #15100c 0 13%, transparent 14%), radial-gradient(ellipse at 50% 100%, #15100c 0 36%, transparent 37%), linear-gradient(#6b5a43, #3a2e22); }
+
+/* Left wall: window with curtains */
+.window { left: 620px; top: 150px; width: 360px; height: 480px; border: 14px solid #1d1210;
+  background: linear-gradient(#1d1210, #1d1210) center / 100% 10px no-repeat, linear-gradient(#1d1210, #1d1210) center / 10px 100% no-repeat, linear-gradient(170deg, #8aa3c0, #1f2d42);
+  box-shadow: 0 0 80px rgba(130, 160, 200, .4), inset 0 0 20px rgba(0, 0, 0, .6); }
+.curtain { top: 110px; width: 130px; height: 620px; background: repeating-linear-gradient(90deg, #4a1820 0 14px, #34101a 14px 28px); box-shadow: 0 0 20px rgba(0, 0, 0, .6); }
+.curtain.a { left: 480px; } .curtain.b { left: 990px; }
+
+/* Right wall: bookshelf and standing lamp */
+.books { left: 560px; top: 90px; width: 640px; height: 730px; border: 14px solid #2a1a10;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 168px, #2a1a10 168px 182px),
+    repeating-linear-gradient(90deg, #5a2a2a 0 16px, #2a3a4a 16px 31px, #4a3a22 31px 52px, #3a2a40 52px 66px, #6a5a3a 66px 82px),
+    #140c08;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, .8); }
+.lamp { left: 160px; bottom: 0; width: 140px; height: 560px; overflow: visible;
+  background: linear-gradient(#2a1a10, #2a1a10) 50% 130px / 10px 400px no-repeat, linear-gradient(#2a1a10, #2a1a10) 50% 100% / 90px 22px no-repeat;
+  filter: drop-shadow(0 0 40px rgba(255, 170, 80, .85)); }
+.lamp::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 140px; background: linear-gradient(#ffdca2, #d89a52); clip-path: polygon(22% 0, 78% 0, 100% 100%, 0 100%); }
+
+@media (prefers-reduced-motion: reduce) {
+  #roomBox { transition-duration: .01s; }
+  .fire { animation: none; }
 }
