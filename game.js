@@ -14,7 +14,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const PIPS = { 1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
 // Rotation (x, y) that brings each face to the front of the cube.
 const FACE_ROT = { 1: [0, 0], 2: [0, -90], 3: [-90, 0], 4: [90, 0], 5: [0, 90], 6: [0, 180] };
-let spinX = 0, spinY = 0;
+let spinX = 0, spinY = 0, yaw = 0;
 
 let players = [];
 let order = [];
@@ -61,12 +61,12 @@ function buildDice() {
   showFace(1, false);
 }
 
-// Turns the cube so face v points at the player; extra full turns make it tumble.
+// Shows face v on TOP of the cube (it rests on the table); extra full turns make it tumble.
 function showFace(v, tumble) {
   const [rx, ry] = FACE_ROT[v];
-  if (tumble) { spinX += 720; spinY += 360; }
+  if (tumble) { spinX += 720; spinY += 360; yaw = Math.round(Math.random() * 70 - 35); }
   $("cube").style.transform =
-    `rotateX(-18deg) rotateY(-22deg) rotateX(${spinX + rx}deg) rotateY(${spinY + ry}deg)`;
+    `rotateY(${yaw}deg) rotateX(90deg) rotateX(${spinX + rx}deg) rotateY(${spinY + ry}deg)`;
 }
 
 function renderTokens(hopId) {
@@ -74,10 +74,10 @@ function renderTokens(hopId) {
   players.forEach((p) => {
     const el = document.createElement("div");
     el.className = "token";
-    el.style.background = p.color;
+    el.style.setProperty("--c", p.color);
     el.title = p.name;
     if (p.id === hopId) el.classList.add("hop");
-    el.textContent = p.id + 1;
+    el.innerHTML = `<i class="pawn-shadow"></i><i class="pawn">${p.id + 1}</i>`;
     tiles[p.progress % BOARD_SIZE].appendChild(el);
   });
 }
@@ -111,8 +111,13 @@ async function askRoll(p, prompt) {
   await new Promise((res) => btn.addEventListener("click", res, { once: true }));
   btn.disabled = true;
   const value = 1 + Math.floor(Math.random() * 6);
+  const dice = $("dice"), shadow = $("dieShadow");
+  dice.classList.add("toss");
+  shadow.classList.add("toss");
   showFace(value, true);
-  await sleep(1050);
+  await sleep(1100);
+  dice.classList.remove("toss");
+  shadow.classList.remove("toss");
   return value;
 }
 
@@ -146,8 +151,8 @@ async function move(p, steps) {
   }
 }
 
-// Landing scene: the camera looks up from the board toward the horizon (the board
-// slides down), the tile's encounter comes in from above, then the camera looks back down. Sprint 2 will fill #frontBody
+// Landing scene: the player's head turns up from the table to look straight ahead (the whole
+// room rotates with the camera), the encounter appears, then the head looks back down. Sprint 2 will fill #frontBody
 // with the question, answer options and timer, and apply benefit/punishment effects.
 const ENCOUNTERS = {
   Q: { name: "a question tile", icon: "?", text: "A question waits for you. Questions arrive in Sprint 2." },
@@ -155,28 +160,48 @@ const ENCOUNTERS = {
   P: { name: "a punishment tile", icon: "\u2620", text: "Something is waiting in the dark. Effects arrive in Sprint 2." },
 };
 
+// Measures the frame rate for `ms` milliseconds.
+function measureFps(ms) {
+  return new Promise((resolve) => {
+    let frames = 0;
+    const t0 = performance.now();
+    const tick = (t) => {
+      frames++;
+      if (t - t0 < ms) requestAnimationFrame(tick);
+      else resolve(frames / ((t - t0) / 1000));
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+function setLite(on) {
+  $("game").classList.toggle("lite", on);
+  $("qualityBtn").textContent = on ? "Quality: low" : "Quality: high";
+}
+
 async function land(p, index) {
   const type = LAYOUT[index];
   const info = ENCOUNTERS[type];
-  const stage = $("stage"), front = $("front"), card = $("frontCard");
+  const front = $("front"), card = $("frontCard");
 
   // Fill the scene first, then start board and message together so the move is one quick motion.
   card.className = "front-card t-" + type;
   $("frontIcon").textContent = info.icon;
   $("frontTitle").textContent = `${p.name} landed on ${info.name}`;
   $("frontText").textContent = info.text;
+  const probe = $("game").classList.contains("lite") ? null : measureFps(650);
   front.hidden = false;
   void front.offsetWidth; // register the start state before animating
-  stage.classList.add("to-front");
   $("game").classList.add("to-front");
   front.classList.add("show");
   $("frontBtn").focus({ preventScroll: true });
   await new Promise((res) => $("frontBtn").addEventListener("click", res, { once: true }));
 
+  if (probe && (await probe) < 30) { setLite(true); log("Low quality enabled for smoother motion."); }
+
   front.classList.remove("show");
-  stage.classList.remove("to-front");
   $("game").classList.remove("to-front");
-  await sleep(500);
+  await sleep(650);
   front.hidden = true;
 }
 
@@ -206,6 +231,21 @@ function finish(winner) {
   $("again").focus();
 }
 
+// The browser draws a surface the first time it comes into view, which makes the first camera
+// move stutter. Look up and back down once, hidden behind a cover, so everything is drawn already.
+async function warmUp() {
+  const game = $("game"), cover = $("cover");
+  cover.hidden = false;
+  game.classList.add("warm");
+  await sleep(500);
+  game.classList.add("to-front");
+  await sleep(700);
+  game.classList.remove("to-front");
+  await sleep(500);
+  game.classList.remove("warm");
+  cover.hidden = true;
+}
+
 function start(n) {
   players = Array.from({ length: n }, (_, i) => ({
     id: i,
@@ -218,7 +258,7 @@ function start(n) {
   buildBoard();
   buildDice();
   renderTokens();
-  play();
+  warmUp().then(play);
 }
 
 document.querySelectorAll(".count button").forEach((b) =>
@@ -228,3 +268,24 @@ $("again").addEventListener("click", () => location.reload());
 $("menuBtn").addEventListener("click", () => {
   if (confirm("Leave the game and return to the main menu?")) location.reload();
 });
+$("qualityBtn").addEventListener("click", () => setLite(!$("game").classList.contains("lite")));
+
+// Rasterize the generated SVG textures once, so they are plain bitmaps while the camera moves.
+function bakeTextures() {
+  ["--wood", "--plaster"].forEach((name) => {
+    const m = /url\("(.*)"\)/.exec(getComputedStyle(document.documentElement).getPropertyValue(name));
+    if (!m) return;
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const c = document.createElement("canvas");
+        c.width = img.naturalWidth || 512;
+        c.height = img.naturalHeight || 512;
+        c.getContext("2d").drawImage(img, 0, 0);
+        c.toBlob((b) => b && document.documentElement.style.setProperty(name, `url("${URL.createObjectURL(b)}")`));
+      } catch (e) { /* keep the SVG texture */ }
+    };
+    img.src = m[1];
+  });
+}
+bakeTextures();

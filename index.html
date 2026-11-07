@@ -22,29 +22,35 @@
 </main>
 
 <main id="game" class="screen" hidden>
-  <div id="room" aria-hidden="true">
+  <div id="room" aria-label="Living room">
     <div id="roomBox">
-      <div class="rf wall back"><i class="mantel"></i><i class="fire"></i><i class="portrait"></i></div>
-      <div class="rf wall left"><i class="curtain a"></i><i class="window"></i><i class="curtain b"></i></div>
-      <div class="rf wall right"><i class="books"></i><i class="lamp"></i></div>
-      <div class="rf floor"></div>
-      <div class="rf rug"></div>
-      <div class="rf ceiling"></div>
+      <div class="p back" style="--w:4800px;--h:2220px;--y:160px;--z:-2600px"><i class="window"></i><i class="curtain a"></i><i class="curtain b"></i><i class="sofa"></i><i class="frame a"></i><i class="frame b"></i></div>
+      <div class="p side" style="--w:4600px;--h:2220px;--x:-2400px;--y:160px;--z:-300px;--r:rotateY(90deg)"><i class="books"></i></div>
+      <div class="p side" style="--w:4600px;--h:2220px;--x:2400px;--y:160px;--z:-300px;--r:rotateY(-90deg)"><i class="hearth"></i></div>
+      <div class="p floor" style="--w:4800px;--h:4600px;--y:1270px;--z:-300px;--r:rotateX(90deg)"></div>
+      <div class="p rug" style="--w:1700px;--h:1250px;--y:1268px;--z:240px;--r:rotateX(90deg)"></div>
+      <div class="p tabletop" style="--w:960px;--h:800px;--y:760px;--z:240px;--r:rotateX(90deg)"></div>
+      <div id="board" aria-label="Game board"></div>
+      <div id="dieShadow"></div>
+      <div id="dice" aria-label="Die"><div class="cube" id="cube"></div></div>
+      <div class="p tablelight" style="--w:1000px;--h:840px;--y:753px;--z:240px;--r:rotateX(90deg)"></div>
+      <div class="p cone" style="--w:1500px;--h:965px;--y:278px;--z:240px"></div>
+      <div class="p cord" style="--w:5px;--h:645px;--y:-628px;--z:240px"></div>
+      <div class="p shade" style="--w:300px;--h:100px;--y:-255px;--z:240px"></div>
+      <div class="p bloom" style="--w:900px;--h:900px;--y:-225px;--z:244px"></div>
     </div>
     <i class="vignette"></i>
   </div>
   <button id="menuBtn" class="menu-btn">Main menu</button>
-  <div id="stage">
-  <div id="board" aria-label="Game board">
-    <section id="center">
+  <div id="hud">
+    <div id="hudTop">
       <h2 class="title small">Guess or Die</h2>
       <p id="msg" aria-live="polite"></p>
-      <div id="dice" aria-label="Die"><div class="cube" id="cube"></div></div>
-      <button id="rollBtn" disabled>Roll the die</button>
-      <ol id="order"></ol>
-      <ul id="log" aria-label="Game log"></ul>
-    </section>
-  </div>
+    </div>
+    <ol id="order"></ol>
+    <ul id="log" aria-label="Game log"></ul>
+    <button id="rollBtn" disabled>Roll the die</button>
+    <button id="qualityBtn">Quality: high</button>
   </div>
   <section id="front" class="front" hidden>
     <div class="front-card" id="frontCard">
@@ -61,6 +67,10 @@
   <h2 id="endTitle" class="title"></h2>
   <p id="endText"></p>
   <button id="again">Play again</button>
+</div>
+
+<div id="cover" class="screen overlay" hidden>
+  <p>Preparing the room&hellip;</p>
 </div>
 
 <script src="game.js"></script>
