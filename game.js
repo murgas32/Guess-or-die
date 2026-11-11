@@ -28,15 +28,40 @@ function ringPos(i) {
   return [24 - i, 0];
 }
 
+// Emblem drawn on each kind of tile (see style.css). The start tile gets a 3D pedestal instead.
+const GLYPHS = {
+  Q: '<span class="g-q"><b>?</b></span>',
+  B: '<span class="g-b"><i class="salt"></i><i class="flame"></i><i class="wax"></i></span>',
+  P: '<span class="g-p"><i class="tri"></i><i class="eye"></i></span>',
+  S: "",
+};
+
+function buildPedestal() {
+  const ped = document.createElement("div");
+  ped.className = "ped";
+  [["base", 76, 76, 8, 0], ["col", 50, 50, 30, 8], ["cap", 64, 64, 6, 38]].forEach(([cls, w, d, h, z]) => {
+    const box = document.createElement("div");
+    box.className = "box " + cls;
+    box.style.cssText = `--w:${w}px;--d:${d}px;--h:${h}px;--z:${z}px`;
+    box.innerHTML = '<i class="f top"></i><i class="f n"></i><i class="f s"></i><i class="f e"></i><i class="f w"></i>';
+    ped.appendChild(box);
+  });
+  return ped;
+}
+
 function buildBoard() {
   const board = $("board");
   tiles = [];
+  const art = document.createElement("div");
+  art.id = "boardArt";
+  board.appendChild(art);
   for (let i = 0; i < BOARD_SIZE; i++) {
     const [row, col] = ringPos(i);
     const t = document.createElement("div");
     t.className = "tile t-" + LAYOUT[i];
     t.style.gridArea = `${row + 1} / ${col + 1}`;
-    t.textContent = SYMBOLS[LAYOUT[i]];
+    t.innerHTML = GLYPHS[LAYOUT[i]];
+    if (LAYOUT[i] === "S") t.appendChild(buildPedestal());
     const tk = document.createElement("div");
     tk.className = "tokens";
     t.appendChild(tk);
@@ -179,30 +204,138 @@ function setLite(on) {
   $("qualityBtn").textContent = on ? "Quality: low" : "Quality: high";
 }
 
+let questionDeck = [];
+function getNextQuestion() {
+  if (!questionDeck.length) {
+    questionDeck = (typeof QUESTIONS !== "undefined" && QUESTIONS.length)
+      ? [...QUESTIONS].sort(() => Math.random() - 0.5)
+      : [];
+  }
+  return questionDeck.pop();
+}
+
 async function land(p, index) {
   const type = LAYOUT[index];
   const info = ENCOUNTERS[type];
-  const front = $("front"), card = $("frontCard");
+  const front = $("front"), card = $("frontCard"), frontBody = $("frontBody"), frontBtn = $("frontBtn");
 
   // Fill the scene first, then start board and message together so the move is one quick motion.
   card.className = "front-card t-" + type;
+  frontBody.innerHTML = "";
+  frontBtn.hidden = false;
+  frontBtn.textContent = "Continue";
+
+  let onAnswerSelected = null;
+
+  if (type === "Q") {
+    const q = getNextQuestion();
+    if (q) {
+      const catIcon = q.category.split(" ")[0] || "?";
+      $("frontIcon").textContent = catIcon;
+      $("frontTitle").textContent = `${p.name} - ${q.category}`;
+      $("frontText").innerHTML = `
+        <span class="q-en notranslate" translate="no">${q.question_en}</span>
+        <button type="button" class="translate-btn" id="translateBtn">🌐 Traducir al español</button>
+        <div class="q-es-box" id="qEsBox" style="display: none;"></div>
+      `;
+
+      let isTranslated = false;
+      const translateBtn = $("translateBtn");
+      const qEsBox = $("qEsBox");
+      translateBtn.addEventListener("click", () => {
+        isTranslated = !isTranslated;
+        if (isTranslated) {
+          qEsBox.textContent = `Traducción: ${q.question_es}`;
+          qEsBox.style.display = "block";
+          translateBtn.textContent = "🌐 Ocultar traducción";
+        } else {
+          qEsBox.style.display = "none";
+          qEsBox.textContent = "";
+          translateBtn.textContent = "🌐 Traducir al español";
+        }
+      });
+
+      const optContainer = document.createElement("div");
+      optContainer.className = "q-options";
+      const feedback = document.createElement("p");
+      feedback.className = "q-feedback";
+
+      frontBtn.hidden = true;
+
+      const answerPromise = new Promise((resolve) => {
+        onAnswerSelected = resolve;
+      });
+
+      q.options.forEach((optText) => {
+        const btn = document.createElement("button");
+        btn.className = "q-opt-btn notranslate";
+        btn.setAttribute("translate", "no");
+        btn.textContent = optText;
+        const letter = optText.trim()[0];
+        btn.dataset.letter = letter;
+
+        btn.addEventListener("click", () => {
+          optContainer.querySelectorAll(".q-opt-btn").forEach((b) => (b.disabled = true));
+          const isCorrect = letter === q.correct_letter;
+          if (isCorrect) {
+            btn.classList.add("correct");
+            feedback.textContent = "Correct! You survived this tile.";
+            feedback.className = "q-feedback correct";
+            log(`${p.name} answered correctly.`);
+            frontBtn.textContent = "Continue";
+          } else {
+            btn.classList.add("wrong");
+            const correctBtn = optContainer.querySelector(`[data-letter="${q.correct_letter}"]`);
+            if (correctBtn) correctBtn.classList.add("correct");
+            feedback.textContent = `Wrong! ${q.answer}. Returning to start.`;
+            feedback.className = "q-feedback wrong";
+            log(`${p.name} failed the question and was sent back to start!`);
+            p.progress = 0;
+            renderTokens(p.id);
+            frontBtn.textContent = "Back to start";
+          }
+          frontBtn.hidden = false;
+          frontBtn.focus({ preventScroll: true });
+          if (onAnswerSelected) onAnswerSelected();
+        });
+        optContainer.appendChild(btn);
+      });
+
+      frontBody.appendChild(optContainer);
+      frontBody.appendChild(feedback);
+
+      front.hidden = false;
+      void front.offsetWidth;
+      $("game").classList.add("to-front");
+      front.classList.add("show");
+
+      await answerPromise;
+      await new Promise((res) => frontBtn.addEventListener("click", res, { once: true }));
+
+      front.classList.remove("show");
+      $("game").classList.remove("to-front");
+      await sleep(650);
+      front.hidden = true;
+      frontBody.innerHTML = "";
+      return;
+    }
+  }
+
   $("frontIcon").textContent = info.icon;
   $("frontTitle").textContent = `${p.name} landed on ${info.name}`;
   $("frontText").textContent = info.text;
-  const probe = $("game").classList.contains("lite") ? null : measureFps(650);
   front.hidden = false;
   void front.offsetWidth; // register the start state before animating
   $("game").classList.add("to-front");
   front.classList.add("show");
-  $("frontBtn").focus({ preventScroll: true });
-  await new Promise((res) => $("frontBtn").addEventListener("click", res, { once: true }));
-
-  if (probe && (await probe) < 30) { setLite(true); log("Low quality enabled for smoother motion."); }
+  frontBtn.focus({ preventScroll: true });
+  await new Promise((res) => frontBtn.addEventListener("click", res, { once: true }));
 
   front.classList.remove("show");
   $("game").classList.remove("to-front");
   await sleep(650);
   front.hidden = true;
+  frontBody.innerHTML = "";
 }
 
 async function play() {

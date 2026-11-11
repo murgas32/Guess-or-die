@@ -74,27 +74,73 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   transform: translate3d(0, 758px, 240px) rotateX(90deg); /* lies flat on the table top */
   transform-style: preserve-3d;
   border-radius: 4px;
-  background: linear-gradient(rgba(0, 0, 0, .55), rgba(0, 0, 0, .55)), var(--wood) 0 0 / 680px;
-  box-shadow: 0 0 0 10px #1c0f08, 0 0 50px rgba(0, 0, 0, .85);
+  /* black lacquer, like a spirit board */
+  background: radial-gradient(ellipse at 28% 18%, rgba(255, 255, 255, .06), transparent 45%), linear-gradient(150deg, #110e0d, #030303);
+  box-shadow: 0 0 0 10px #060505, 0 0 0 11px rgba(205, 195, 170, .3), 0 0 0 14px #0b0908, 0 0 50px rgba(0, 0, 0, .85);
 }
+/* engraved ring in the middle: GUESS / OR DIE, a moon and a sun */
+#boardArt { grid-area: 2 / 2 / 7 / 7; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cdefs%3E%3Cpath id='t' d='M 82,250 A 168,168 0 0 1 418,250'/%3E%3Cpath id='b' d='M 58,250 A 192,192 0 0 0 442,250'/%3E%3C/defs%3E%3Cg fill='none' stroke='%23d9cfba' stroke-opacity='.5'%3E%3Ccircle cx='250' cy='250' r='243' stroke-width='2'/%3E%3Ccircle cx='250' cy='250' r='232' stroke-width='1' stroke-dasharray='2 7'/%3E%3Ccircle cx='250' cy='250' r='150' stroke-width='1'/%3E%3Ccircle cx='250' cy='250' r='142' stroke-width='.6' stroke-opacity='.3'/%3E%3Ccircle cx='250' cy='250' r='52' stroke-width='.8' stroke-opacity='.3'/%3E%3Cpath d='M250 198 L250 302 M198 250 L302 250' stroke-width='.6' stroke-opacity='.25'/%3E%3Cpath d='M112 232 a20 20 0 1 0 0 36 a15 15 0 1 1 0 -36 z' stroke-width='1.4' stroke-opacity='.7'/%3E%3Ccircle cx='388' cy='250' r='9' stroke-width='1.4' stroke-opacity='.7'/%3E%3Cpath d='M388 232 v-8 M388 268 v8 M370 250 h-8 M406 250 h8 M375 237 l-6 -6 M401 263 l6 6 M401 237 l6 -6 M375 263 l-6 6' stroke-width='1.4' stroke-opacity='.7'/%3E%3C/g%3E%3Cg fill='%23d9cfba' fill-opacity='.62' font-family='Palatino Linotype, Book Antiqua, Georgia, serif' font-size='30' text-anchor='middle'%3E%3Ctext letter-spacing='16'%3E%3CtextPath href='%23t' startOffset='50%25'%3EGUESS%3C/textPath%3E%3C/text%3E%3Ctext letter-spacing='16'%3E%3CtextPath href='%23b' startOffset='50%25'%3EOR DIE%3C/textPath%3E%3C/text%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat; }
 
+/* Tiles: black stone slabs with engraved edges; each kind has its own emblem */
 .tile {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(230, 220, 203, .18);
-  border-radius: 4px;
-  font-size: clamp(.9rem, 3vw, 1.5rem);
-  color: rgba(230, 220, 203, .55);
-  transform-style: preserve-3d;
-  transform: translateZ(4px);
-  box-shadow: 0 4px 0 rgba(0, 0, 0, .65), 0 9px 10px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .07);
+  --acc: #cfc6b2;
+  position: relative; display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(205, 195, 170, .22); border-radius: 3px;
+  background: linear-gradient(145deg, #1a1614, #060505);
+  transform-style: preserve-3d; transform: translateZ(4px);
+  box-shadow: inset 0 0 0 5px #090707, inset 0 0 0 6px rgba(205, 195, 170, .16), 0 4px 0 rgba(0, 0, 0, .7), 0 9px 10px rgba(0, 0, 0, .55);
 }
-.t-Q { background: linear-gradient(rgba(62, 38, 82, .66), rgba(38, 20, 54, .8)), var(--wood) 0 0 / 260px; }
-.t-B { background: linear-gradient(rgba(44, 74, 34, .62), rgba(24, 44, 18, .8)), var(--wood) 0 0 / 260px; }
-.t-P { background: linear-gradient(rgba(120, 28, 38, .62), rgba(70, 14, 20, .82)), var(--wood) 0 0 / 260px; }
-.t-S { background: linear-gradient(rgba(130, 100, 56, .5), rgba(70, 50, 28, .7)), var(--wood) 0 0 / 260px; color: var(--bone); font-size: clamp(.7rem, 2.2vw, 1rem); font-style: italic; }
+.tile::after { /* four studs in the corners */
+  content: ""; position: absolute; inset: 9px; pointer-events: none;
+  background:
+    radial-gradient(circle at 3px 3px, var(--acc) 0 1.4px, transparent 1.9px),
+    radial-gradient(circle at calc(100% - 3px) 3px, var(--acc) 0 1.4px, transparent 1.9px),
+    radial-gradient(circle at 3px calc(100% - 3px), var(--acc) 0 1.4px, transparent 1.9px),
+    radial-gradient(circle at calc(100% - 3px) calc(100% - 3px), var(--acc) 0 1.4px, transparent 1.9px);
+}
+.t-Q { --acc: #b7a4e0; background: radial-gradient(circle, rgba(120, 80, 200, .18), transparent 62%), linear-gradient(145deg, #1b1620, #070509); }
+.t-B { --acc: #e7b552; background: radial-gradient(circle at 50% 70%, rgba(230, 160, 50, .2), transparent 62%), linear-gradient(145deg, #1a1510, #080605); }
+.t-P { --acc: #c2323e; background: radial-gradient(circle, rgba(190, 30, 40, .22), transparent 62%), linear-gradient(145deg, #1c1012, #070405); }
+.t-P::before { /* cracks */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 46.5%, rgba(180, 40, 50, .55) 47% 48%, transparent 48.5%), linear-gradient(62deg, transparent 69.5%, rgba(180, 40, 50, .4) 70% 71%, transparent 71.5%);
+}
+.t-S { --acc: #8a2330; background: radial-gradient(circle, rgba(160, 30, 40, .3), transparent 58%), linear-gradient(145deg, #1a1614, #060505); }
+
+/* Question: the lens of a planchette */
+.g-q { position: relative; width: 54px; height: 54px; border-radius: 50%; border: 2px solid rgba(220, 210, 190, .85); display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, rgba(190, 160, 255, .28), rgba(18, 10, 32, .9) 70%);
+  box-shadow: 0 0 14px rgba(150, 110, 220, .5), inset 0 0 14px rgba(150, 110, 220, .35); }
+.g-q::before { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 1px dashed rgba(220, 210, 190, .35); }
+.g-q b { font: italic 400 2rem/1 var(--serif); color: #efe6d4; text-shadow: 0 0 8px rgba(170, 130, 255, .9); }
+/* Benefit: a candle inside a circle of salt */
+.g-b { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 60px; height: 60px; padding-bottom: 8px; }
+.g-b i, .g-p i { display: block; }
+.salt { position: absolute; inset: 0; border-radius: 50%; border: 3px dotted rgba(240, 230, 205, .5); }
+.flame { position: relative; width: 16px; height: 28px; border-radius: 50% 50% 50% 50% / 64% 64% 36% 36%;
+  background: radial-gradient(ellipse at 50% 78%, #fff3c4 0, #ffb938 46%, #e0601a 82%); box-shadow: 0 0 18px 5px rgba(255, 170, 60, .5); }
+.wax { position: relative; width: 12px; height: 16px; margin-top: -1px; border-radius: 2px; background: linear-gradient(90deg, #b5ab94, #efe6d0, #a89e88); }
+/* Punishment: an inverted triangle with a bloodshot eye */
+.g-p { position: relative; width: 56px; height: 52px; }
+.tri { position: absolute; inset: 0; background: linear-gradient(#e03a46, #6a0f1a); clip-path: polygon(50% 100%, 0 0, 100% 0); }
+.tri::after { content: ""; position: absolute; inset: 5px 8px 10px; background: #0a0405; clip-path: polygon(50% 100%, 0 0, 100% 0); }
+.eye { position: absolute; left: 19px; top: 12px; width: 18px; height: 10px; border-radius: 50%;
+  background: radial-gradient(circle, #1a0003 0 24%, #e0303c 26% 58%, #f1e6d0 60%); box-shadow: 0 0 8px rgba(224, 48, 60, .8); }
+
+/* Start: a pedestal built from three stacked stone blocks (real 3D boxes) */
+.ped { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
+.box { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; transform: translateZ(var(--z)); }
+.f { position: absolute; left: 0; top: 0; display: block; backface-visibility: hidden; border: 1px solid rgba(205, 195, 170, .28); background: linear-gradient(160deg, #211c19, #0b0909); }
+.f.top { width: var(--w); height: var(--d); margin: calc(var(--d) / -2) 0 0 calc(var(--w) / -2); transform: translateZ(var(--h)); background: radial-gradient(circle at 40% 35%, #342e28, #0d0b0a 75%); }
+.f.s, .f.n { width: var(--w); height: var(--h); margin: calc(var(--h) / -2) 0 0 calc(var(--w) / -2); }
+.f.s { transform: translate3d(0, calc(var(--d) / 2), calc(var(--h) / 2)) rotateX(-90deg); }
+.f.n { transform: translate3d(0, calc(var(--d) / -2), calc(var(--h) / 2)) rotateX(90deg); }
+.f.e, .f.w { width: var(--h); height: var(--d); margin: calc(var(--d) / -2) 0 0 calc(var(--h) / -2); }
+.f.e { transform: translate3d(calc(var(--w) / 2), 0, calc(var(--h) / 2)) rotateY(90deg); background: linear-gradient(160deg, #17130f, #080606); }
+.f.w { transform: translate3d(calc(var(--w) / -2), 0, calc(var(--h) / 2)) rotateY(-90deg); background: linear-gradient(160deg, #0f0c0a, #050404); }
+.col .f.s::after { content: "START"; position: absolute; inset: 0; display: grid; place-items: center; font: italic .6rem var(--serif); letter-spacing: .16em; color: rgba(230, 220, 200, .85); text-shadow: 0 0 6px rgba(200, 40, 50, .9); }
+.cap .f.top::after { content: ""; position: absolute; inset: 9px; border-radius: 50%; border: 1px solid rgba(230, 220, 200, .5); box-shadow: inset 0 0 8px rgba(160, 30, 40, .5); }
+.t-S .tokens { transform: translateZ(44px); } /* pieces stand on top of the pedestal */
 
 .tokens {
   position: absolute;
@@ -369,10 +415,81 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 #game.lite .ceiling { background-color: #0d0807 !important; }
 #game.lite .rug { background-color: #2a0d12 !important; }
 #game.lite .tabletop { background-color: #3a2214 !important; }
-#game.lite #board { background-color: #2a180d !important; }
-#game.lite .t-Q { background-color: #3a2548; } #game.lite .t-B { background-color: #2c4422; }
-#game.lite .t-P { background-color: #6a1a24; } #game.lite .t-S { background-color: #6b5434; }
+#game.lite #board { background-color: #070606 !important; }
+#game.lite #boardArt { display: none; }
+#game.lite .tile { background-color: #0d0b0a; } #game.lite .t-P { background-color: #1c0c0e; }
 
 /* Warm-up: the room is drawn once behind a cover so the first camera move does not stutter */
 #cover { background: #050303; z-index: 20; }
 .warm #roomBox { transition: none !important; }
+
+/* Question card additions */
+.q-en { display: block; font-size: clamp(1rem, 3vw, 1.25rem); font-weight: 600; margin: 0 0 .5rem; line-height: 1.35; color: var(--bone); }
+.q-es-box {
+  font-size: clamp(.85rem, 2.5vw, .95rem);
+  color: #dfcaa7;
+  background: rgba(35, 18, 22, 0.7);
+  border: 1px dashed rgba(223, 202, 167, 0.35);
+  border-radius: 4px;
+  padding: .5rem .8rem;
+  font-style: italic;
+  margin: .3rem auto .9rem;
+  line-height: 1.4;
+}
+.translate-btn {
+  display: inline-block;
+  font-size: .8rem;
+  padding: .25rem .75rem;
+  margin: .2rem auto .7rem;
+  background: rgba(20, 10, 14, .85);
+  border: 1px solid var(--dim);
+  border-radius: 4px;
+  color: var(--bone);
+  cursor: pointer;
+  transition: all .2s;
+}
+.translate-btn:hover {
+  border-color: var(--bone);
+  background: rgba(45, 20, 25, .95);
+}
+.q-options { display: grid; grid-template-columns: 1fr; gap: .6rem; margin-bottom: 1rem; width: 100%; }
+@media (min-width: 500px) {
+  .q-options { grid-template-columns: 1fr 1fr; }
+}
+.q-opt-btn {
+  text-align: left;
+  padding: .75rem 1rem;
+  font-size: clamp(.85rem, 2.2vw, .95rem);
+  background: rgba(15, 8, 10, .85);
+  border: 1px solid rgba(230, 220, 203, .3);
+  border-radius: 4px;
+  color: var(--bone);
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.q-opt-btn:hover:not(:disabled) {
+  border-color: var(--bone);
+  background: rgba(45, 20, 25, .9);
+  transform: translateY(-1px);
+}
+.q-opt-btn:disabled { cursor: default; }
+.q-opt-btn.correct {
+  background: #254a22 !important;
+  border-color: #6ecd55 !important;
+  color: #fff !important;
+  box-shadow: 0 0 10px rgba(110, 205, 85, .4);
+}
+.q-opt-btn.wrong {
+  background: #631820 !important;
+  border-color: #e65260 !important;
+  color: #fff !important;
+  box-shadow: 0 0 10px rgba(230, 82, 96, .4);
+}
+.q-feedback {
+  margin: .8rem 0 .4rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  min-height: 1.5em;
+}
+.q-feedback.correct { color: #8ad665; text-shadow: 0 0 8px rgba(138, 214, 101, .5); }
+.q-feedback.wrong { color: #f26b78; text-shadow: 0 0 8px rgba(242, 107, 120, .5); }
