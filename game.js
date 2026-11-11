@@ -179,30 +179,138 @@ function setLite(on) {
   $("qualityBtn").textContent = on ? "Quality: low" : "Quality: high";
 }
 
+let questionDeck = [];
+function getNextQuestion() {
+  if (!questionDeck.length) {
+    questionDeck = (typeof QUESTIONS !== "undefined" && QUESTIONS.length)
+      ? [...QUESTIONS].sort(() => Math.random() - 0.5)
+      : [];
+  }
+  return questionDeck.pop();
+}
+
 async function land(p, index) {
   const type = LAYOUT[index];
   const info = ENCOUNTERS[type];
-  const front = $("front"), card = $("frontCard");
+  const front = $("front"), card = $("frontCard"), frontBody = $("frontBody"), frontBtn = $("frontBtn");
 
   // Fill the scene first, then start board and message together so the move is one quick motion.
   card.className = "front-card t-" + type;
+  frontBody.innerHTML = "";
+  frontBtn.hidden = false;
+  frontBtn.textContent = "Continue";
+
+  let onAnswerSelected = null;
+
+  if (type === "Q") {
+    const q = getNextQuestion();
+    if (q) {
+      const catIcon = q.category.split(" ")[0] || "?";
+      $("frontIcon").textContent = catIcon;
+      $("frontTitle").textContent = `${p.name} - ${q.category}`;
+      $("frontText").innerHTML = `
+        <span class="q-en notranslate" translate="no">${q.question_en}</span>
+        <button type="button" class="translate-btn" id="translateBtn">🌐 Traducir al español</button>
+        <div class="q-es-box" id="qEsBox" style="display: none;"></div>
+      `;
+
+      let isTranslated = false;
+      const translateBtn = $("translateBtn");
+      const qEsBox = $("qEsBox");
+      translateBtn.addEventListener("click", () => {
+        isTranslated = !isTranslated;
+        if (isTranslated) {
+          qEsBox.textContent = `Traducción: ${q.question_es}`;
+          qEsBox.style.display = "block";
+          translateBtn.textContent = "🌐 Ocultar traducción";
+        } else {
+          qEsBox.style.display = "none";
+          qEsBox.textContent = "";
+          translateBtn.textContent = "🌐 Traducir al español";
+        }
+      });
+
+      const optContainer = document.createElement("div");
+      optContainer.className = "q-options";
+      const feedback = document.createElement("p");
+      feedback.className = "q-feedback";
+
+      frontBtn.hidden = true;
+
+      const answerPromise = new Promise((resolve) => {
+        onAnswerSelected = resolve;
+      });
+
+      q.options.forEach((optText) => {
+        const btn = document.createElement("button");
+        btn.className = "q-opt-btn notranslate";
+        btn.setAttribute("translate", "no");
+        btn.textContent = optText;
+        const letter = optText.trim()[0];
+        btn.dataset.letter = letter;
+
+        btn.addEventListener("click", () => {
+          optContainer.querySelectorAll(".q-opt-btn").forEach((b) => (b.disabled = true));
+          const isCorrect = letter === q.correct_letter;
+          if (isCorrect) {
+            btn.classList.add("correct");
+            feedback.textContent = "Correct! You survived this tile.";
+            feedback.className = "q-feedback correct";
+            log(`${p.name} answered correctly.`);
+            frontBtn.textContent = "Continue";
+          } else {
+            btn.classList.add("wrong");
+            const correctBtn = optContainer.querySelector(`[data-letter="${q.correct_letter}"]`);
+            if (correctBtn) correctBtn.classList.add("correct");
+            feedback.textContent = `Wrong! ${q.answer}. Returning to start.`;
+            feedback.className = "q-feedback wrong";
+            log(`${p.name} failed the question and was sent back to start!`);
+            p.progress = 0;
+            renderTokens(p.id);
+            frontBtn.textContent = "Back to start";
+          }
+          frontBtn.hidden = false;
+          frontBtn.focus({ preventScroll: true });
+          if (onAnswerSelected) onAnswerSelected();
+        });
+        optContainer.appendChild(btn);
+      });
+
+      frontBody.appendChild(optContainer);
+      frontBody.appendChild(feedback);
+
+      front.hidden = false;
+      void front.offsetWidth;
+      $("game").classList.add("to-front");
+      front.classList.add("show");
+
+      await answerPromise;
+      await new Promise((res) => frontBtn.addEventListener("click", res, { once: true }));
+
+      front.classList.remove("show");
+      $("game").classList.remove("to-front");
+      await sleep(650);
+      front.hidden = true;
+      frontBody.innerHTML = "";
+      return;
+    }
+  }
+
   $("frontIcon").textContent = info.icon;
   $("frontTitle").textContent = `${p.name} landed on ${info.name}`;
   $("frontText").textContent = info.text;
-  const probe = $("game").classList.contains("lite") ? null : measureFps(650);
   front.hidden = false;
   void front.offsetWidth; // register the start state before animating
   $("game").classList.add("to-front");
   front.classList.add("show");
-  $("frontBtn").focus({ preventScroll: true });
-  await new Promise((res) => $("frontBtn").addEventListener("click", res, { once: true }));
-
-  if (probe && (await probe) < 30) { setLite(true); log("Low quality enabled for smoother motion."); }
+  frontBtn.focus({ preventScroll: true });
+  await new Promise((res) => frontBtn.addEventListener("click", res, { once: true }));
 
   front.classList.remove("show");
   $("game").classList.remove("to-front");
   await sleep(650);
   front.hidden = true;
+  frontBody.innerHTML = "";
 }
 
 async function play() {
