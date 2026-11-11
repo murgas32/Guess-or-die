@@ -28,15 +28,40 @@ function ringPos(i) {
   return [24 - i, 0];
 }
 
+// Emblem drawn on each kind of tile (see style.css). The start tile gets a 3D pedestal instead.
+const GLYPHS = {
+  Q: '<span class="g-q"><b>?</b></span>',
+  B: '<span class="g-b"><i class="salt"></i><i class="flame"></i><i class="wax"></i></span>',
+  P: '<span class="g-p"><i class="tri"></i><i class="eye"></i></span>',
+  S: "",
+};
+
+function buildPedestal() {
+  const ped = document.createElement("div");
+  ped.className = "ped";
+  [["base", 76, 76, 8, 0], ["col", 50, 50, 30, 8], ["cap", 64, 64, 6, 38]].forEach(([cls, w, d, h, z]) => {
+    const box = document.createElement("div");
+    box.className = "box " + cls;
+    box.style.cssText = `--w:${w}px;--d:${d}px;--h:${h}px;--z:${z}px`;
+    box.innerHTML = '<i class="f top"></i><i class="f n"></i><i class="f s"></i><i class="f e"></i><i class="f w"></i>';
+    ped.appendChild(box);
+  });
+  return ped;
+}
+
 function buildBoard() {
   const board = $("board");
   tiles = [];
+  const art = document.createElement("div");
+  art.id = "boardArt";
+  board.appendChild(art);
   for (let i = 0; i < BOARD_SIZE; i++) {
     const [row, col] = ringPos(i);
     const t = document.createElement("div");
     t.className = "tile t-" + LAYOUT[i];
     t.style.gridArea = `${row + 1} / ${col + 1}`;
-    t.textContent = SYMBOLS[LAYOUT[i]];
+    t.innerHTML = GLYPHS[LAYOUT[i]];
+    if (LAYOUT[i] === "S") t.appendChild(buildPedestal());
     const tk = document.createElement("div");
     tk.className = "tokens";
     t.appendChild(tk);
