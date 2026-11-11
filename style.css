@@ -376,3 +376,74 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 /* Warm-up: the room is drawn once behind a cover so the first camera move does not stutter */
 #cover { background: #050303; z-index: 20; }
 .warm #roomBox { transition: none !important; }
+
+/* Question card additions */
+.q-en { display: block; font-size: clamp(1rem, 3vw, 1.25rem); font-weight: 600; margin: 0 0 .5rem; line-height: 1.35; color: var(--bone); }
+.q-es-box {
+  font-size: clamp(.85rem, 2.5vw, .95rem);
+  color: #dfcaa7;
+  background: rgba(35, 18, 22, 0.7);
+  border: 1px dashed rgba(223, 202, 167, 0.35);
+  border-radius: 4px;
+  padding: .5rem .8rem;
+  font-style: italic;
+  margin: .3rem auto .9rem;
+  line-height: 1.4;
+}
+.translate-btn {
+  display: inline-block;
+  font-size: .8rem;
+  padding: .25rem .75rem;
+  margin: .2rem auto .7rem;
+  background: rgba(20, 10, 14, .85);
+  border: 1px solid var(--dim);
+  border-radius: 4px;
+  color: var(--bone);
+  cursor: pointer;
+  transition: all .2s;
+}
+.translate-btn:hover {
+  border-color: var(--bone);
+  background: rgba(45, 20, 25, .95);
+}
+.q-options { display: grid; grid-template-columns: 1fr; gap: .6rem; margin-bottom: 1rem; width: 100%; }
+@media (min-width: 500px) {
+  .q-options { grid-template-columns: 1fr 1fr; }
+}
+.q-opt-btn {
+  text-align: left;
+  padding: .75rem 1rem;
+  font-size: clamp(.85rem, 2.2vw, .95rem);
+  background: rgba(15, 8, 10, .85);
+  border: 1px solid rgba(230, 220, 203, .3);
+  border-radius: 4px;
+  color: var(--bone);
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.q-opt-btn:hover:not(:disabled) {
+  border-color: var(--bone);
+  background: rgba(45, 20, 25, .9);
+  transform: translateY(-1px);
+}
+.q-opt-btn:disabled { cursor: default; }
+.q-opt-btn.correct {
+  background: #254a22 !important;
+  border-color: #6ecd55 !important;
+  color: #fff !important;
+  box-shadow: 0 0 10px rgba(110, 205, 85, .4);
+}
+.q-opt-btn.wrong {
+  background: #631820 !important;
+  border-color: #e65260 !important;
+  color: #fff !important;
+  box-shadow: 0 0 10px rgba(230, 82, 96, .4);
+}
+.q-feedback {
+  margin: .8rem 0 .4rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  min-height: 1.5em;
+}
+.q-feedback.correct { color: #8ad665; text-shadow: 0 0 8px rgba(138, 214, 101, .5); }
+.q-feedback.wrong { color: #f26b78; text-shadow: 0 0 8px rgba(242, 107, 120, .5); }
