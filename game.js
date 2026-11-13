@@ -2,7 +2,9 @@
 
 const BOARD_SIZE = 24;
 // S = start, Q = question (12), B = benefit (6), P = punishment (5)
-const LAYOUT = "SQQBQPQBQQPQBQPQBQQPQBPB";
+// Distribución base (cantidades fijas). En cada partida se reordena al azar con randomizeLayout().
+const LAYOUT_BASE = "SQQBQPQBQQPQBQPQBQQPQBPB";
+let LAYOUT = LAYOUT_BASE;
 const COLORS = ["#d9b25a", "#8fb3c4", "#c0708a", "#8aa05c"];
 // Beneficio "dado doble": "sum" suma las dos tiradas, "best" se queda con la mayor.
 const DOUBLE_DICE_MODE = "sum";
@@ -388,6 +390,27 @@ function shuffle(a) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+// Baraja las casillas (la de inicio "S" siempre queda en la posición 0, y se mantiene la cantidad
+// de cada tipo). Para que el tablero no quede injusto, se descartan barajas con 3 o más casillas
+// iguales de beneficio/castigo seguidas.
+function randomizeLayout() {
+  const rest = LAYOUT_BASE.slice(1).split("");
+  const clustered = (l) => {
+    for (let i = 0; i < l.length; i++) {
+      const a = l[i];
+      if (a !== "Q" && a === l[(i + 1) % l.length] && a === l[(i + 2) % l.length]) return true;
+    }
+    return false;
+  };
+  let layout;
+  let tries = 0;
+  do {
+    layout = "S" + shuffle(rest.slice()).join("");
+    tries++;
+  } while (clustered(layout) && tries < 200);
+  LAYOUT = layout;
 }
 
 let questionDeck = [];
@@ -885,6 +908,7 @@ function start(playerNames) {
   $("rollBtn").textContent = I18N[gameLang].rollBtn;
   $("setup").hidden = true;
   $("game").hidden = false;
+  randomizeLayout();
   buildBoard();
   buildDice();
   renderTokens();
