@@ -6,6 +6,9 @@ Juego de mesa por turnos de terror psicologico y supervivencia con trivia biling
 Los jugadores se encuentran en una misteriosa sala oscura iluminada unicamente por una lampara sobre la mesa. Para escapar deben recorrer un tablero maldito de 24 casillas. Una sola respuesta incorrecta sin proteccion sobrenatural te devolvera al punto de partida.
 
 ## Caracteristicas
+- Tablero Procedural Aleatorio: Las 24 casillas se posicionan y barajan de forma completamente aleatoria en cada partida, garantizando una experiencia diferente y rejugable en cada juego.
+- Sistema de 3 Vidas y Modo Espectador: Cada jugador cuenta con 3 vidas (representadas con velas en el HUD). Al acumular 3 fallas, el jugador muere definitivamente, su peon desaparece del tablero y permanece en la partida unicamente como espectador. Si todos mueren, la oscuridad gana; en multijugador, el ultimo superviviente se alza con la victoria.
+- Castigo Letal "LIMBO": Al caer en una casilla de castigo, existe una baja probabilidad de entrar al temible "LIMBO", una prueba de vida o muerte con ambientacion abisal roja. Un acierto te salva; un fallo o tiempo agotado (sin proteccion del circulo de sal) provoca tu muerte instantanea y eliminacion inmediata como espectador.
 - Entorno 3D sin librerias externas: Habitacion completa en CSS 3D con perspectiva, efectos de iluminacion, chimenea, ventana con luz de luna y camara en primera persona que levanta la mirada en cada encuentro.
 - Screamer instantaneo al fallar: Si un jugador responde incorrectamente sin la proteccion del circulo de sal, un screamer visual azota la pantalla e inmediatamente el peon es devuelto a la casilla de inicio.
 - Flujo agil sin boton de continuar: Al acertar una pregunta, el sistema valida la respuesta y transfiere el turno directamente al siguiente jugador sin pantallas intermedias.
@@ -16,7 +19,7 @@ Los jugadores se encuentran en una misteriosa sala oscura iluminada unicamente p
 - Casillas Especiales:
   - Pregunta (?): Pregunta aleatoria del mazo sin repeticion.
   - Beneficio (+): Vela mas brillante (+2 casillas), Circulo de sal (escudo ante un fallo) o Susurros apagados (salta la proxima pregunta).
-  - Castigo (+): El suelo cede (-2 casillas) o Retencion (pierde el turno). En modo de 1 jugador solo aparece "El suelo cede", porque perder el turno no tiene sentido sin rivales.
+  - Castigo (+): El suelo cede (-2 casillas), Retencion (pierde el turno) o el letal "LIMBO" (pregunta de vida o muerte).
 - Modo de Calidad (Baja / Alta): Optimizado para correr fluido en cualquier equipo mediante texture baking y modo simplificado.
 
 ## Como jugar
