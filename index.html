@@ -1,25 +1,63 @@
 <!DOCTYPE html>
-<html lang="en" class="notranslate" translate="no">
+<html lang="es" class="notranslate" translate="no">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google" content="notranslate">
 <title>Guess or Die</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Crimson+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="notranslate" translate="no">
 
 <main id="setup" class="screen">
   <h1 class="title">Guess or Die</h1>
-  <p class="tag">One wrong answer sends you back to the start.</p>
-  <p id="setupLabel">How many players?</p>
-  <div class="count" role="group" aria-labelledby="setupLabel">
-    <button data-n="1">1</button>
-    <button data-n="2">2</button>
-    <button data-n="3">3</button>
-    <button data-n="4">4</button>
+  <p class="tag" id="setupTag">Una sola respuesta incorrecta te devolverá al inicio.</p>
+
+  <div class="setup-panel">
+    <!-- Idioma -->
+    <div class="setup-group">
+      <span class="setup-label" id="langLabel">Idioma de las preguntas / Language:</span>
+      <div class="pill-group" id="langGroup" role="group">
+        <button type="button" class="pill active" data-lang="es">Español</button>
+        <button type="button" class="pill" data-lang="en">English</button>
+      </div>
+    </div>
+
+    <!-- Temporizador -->
+    <div class="setup-group">
+      <span class="setup-label" id="timerLabel">Tiempo por pregunta / Question timer:</span>
+      <div class="pill-group" id="timerGroup" role="group">
+        <button type="button" class="pill" data-timer="15">15s</button>
+        <button type="button" class="pill active" data-timer="20">20s</button>
+        <button type="button" class="pill" data-timer="30">30s</button>
+        <button type="button" class="pill" data-timer="0" id="timerOffBtn">Sin límite</button>
+      </div>
+    </div>
+
+    <!-- Número de jugadores -->
+    <div class="setup-group">
+      <span class="setup-label" id="playersLabel">¿Cuántos jugadores? / How many players?</span>
+      <div class="count" role="group" aria-labelledby="playersLabel">
+        <button type="button" class="count-btn" data-n="1">1</button>
+        <button type="button" class="count-btn active" data-n="2">2</button>
+        <button type="button" class="count-btn" data-n="3">3</button>
+        <button type="button" class="count-btn" data-n="4">4</button>
+      </div>
+    </div>
+
+    <!-- Nombres de los jugadores -->
+    <div class="setup-group" id="namesGroup">
+      <span class="setup-label" id="namesLabel">Nombres de los jugadores:</span>
+      <div id="playerInputs" class="player-inputs"></div>
+    </div>
+
+    <button type="button" id="startBtn" class="start-btn">Entrar a la oscuridad</button>
   </div>
-  <p class="note">Everyone plays on this computer, taking turns. First back to the start wins.</p>
+
+  <p class="note" id="setupNote">Todos juegan en esta computadora, por turnos. El primero en volver al inicio gana.</p>
 </main>
 
 <main id="game" class="screen" hidden>
@@ -42,7 +80,7 @@
     </div>
     <i class="vignette"></i>
   </div>
-  <button id="menuBtn" class="menu-btn">Main menu</button>
+  <button id="menuBtn" class="menu-btn">Menú principal</button>
   <div id="hud">
     <div id="hudTop">
       <h2 class="title small">Guess or Die</h2>
@@ -50,16 +88,25 @@
     </div>
     <ol id="order"></ol>
     <ul id="log" aria-label="Game log"></ul>
-    <button id="rollBtn" disabled>Roll the die</button>
-    <button id="qualityBtn">Quality: high</button>
+    <button id="rollBtn" disabled>Lanzar el dado</button>
+    <button id="qualityBtn">Calidad: alta</button>
   </div>
   <section id="front" class="front notranslate" translate="no" hidden>
+    <div id="fxLayer" aria-hidden="true"></div>
     <div class="front-card" id="frontCard">
+      <!-- Barra y temporizador de vela -->
+      <div id="frontTimerWrap" class="timer-wrap" hidden>
+        <div class="timer-candle">
+          <div class="timer-flame"></div>
+          <div class="timer-track"><div id="timerBar" class="timer-bar"></div></div>
+        </div>
+        <span id="timerText" class="timer-text">20s</span>
+      </div>
       <div id="frontIcon" class="front-icon" aria-hidden="true"></div>
       <h2 id="frontTitle"></h2>
       <p id="frontText" aria-live="polite"></p>
       <div id="frontBody"></div>
-      <button id="frontBtn">Continue</button>
+      <button id="frontBtn">Continuar</button>
     </div>
   </section>
 </main>
@@ -67,11 +114,57 @@
 <div id="end" class="screen overlay" hidden>
   <h2 id="endTitle" class="title"></h2>
   <p id="endText"></p>
-  <button id="again">Play again</button>
+  <button id="again">Jugar de nuevo</button>
 </div>
 
 <div id="cover" class="screen overlay" hidden>
-  <p>Preparing the room&hellip;</p>
+  <p id="coverText">Preparando la sala&hellip;</p>
+</div>
+
+<!-- Screamer jumpscare overlay -->
+<div id="screamerOverlay" class="screamer-overlay" hidden aria-hidden="true">
+  <div class="screamer-jumpscare">
+    <svg viewBox="0 0 800 800" class="screamer-face" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="scGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#400005" />
+          <stop offset="60%" stop-color="#150002" />
+          <stop offset="100%" stop-color="#000000" />
+        </radialGradient>
+        <filter id="horrorDistort">
+          <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" />
+        </filter>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#scGlow)" />
+      
+      <g filter="url(#horrorDistort)">
+        <path d="M 260,180 C 240,60 560,60 540,180 C 560,330 580,480 500,680 C 440,760 360,760 300,680 C 220,480 240,330 260,180 Z" fill="#d8cbba" />
+        <ellipse cx="330" cy="300" rx="70" ry="85" fill="#030001" />
+        <ellipse cx="470" cy="300" rx="70" ry="85" fill="#030001" />
+        <circle cx="330" cy="305" r="9" fill="#ff0011" />
+        <circle cx="470" cy="305" r="9" fill="#ff0011" />
+        <path d="M 310,360 Q 300,490 295,580 Q 315,590 320,580 Q 330,490 335,360 Z" fill="#800208" />
+        <path d="M 345,360 Q 350,470 355,540 Q 365,550 370,540 Q 365,470 360,360 Z" fill="#99030b" />
+        <path d="M 450,360 Q 445,480 440,550 Q 455,560 460,550 Q 465,480 470,360 Z" fill="#99030b" />
+        <path d="M 485,360 Q 495,500 500,590 Q 510,600 515,590 Q 505,500 500,360 Z" fill="#800208" />
+        <polygon points="400,375 375,445 425,445" fill="#0a0204" />
+        <path d="M 305,510 C 330,475 470,475 495,510 C 535,630 525,750 400,760 C 275,750 265,630 305,510 Z" fill="#030001" />
+        <polygon points="325,505 335,545 345,505" fill="#e8dfce" />
+        <polygon points="350,500 360,555 370,500" fill="#e8dfce" />
+        <polygon points="375,495 385,560 395,495" fill="#e8dfce" />
+        <polygon points="405,495 415,560 425,495" fill="#e8dfce" />
+        <polygon points="430,500 440,555 450,500" fill="#e8dfce" />
+        <polygon points="455,505 465,545 475,505" fill="#e8dfce" />
+        <polygon points="335,725 345,680 355,725" fill="#e8dfce" />
+        <polygon points="365,735 375,670 385,735" fill="#e8dfce" />
+        <polygon points="395,740 405,665 415,740" fill="#e8dfce" />
+        <polygon points="425,735 435,670 445,735" fill="#e8dfce" />
+        <polygon points="455,725 465,680 475,725" fill="#e8dfce" />
+      </g>
+    </svg>
+    <div class="screamer-vignette"></div>
+  </div>
 </div>
 
 <script src="questions.js"></script>
