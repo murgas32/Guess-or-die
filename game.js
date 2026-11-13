@@ -13,10 +13,11 @@ const I18N = {
   es: {
     tag: "Una sola respuesta incorrecta te devolverá al inicio.",
     note: "Todos juegan en esta computadora, por turnos. El primero en volver al inicio gana.",
-    langLabel: "Idioma de las preguntas / Language:",
-    timerLabel: "Tiempo por pregunta / Question timer:",
+    noteSolo: "Juegas solo: completa la vuelta al tablero sin fallar.",
+    langLabel: "Idioma / Language:",
+    timerLabel: "Tiempo por pregunta:",
     timerOff: "Sin límite",
-    playersLabel: "¿Cuántos jugadores? / How many players?",
+    playersLabel: "¿Cuántos jugadores?",
     namesLabel: "Nombres de los jugadores:",
     defaultPlayer: (i) => `Jugador ${i}`,
     startBtn: "Entrar a la oscuridad",
@@ -66,10 +67,11 @@ const I18N = {
   en: {
     tag: "One wrong answer sends you back to the start.",
     note: "Everyone plays on this computer, taking turns. First back to the start wins.",
-    langLabel: "Questions Language / Idioma:",
-    timerLabel: "Question timer / Tiempo por pregunta:",
+    noteSolo: "Playing solo: complete the lap around the board without failing.",
+    langLabel: "Language / Idioma:",
+    timerLabel: "Time per question:",
     timerOff: "No limit",
-    playersLabel: "How many players? / ¿Cuántos jugadores?",
+    playersLabel: "How many players?",
     namesLabel: "Player names:",
     defaultPlayer: (i) => `Player ${i}`,
     startBtn: "Enter the Dark",
@@ -309,11 +311,20 @@ function setLite(on) {
   $("qualityBtn").textContent = on ? I18N[gameLang].qualityLow : I18N[gameLang].qualityHigh;
 }
 
+// Fisher-Yates (Array.sort with a random comparator is biased)
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 let questionDeck = [];
 function getNextQuestion() {
   if (!questionDeck.length) {
     questionDeck = (typeof QUESTIONS !== "undefined" && QUESTIONS.length)
-      ? [...QUESTIONS].sort(() => Math.random() - 0.5)
+      ? shuffle([...QUESTIONS])
       : [];
   }
   return questionDeck.pop();
@@ -335,7 +346,7 @@ const EFFECTS = {
         }
       }
     },
-    { id: "P2", run: async (p) => { p.skipTurn = true; } },
+    { id: "P2", multiOnly: true, run: async (p) => { p.skipTurn = true; } },
   ],
 };
 
@@ -425,7 +436,9 @@ async function land(p, index) {
       }
     }
   } else {
-    effect = pick(EFFECTS[type]);
+    // Punishments that only make sense with other players (e.g. losing a turn) are dropped in solo mode
+    const pool = EFFECTS[type].filter((e) => !(e.multiOnly && players.length === 1));
+    effect = pick(pool);
     const info = I18N[gameLang].effects[effect.id];
     scene = { icon: type === "B" ? "+" : "\u2020", title: info.title, text: info.text };
     log(`${p.name}: ${info.title}.`);
@@ -457,6 +470,9 @@ async function land(p, index) {
   const primaryText = isEs ? q.question_es : q.question_en;
   const secondaryText = isEs ? q.question_en : q.question_es;
   const n = primaryText.split(" ").length;
+  const optsPrimary = (isEs && q.options_es) ? q.options_es : q.options;
+  const optsSecondary = (isEs ? q.options : q.options_es) || q.options;
+  const answerPrimary = (isEs && q.answer_es) ? q.answer_es : q.answer;
 
   $("frontText").innerHTML =
     `<span class="q-en notranslate" translate="no">${words(primaryText)}</span>` +
@@ -467,7 +483,7 @@ async function land(p, index) {
   tBtn.addEventListener("click", () => {
     const show = esBox.hidden;
     esBox.hidden = !show;
-    esBox.textContent = show ? secondaryText : "";
+    esBox.textContent = show ? `${secondaryText}\n${optsSecondary.join("\n")}` : "";
     tBtn.textContent = show ? I18N[gameLang].translateBtnHide : I18N[gameLang].translateBtnShow;
   });
 
@@ -509,14 +525,14 @@ async function land(p, index) {
 
         if (p.shield) {
           p.shield = false;
-          feedback.textContent = I18N[gameLang].wrongFeedbackShield(q.answer);
+          feedback.textContent = I18N[gameLang].wrongFeedbackShield(answerPrimary);
           feedback.className = "q-feedback correct";
           log(I18N[gameLang].failedSaltLog(p.name));
           await sleep(1600);
           await close();
           resolveQuestion();
         } else {
-          feedback.textContent = I18N[gameLang].wrongFeedbackDeath(q.answer);
+          feedback.textContent = I18N[gameLang].wrongFeedbackDeath(answerPrimary);
           feedback.className = "q-feedback wrong";
           front.classList.add("fail");
           card.classList.add("hit");
@@ -544,14 +560,14 @@ async function land(p, index) {
 
       if (p.shield) {
         p.shield = false;
-        feedback.textContent = I18N[gameLang].timeExpiredFeedbackShield(q.answer);
+        feedback.textContent = I18N[gameLang].timeExpiredFeedbackShield(answerPrimary);
         feedback.className = "q-feedback correct";
         log(I18N[gameLang].failedSaltLog(p.name));
         await sleep(1600);
         await close();
         resolveQuestion();
       } else {
-        feedback.textContent = I18N[gameLang].timeExpiredFeedbackDeath(q.answer);
+        feedback.textContent = I18N[gameLang].timeExpiredFeedbackDeath(answerPrimary);
         feedback.className = "q-feedback wrong";
         front.classList.add("fail");
         card.classList.add("hit");
@@ -596,7 +612,7 @@ async function land(p, index) {
     }
 
     // Build answer buttons
-    q.options.forEach((optText, idx) => {
+    optsPrimary.forEach((optText, idx) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "q-opt-btn notranslate";
@@ -667,6 +683,7 @@ function start(playerNames) {
     progress: 0,
   }));
   $("menuBtn").textContent = I18N[gameLang].mainMenu;
+  setLite($("game").classList.contains("lite"));
   $("rollBtn").textContent = I18N[gameLang].rollBtn;
   $("setup").hidden = true;
   $("game").hidden = false;
@@ -710,8 +727,9 @@ function renderPlayerInputs(n) {
 
 function updateSetupTexts() {
   const t = I18N[gameLang];
+  document.documentElement.lang = gameLang;
   $("setupTag").textContent = t.tag;
-  $("setupNote").textContent = t.note;
+  $("setupNote").textContent = selectedPlayerCount === 1 ? t.noteSolo : t.note;
   $("langLabel").textContent = t.langLabel;
   $("timerLabel").textContent = t.timerLabel;
   $("timerOffBtn").textContent = t.timerOff;
@@ -755,6 +773,7 @@ document.querySelectorAll(".count-btn").forEach((btn) => {
     btn.classList.add("active");
     selectedPlayerCount = Number(btn.dataset.n);
     renderPlayerInputs(selectedPlayerCount);
+    updateSetupTexts();
   });
 });
 

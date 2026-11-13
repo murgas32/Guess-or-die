@@ -650,7 +650,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 
 /* Questions: text and options written in the air, no boxes */
 .q-en { display: block; font-style: normal; font-weight: 600; font-size: clamp(1.25rem, 3.6vw, 1.95rem); line-height: 1.35; color: var(--bone); margin: .2rem 0 .6rem; }
-.q-es-box { display: block; margin: .3rem auto .8rem; max-width: 36rem; font-style: normal; font-size: 1.05rem; color: #d8c5a2; }
+.q-es-box { display: block; white-space: pre-line; margin: .3rem auto .8rem; max-width: 36rem; font-style: normal; font-size: 1.05rem; color: #d8c5a2; }
 .translate-btn, .translate-btn:hover:not(:disabled) { background: none; border: 0; box-shadow: none; }
 .translate-btn { padding: .2rem .4rem; font: inherit; font-size: .85rem; color: var(--dim); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; text-shadow: 0 1px 6px #000; }
 .translate-btn:hover:not(:disabled) { color: var(--bone); }
