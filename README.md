@@ -15,7 +15,13 @@ Los jugadores se encuentran en una misteriosa sala oscura iluminada unicamente p
 - Banco Ampliado de Preguntas: Mas de 110 preguntas bilingues clasificadas en 4 categorias (Deportes, Historia, Matematicas y Geografia).
 - Casillas Especiales:
   - Pregunta (?): Pregunta aleatoria del mazo sin repeticion.
-  - Beneficio (+): Vela mas brillante (+2 casillas), Circulo de sal (escudo ante un fallo) o Susurros apagados (salta la proxima pregunta).
+  - Beneficio (+): 6 posibles, se guardan hasta usarse y se muestran junto al nombre del jugador:
+    - Vela mas brillante: avanza 2 casillas.
+    - Circulo de sal: escudo que perdona el proximo fallo.
+    - Susurros apagados: la proxima casilla de pregunta guarda silencio (sin pregunta).
+    - Dados del destino: la proxima tirada se lanza dos veces y se suman (`DOUBLE_DICE_MODE` en game.js permite quedarse con la mayor).
+    - Susurro del mas alla (50/50): en la proxima pregunta desaparecen dos respuestas incorrectas.
+    - Ancla fantasmal: fija la casilla actual durante el proximo turno. Si fallas (o se acaba el tiempo) vuelves a esa casilla en vez de al inicio, y "Algo te retiene" no tiene efecto. El circulo de sal se gasta antes que el ancla.
   - Castigo (+): El suelo cede (-2 casillas) o Retencion (pierde el turno). En modo de 1 jugador solo aparece "El suelo cede", porque perder el turno no tiene sentido sin rivales.
 - Modo de Calidad (Baja / Alta): Optimizado para correr fluido en cualquier equipo mediante texture baking y modo simplificado.
 

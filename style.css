@@ -727,3 +727,6 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   50% { filter: sepia(1) hue-rotate(-55deg) saturate(900%) contrast(200%); }
   75% { filter: invert(0.8) brightness(1.4) contrast(300%); }
 }
+
+/* Beneficios guardados junto al nombre del jugador */
+#order .st { margin-left: .5em; font-size: .75em; color: #e7b552; opacity: .9; }

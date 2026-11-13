@@ -4,6 +4,8 @@ const BOARD_SIZE = 24;
 // S = start, Q = question (12), B = benefit (6), P = punishment (5)
 const LAYOUT = "SQQBQPQBQQPQBQPQBQQPQBPB";
 const COLORS = ["#d9b25a", "#8fb3c4", "#c0708a", "#8aa05c"];
+// Beneficio "dado doble": "sum" suma las dos tiradas, "best" se queda con la mayor.
+const DOUBLE_DICE_MODE = "sum";
 
 const $ = (id) => document.getElementById(id);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -56,12 +58,23 @@ const I18N = {
     multiWinText: "Todos los demás han quedado atrapados en la oscuridad.",
     playAgain: "Jugar de nuevo",
     preparing: "Preparando la sala...",
+    rollAgainPrompt: "lanza el dado otra vez (dado doble)",
+    doubleRolled: (name, a, b, total) => `${name} sacó ${a} y ${b}: avanza ${total}.`,
+    fiftyHint: "Los susurros eliminaron dos respuestas incorrectas.",
+    wrongFeedbackAnchor: (ans) => `Incorrecto. ${ans}. Pero el ancla te sujeta: vuelves a la casilla fijada, no al inicio.`,
+    timeExpiredFeedbackAnchor: (ans) => `Tiempo agotado. ${ans}. Pero el ancla te sujeta: vuelves a la casilla fijada.`,
+    failedAnchorLog: (name) => `${name} falló, pero el ancla evitó que volviera al inicio.`,
+    status: { shield: "círculo de sal", skipQ: "susurros apagados", doubleDice: "dado doble", fifty: "50/50", anchor: "ancla" },
     effects: {
       B1: { title: "La vela arde con más fuerza", text: "La oscuridad te deja pasar. Avanzas 2 casillas." },
       B2: { title: "Un círculo de sal", text: "Estás protegido. Tu próxima respuesta incorrecta será perdonada." },
       B3: { title: "Los susurros se apagan", text: "La siguiente casilla de pregunta guardará silencio." },
+      B4: { title: "Los dados del destino", text: "Tu próxima tirada se lanza dos veces." },
+      B5: { title: "Un susurro del más allá", text: "En tu próxima pregunta desaparecerán dos respuestas incorrectas." },
+      B6: { title: "Un ancla fantasmal", text: "Tu posición queda fijada durante tu próximo turno: si fallas volverás aquí en lugar del inicio, y nada podrá retenerte." },
       P1: { title: "El suelo cede", text: "Algo te arrastra 2 casillas hacia atrás." },
       P2: { title: "Algo te retiene", text: "Pierdes tu siguiente turno." },
+      P2_anchor: { title: "Algo intenta retenerte", text: "El ancla fantasmal te sujeta: no pierdes tu siguiente turno." },
     }
   },
   en: {
@@ -110,12 +123,23 @@ const I18N = {
     multiWinText: "Everyone else is lost in the dark.",
     playAgain: "Play again",
     preparing: "Preparing the room...",
+    rollAgainPrompt: "roll the die again (double roll)",
+    doubleRolled: (name, a, b, total) => `${name} rolled ${a} and ${b}: moves ${total}.`,
+    fiftyHint: "The whispers removed two wrong answers.",
+    wrongFeedbackAnchor: (ans) => `Wrong. ${ans}. But the anchor holds: you return to the marked tile, not the start.`,
+    timeExpiredFeedbackAnchor: (ans) => `Time expired. ${ans}. But the anchor holds: you return to the marked tile.`,
+    failedAnchorLog: (name) => `${name} failed, but the anchor kept them from going back to the start.`,
+    status: { shield: "salt circle", skipQ: "whispers silenced", doubleDice: "double roll", fifty: "50/50", anchor: "anchor" },
     effects: {
       B1: { title: "The candle burns brighter", text: "The dark lets you pass. Move forward 2 tiles." },
       B2: { title: "A circle of salt", text: "You are protected. Your next wrong answer will be forgiven." },
       B3: { title: "The whispers fade", text: "The next question tile will stay silent." },
+      B4: { title: "The dice of fate", text: "Your next roll is thrown twice." },
+      B5: { title: "A whisper from beyond", text: "On your next question, two wrong answers will vanish." },
+      B6: { title: "A ghostly anchor", text: "Your position is fixed during your next turn: if you fail you return here instead of the start, and nothing can hold you." },
       P1: { title: "The floor gives way", text: "Something drags you back 2 tiles." },
       P2: { title: "Something holds you", text: "You lose your next turn." },
+      P2_anchor: { title: "Something tries to hold you", text: "The ghostly anchor holds firm: you do not lose your next turn." },
     }
   }
 };
@@ -245,13 +269,25 @@ function log(text) {
   while ($("log").children.length > 4) $("log").lastChild.remove();
 }
 
+// Beneficios que el jugador tiene guardados (se muestran junto a su nombre).
+function statusBadges(p) {
+  const t = I18N[gameLang].status;
+  const on = [];
+  if (p.shield) on.push(t.shield);
+  if (p.skipQ) on.push(t.skipQ);
+  if (p.doubleDice) on.push(t.doubleDice);
+  if (p.fifty) on.push(t.fifty);
+  if (p.anchor) on.push(t.anchor);
+  return on.length ? `<small class="st">${on.join(" · ")}</small>` : "";
+}
+
 function renderOrder(activeId) {
   const ol = $("order");
   ol.innerHTML = "";
   order.forEach((p) => {
     const li = document.createElement("li");
     if (p.id === activeId) li.className = "active";
-    li.innerHTML = `<i style="background:${p.color}"></i>${p.name}`;
+    li.innerHTML = `<i style="background:${p.color}"></i>${p.name}${statusBadges(p)}`;
     ol.appendChild(li);
   });
 }
@@ -336,6 +372,10 @@ const EFFECTS = {
     { id: "B1", run: (p) => move(p, 2) },
     { id: "B2", run: async (p) => { p.shield = true; } },
     { id: "B3", run: async (p) => { p.skipQ = true; } },
+    { id: "B4", run: async (p) => { p.doubleDice = true; } },
+    { id: "B5", run: async (p) => { p.fifty = true; } },
+    // turns: 2 = el resto de este turno + el próximo turno completo del jugador.
+    { id: "B6", run: async (p) => { p.anchor = { pos: p.progress, turns: 2 }; } },
   ],
   P: [
     { id: "P1", run: async (p) => {
@@ -346,9 +386,23 @@ const EFFECTS = {
         }
       }
     },
-    { id: "P2", multiOnly: true, run: async (p) => { p.skipTurn = true; } },
+    // soft: versión que se aplica si el jugador tiene el ancla (B6) activa.
+    { id: "P2", multiOnly: true, run: async (p) => { p.skipTurn = true; }, soft: async () => {} },
   ],
 };
+
+// Protecciones ante un fallo, por orden de prioridad: círculo de sal y luego ancla.
+// Devuelve null si no hay ninguna.
+function useGuard(p) {
+  if (p.shield) { p.shield = false; return { type: "shield" }; }
+  if (p.anchor) { const pos = p.anchor.pos; p.anchor = null; return { type: "anchor", pos }; }
+  return null;
+}
+
+// Al terminar un turno jugado, el ancla gasta una ronda.
+function tickAnchor(p) {
+  if (p.anchor && --p.anchor.turns <= 0) p.anchor = null;
+}
 
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -416,7 +470,7 @@ async function land(p, index) {
     body.innerHTML = "";
   };
 
-  let q = null, effect = null, scene = null;
+  let q = null, effect = null, scene = null, anchored = false;
   if (type === "Q") {
     if (p.skipQ) {
       p.skipQ = false;
@@ -439,7 +493,10 @@ async function land(p, index) {
     // Punishments that only make sense with other players (e.g. losing a turn) are dropped in solo mode
     const pool = EFFECTS[type].filter((e) => !(e.multiOnly && players.length === 1));
     effect = pick(pool);
-    const info = I18N[gameLang].effects[effect.id];
+    // B6: el ancla suaviza los castigos severos (los que tienen versión "soft").
+    anchored = type === "P" && !!effect.soft && !!p.anchor;
+    if (anchored) p.anchor = null;
+    const info = I18N[gameLang].effects[effect.id + (anchored ? "_anchor" : "")];
     scene = { icon: type === "B" ? "+" : "\u2020", title: info.title, text: info.text };
     log(`${p.name}: ${info.title}.`);
   }
@@ -456,7 +513,7 @@ async function land(p, index) {
     btn.focus({ preventScroll: true });
     await waitContinue();
     await close();
-    if (effect) await effect.run(p);
+    if (effect) await (anchored ? effect.soft : effect.run)(p);
     return;
   }
 
@@ -470,8 +527,19 @@ async function land(p, index) {
   const primaryText = isEs ? q.question_es : q.question_en;
   const secondaryText = isEs ? q.question_en : q.question_es;
   const n = primaryText.split(" ").length;
-  const optsPrimary = (isEs && q.options_es) ? q.options_es : q.options;
-  const optsSecondary = (isEs ? q.options : q.options_es) || q.options;
+  let optsPrimary = (isEs && q.options_es) ? q.options_es : q.options;
+  let optsSecondary = (isEs ? q.options : q.options_es) || q.options;
+  // B5: elimina dos respuestas incorrectas (queda la correcta y una incorrecta).
+  let fiftyApplied = false;
+  if (p.fifty && optsPrimary.length > 2) {
+    p.fifty = false;
+    fiftyApplied = true;
+    const letterOf = (o) => o.trim()[0];
+    const keepWrong = pick(optsPrimary.map(letterOf).filter((l) => l !== q.correct_letter));
+    const keep = (o) => letterOf(o) === q.correct_letter || letterOf(o) === keepWrong;
+    optsPrimary = optsPrimary.filter(keep);
+    optsSecondary = optsSecondary.filter(keep);
+  }
   const answerPrimary = (isEs && q.answer_es) ? q.answer_es : q.answer;
 
   $("frontText").innerHTML =
@@ -492,6 +560,7 @@ async function land(p, index) {
   const feedback = document.createElement("p");
   feedback.className = "q-feedback";
 
+  if (fiftyApplied) feedback.textContent = I18N[gameLang].fiftyHint;
   body.appendChild(opts);
   body.appendChild(feedback);
   open();
@@ -523,11 +592,21 @@ async function land(p, index) {
         if (b) b.classList.add("wrong");
         if (correctBtn) correctBtn.classList.add("correct");
 
-        if (p.shield) {
-          p.shield = false;
+        const guard = useGuard(p);
+        if (guard && guard.type === "shield") {
           feedback.textContent = I18N[gameLang].wrongFeedbackShield(answerPrimary);
           feedback.className = "q-feedback correct";
           log(I18N[gameLang].failedSaltLog(p.name));
+          await sleep(1600);
+          await close();
+          resolveQuestion();
+        } else if (guard) {
+          // B6: el ancla devuelve al jugador a la casilla fijada en lugar del inicio
+          feedback.textContent = I18N[gameLang].wrongFeedbackAnchor(answerPrimary);
+          feedback.className = "q-feedback correct";
+          log(I18N[gameLang].failedAnchorLog(p.name));
+          p.progress = guard.pos;
+          renderTokens(p.id);
           await sleep(1600);
           await close();
           resolveQuestion();
@@ -558,11 +637,20 @@ async function land(p, index) {
       const correctBtn = opts.querySelector(`[data-letter="${q.correct_letter}"]`);
       if (correctBtn) correctBtn.classList.add("correct");
 
-      if (p.shield) {
-        p.shield = false;
+      const guard = useGuard(p);
+      if (guard && guard.type === "shield") {
         feedback.textContent = I18N[gameLang].timeExpiredFeedbackShield(answerPrimary);
         feedback.className = "q-feedback correct";
         log(I18N[gameLang].failedSaltLog(p.name));
+        await sleep(1600);
+        await close();
+        resolveQuestion();
+      } else if (guard) {
+        feedback.textContent = I18N[gameLang].timeExpiredFeedbackAnchor(answerPrimary);
+        feedback.className = "q-feedback correct";
+        log(I18N[gameLang].failedAnchorLog(p.name));
+        p.progress = guard.pos;
+        renderTokens(p.id);
         await sleep(1600);
         await close();
         resolveQuestion();
@@ -641,12 +729,20 @@ async function play() {
       turn++;
       continue;
     }
-    const v = await askRoll(p, I18N[gameLang].rollPrompt);
+    let v = await askRoll(p, I18N[gameLang].rollPrompt);
     log(I18N[gameLang].rolled(p.name, v));
+    if (p.doubleDice) { // B4: segunda tirada
+      p.doubleDice = false;
+      const v2 = await askRoll(p, I18N[gameLang].rollAgainPrompt);
+      const total = DOUBLE_DICE_MODE === "best" ? Math.max(v, v2) : v + v2;
+      log(I18N[gameLang].doubleRolled(p.name, v, v2, total));
+      v = total;
+    }
     await move(p, v);
     if (p.progress >= BOARD_SIZE) return finish(p);
     await land(p, p.progress % BOARD_SIZE);
     if (p.progress >= BOARD_SIZE) return finish(p);
+    tickAnchor(p);
     turn++;
   }
 }
@@ -681,6 +777,12 @@ function start(playerNames) {
     name: name,
     color: COLORS[i],
     progress: 0,
+    shield: false,     // B2: perdona el próximo fallo
+    skipQ: false,      // B3: la próxima casilla de pregunta guarda silencio
+    doubleDice: false, // B4: la próxima tirada es doble
+    fifty: false,      // B5: la próxima pregunta pierde 2 respuestas incorrectas
+    anchor: null,      // B6: { pos, turns } casilla fijada durante el próximo turno
+    skipTurn: false,   // P2
   }));
   $("menuBtn").textContent = I18N[gameLang].mainMenu;
   setLite($("game").classList.contains("lite"));
