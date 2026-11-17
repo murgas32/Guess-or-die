@@ -668,6 +668,13 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 .q-opt-btn.correct { color: #b8f08c; text-shadow: 0 0 16px rgba(120, 220, 80, .9), 0 2px 8px #000; }
 .q-opt-btn.wrong { color: #ff6b78; text-shadow: 0 0 16px rgba(240, 40, 60, .95), 0 2px 8px #000; animation: ghost .6s ease-out forwards, shake .5s ease-out; }
 .q-opt-btn.correct::before, .q-opt-btn.wrong::before { opacity: 1; }
+.q-opt-btn.banished-option {
+  opacity: 0.18 !important;
+  text-decoration: line-through !important;
+  pointer-events: none !important;
+  cursor: default !important;
+  filter: grayscale(1);
+}
 .q-feedback { margin: .6rem 0 .6rem; font-size: 1.25rem; font-style: normal; font-weight: 600; min-height: 1.5em; }
 .q-feedback.correct { color: #b8f08c; text-shadow: 0 0 14px rgba(120, 220, 80, .8), 0 2px 8px #000; }
 .q-feedback.wrong { color: #ff8a92; text-shadow: 0 0 14px rgba(240, 40, 60, .9), 0 2px 8px #000; }

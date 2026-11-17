@@ -27,6 +27,13 @@ const I18N = {
     confirmLeave: "¿Abandonar la partida y regresar al menú principal?",
     rollOrderPrompt: "lanza para decidir el orden de turnos",
     rollPrompt: "lanza el dado",
+    extraRollPrompt: "lanza tu tirada adicional",
+    extraRollLog: (name) => `${name} activa una tirada adicional.`,
+    fiftyFiftyLog: (name) => `Un susurro disipó dos opciones falsas para ${name}.`,
+    timePressureLog: (name) => `La presión temporal acecha a ${name}.`,
+    anchorSaved: (tile) => `El ancla espectral resistió: caes a la casilla ${tile + 1}.`,
+    cursedLog: (name) => `Una maldición envuelve a ${name}.`,
+    cursedVictimLog: (name) => `La maldición del susurro le costó el siguiente turno a ${name}.`,
     rolled: (name, v) => `${name} sacó un ${v}.`,
     tie: (v) => `Empate en ${v}. Vuelvan a lanzar.`,
     firstGoes: (name) => `${name} va primero.`,
@@ -39,12 +46,12 @@ const I18N = {
     translateBtnShow: "Ver en inglés",
     translateBtnHide: "Ocultar inglés",
     correctFeedback: "Correcto. Sobrevives a esta casilla.",
-    wrongFeedbackShield: (ans) => `Incorrecto. ${ans}. Pero el círculo de sal te protege del abismo.`,
+    wrongFeedbackShield: (ans) => `Incorrecto. ${ans}. Pero el aura espectral te protege del abismo.`,
     wrongFeedbackDeath: (ans) => `Incorrecto. ${ans}. Vuelves al inicio.`,
     answeredCorrectLog: (name) => `${name} respondió correctamente.`,
-    failedSaltLog: (name) => `${name} falló, pero el círculo de sal le protegió.`,
+    failedSaltLog: (name) => `${name} falló, pero el aura espectral le protegió.`,
     failedLog: (name) => `${name} falló la pregunta y volvió al inicio.`,
-    timeExpiredFeedbackShield: (ans) => `Tiempo agotado. ${ans}. Pero el círculo de sal te protege.`,
+    timeExpiredFeedbackShield: (ans) => `Tiempo agotado. ${ans}. Pero el aura espectral te protege.`,
     timeExpiredFeedbackDeath: (ans) => `Tiempo agotado. ${ans}. La oscuridad te arrastra al inicio.`,
     timeExpiredLog: (name) => `${name} agotó el tiempo y volvió al inicio.`,
     btnContinue: "Continuar",
@@ -56,11 +63,16 @@ const I18N = {
     playAgain: "Jugar de nuevo",
     preparing: "Preparando la sala...",
     effects: {
-      B1: { title: "La vela arde con más fuerza", text: "La oscuridad te deja pasar. Avanzas 2 casillas." },
-      B2: { title: "Un círculo de sal", text: "Estás protegido. Tu próxima respuesta incorrecta será perdonada." },
-      B3: { title: "Los susurros se apagan", text: "La siguiente casilla de pregunta guardará silencio." },
-      P1: { title: "El suelo cede", text: "Algo te arrastra 2 casillas hacia atrás." },
-      P2: { title: "Algo te retiene", text: "Pierdes tu siguiente turno." },
+      B1: { title: "Escudo Espectral", text: "Un aura espectral te protege. Tu siguiente error o tiempo agotado será perdonado sin enviarte al inicio." },
+      B2: { title: "Paso Veloz", text: "Una ráfaga de viento frío te impulsa 2 casillas hacia adelante de inmediato." },
+      B3: { title: "Susurro Protector", text: "El espíritu responde por ti. La siguiente casilla de pregunta que pises guardará silencio." },
+      B4: { title: "Tirada Espectral", text: "Los dados resuenan con ecos espectrales. Lanzas el dado una vez más en este mismo turno." },
+      B5: { title: "Susurro de Sabiduría", text: "Voces del más allá disiparán dos opciones incorrectas en tu próxima pregunta." },
+      B6: { title: "Ancla Espectral", text: "Un ancla fantasmal fija tu posición. Si caes en tu próxima pregunta, solo retrocederás hasta esta casilla." },
+      P1: { title: "Retroceso Espectral", text: "Fuerzas oscuras te arrastran 2 casillas hacia atrás entre lamentos lejanos." },
+      P2: { title: "Parálisis del Miedo", text: "El terror congela tu cuerpo. Pierdes tu siguiente turno completo." },
+      P3: { title: "Presión Temporal", text: "El tiempo se acelera furiosamente. Tu próxima pregunta tendrá solo la mitad del tiempo." },
+      P5: { title: "Maldición del Susurro", text: "La oscuridad distorsiona la realidad: tus escudos quedan anulados, y fallar o acertar te costará tu siguiente turno." },
     }
   },
   en: {
@@ -80,6 +92,13 @@ const I18N = {
     confirmLeave: "Leave the game and return to the main menu?",
     rollOrderPrompt: "roll to decide the turn order",
     rollPrompt: "roll the die",
+    extraRollPrompt: "roll your extra roll",
+    extraRollLog: (name) => `${name} gains an extra roll.`,
+    fiftyFiftyLog: (name) => `A whisper banished two false options for ${name}.`,
+    timePressureLog: (name) => `Time pressure looms over ${name}.`,
+    anchorSaved: (tile) => `The safety anchor held: you only fell to tile ${tile + 1}.`,
+    cursedLog: (name) => `A dark curse grips ${name}.`,
+    cursedVictimLog: (name) => `The cursed whisper cost ${name} their next turn.`,
     rolled: (name, v) => `${name} rolled ${v}.`,
     tie: (v) => `Tie on ${v}. Roll again.`,
     firstGoes: (name) => `${name} goes first.`,
@@ -92,12 +111,12 @@ const I18N = {
     translateBtnShow: "Translate to Spanish",
     translateBtnHide: "Hide translation",
     correctFeedback: "Correct. You survive this tile.",
-    wrongFeedbackShield: (ans) => `Wrong. ${ans}. But the circle of salt holds: you are spared.`,
+    wrongFeedbackShield: (ans) => `Wrong. ${ans}. But the spectral shield holds: you are spared.`,
     wrongFeedbackDeath: (ans) => `Wrong. ${ans}. Back to the start.`,
     answeredCorrectLog: (name) => `${name} answered correctly.`,
-    failedSaltLog: (name) => `${name} failed, but the salt circle protected them.`,
+    failedSaltLog: (name) => `${name} failed, but the spectral aura protected them.`,
     failedLog: (name) => `${name} failed the question and was sent back to start.`,
-    timeExpiredFeedbackShield: (ans) => `Time expired. ${ans}. But the circle of salt holds: you are spared.`,
+    timeExpiredFeedbackShield: (ans) => `Time expired. ${ans}. But the spectral shield holds: you are spared.`,
     timeExpiredFeedbackDeath: (ans) => `Time expired. ${ans}. The dark drags you back to the start.`,
     timeExpiredLog: (name) => `${name} ran out of time and was sent back to start.`,
     btnContinue: "Continue",
@@ -109,11 +128,16 @@ const I18N = {
     playAgain: "Play again",
     preparing: "Preparing the room...",
     effects: {
-      B1: { title: "The candle burns brighter", text: "The dark lets you pass. Move forward 2 tiles." },
-      B2: { title: "A circle of salt", text: "You are protected. Your next wrong answer will be forgiven." },
-      B3: { title: "The whispers fade", text: "The next question tile will stay silent." },
-      P1: { title: "The floor gives way", text: "Something drags you back 2 tiles." },
-      P2: { title: "Something holds you", text: "You lose your next turn." },
+      B1: { title: "Spectral Shield", text: "A spectral aura protects you. Your next failed question or timeout will be forgiven." },
+      B2: { title: "Swift Step", text: "A gust of cold wind propels you forward 2 tiles immediately." },
+      B3: { title: "Protective Whisper", text: "The spirit answers for you. The next question tile you land on will stay silent." },
+      B4: { title: "Spectral Roll", text: "The dice echo from the beyond. Roll the die one more time right now." },
+      B5: { title: "Wisdom Whisper", text: "Voices from beyond will banish two incorrect options on your next question." },
+      B6: { title: "Safety Anchor", text: "A phantom anchor marks your position. If you fall on your next question, you only retreat here." },
+      P1: { title: "Spectral Drag", text: "Dark forces drag you back 2 tiles among distant wails." },
+      P2: { title: "Fear Paralysis", text: "Terror freezes you in place. You lose your next turn completely." },
+      P3: { title: "Time Pressure", text: "Time accelerates furiously. Your next question will only have half the normal time." },
+      P5: { title: "The Cursed Whisper", text: "Darkness distorts reality: shields are voided, and answering will cost your next turn." },
     }
   }
 };
@@ -319,14 +343,31 @@ function getNextQuestion() {
   return questionDeck.pop();
 }
 
-// Benefits and punishments.
+// 6 Benefits and 5 Punishments fully adapted to game mechanics.
 const EFFECTS = {
   B: [
-    { id: "B1", run: (p) => move(p, 2) },
-    { id: "B2", run: async (p) => { p.shield = true; } },
+    // BEN-01: Shield of Grammar / Escudo Espectral
+    { id: "B1", run: async (p) => { p.shield = true; } },
+    // BEN-02: Swift Step / Paso Veloz (+2 casillas)
+    { id: "B2", run: async (p) => { await move(p, 2); } },
+    // BEN-03: Skip Quest / Susurro Protector (salta la proxima pregunta)
     { id: "B3", run: async (p) => { p.skipQ = true; } },
+    // BEN-04: Double Dice Roll / Tirada Espectral (lanzamiento extra inmediato)
+    { id: "B4", run: async (p) => {
+        log(I18N[gameLang].extraRollLog(p.name));
+        await sleep(400);
+        const v = await askRoll(p, I18N[gameLang].extraRollPrompt);
+        log(I18N[gameLang].rolled(p.name, v));
+        await move(p, v);
+      }
+    },
+    // BEN-05: Wisdom Whisper / Susurro de Sabiduria (50/50 en la siguiente pregunta)
+    { id: "B5", run: async (p) => { p.fiftyFifty = true; } },
+    // BEN-06: Safety Anchor / Ancla Espectral (punto de anclaje de seguridad)
+    { id: "B6", run: async (p) => { p.anchor = p.progress; } },
   ],
   P: [
+    // CAS-01: Retroceso Espectral (-2 casillas)
     { id: "P1", run: async (p) => {
         for (let i = 0; i < 2 && p.progress > 0; i++) {
           p.progress--;
@@ -335,7 +376,12 @@ const EFFECTS = {
         }
       }
     },
+    // CAS-02: Paralisis del Miedo (pierde el siguiente turno)
     { id: "P2", run: async (p) => { p.skipTurn = true; } },
+    // CAS-03: Time Pressure / Presion Temporal (mitad de tiempo en la siguiente pregunta)
+    { id: "P3", run: async (p) => { p.timePressure = true; } },
+    // CAS-05: The Cursed Whisper / Maldicion del Susurro (anula escudos y cuesta el turno)
+    { id: "P5", run: async (p) => { p.cursedWhisper = true; } },
   ],
 };
 
@@ -450,6 +496,16 @@ async function land(p, index) {
   // --- QUESTION ENCOUNTER (NO CONTINUE BUTTON) ---
   btn.hidden = true;
   const catName = (CATEGORY_NAMES[gameLang] && CATEGORY_NAMES[gameLang][q.category]) || q.category;
+  
+  // Check CAS-05: The Cursed Whisper
+  let isCursed = false;
+  if (p.cursedWhisper) {
+    p.cursedWhisper = false;
+    isCursed = true;
+    p.shield = false; // The curse pierces all shields
+    log(I18N[gameLang].cursedLog(p.name));
+  }
+
   $("frontIcon").textContent = "?";
   $("frontTitle").textContent = `${p.name} \u2014 ${catName.toUpperCase()}`;
 
@@ -493,13 +549,21 @@ async function land(p, index) {
       const correctBtn = opts.querySelector(`[data-letter="${q.correct_letter}"]`);
 
       if (b && b.dataset.letter === q.correct_letter) {
-        // CORRECT ANSWER: brief visual feedback, then automatically move to next player
+        // CORRECT ANSWER
         b.classList.add("correct");
-        feedback.textContent = I18N[gameLang].correctFeedback;
+        if (isCursed) {
+          p.skipTurn = true;
+          feedback.textContent = isEs
+            ? "Correcto, pero la maldición del susurro congela tu siguiente turno."
+            : "Correct, but the cursed whisper freezes your next turn.";
+          log(I18N[gameLang].cursedVictimLog(p.name));
+        } else {
+          feedback.textContent = I18N[gameLang].correctFeedback;
+        }
         feedback.className = "q-feedback correct";
         front.classList.add("win");
         log(I18N[gameLang].answeredCorrectLog(p.name));
-        await sleep(850);
+        await sleep(900);
         await close();
         resolveQuestion();
       } else {
@@ -507,7 +571,8 @@ async function land(p, index) {
         if (b) b.classList.add("wrong");
         if (correctBtn) correctBtn.classList.add("correct");
 
-        if (p.shield) {
+        if (p.shield && !isCursed) {
+          // Protected by Spectral Shield
           p.shield = false;
           feedback.textContent = I18N[gameLang].wrongFeedbackShield(q.answer);
           feedback.className = "q-feedback correct";
@@ -515,7 +580,26 @@ async function land(p, index) {
           await sleep(1600);
           await close();
           resolveQuestion();
+        } else if (p.anchor && p.anchor > 0) {
+          // Saved by Safety Anchor checkpoint
+          const savedAnchor = p.anchor;
+          p.anchor = 0;
+          p.progress = savedAnchor;
+          renderTokens(p.id);
+          feedback.textContent = I18N[gameLang].anchorSaved(savedAnchor);
+          feedback.className = "q-feedback wrong";
+          front.classList.add("fail");
+          card.classList.add("hit");
+          log(I18N[gameLang].anchorSaved(savedAnchor));
+          if (isCursed) {
+            p.skipTurn = true;
+            log(I18N[gameLang].cursedVictimLog(p.name));
+          }
+          await triggerScreamer();
+          await close();
+          resolveQuestion();
         } else {
+          // Standard full demise: reset to start + screamer
           feedback.textContent = I18N[gameLang].wrongFeedbackDeath(q.answer);
           feedback.className = "q-feedback wrong";
           front.classList.add("fail");
@@ -523,8 +607,10 @@ async function land(p, index) {
           log(I18N[gameLang].failedLog(p.name));
           p.progress = 0;
           renderTokens(p.id);
-
-          // Instant screamer jumpscare
+          if (isCursed) {
+            p.skipTurn = true;
+            log(I18N[gameLang].cursedVictimLog(p.name));
+          }
           await triggerScreamer();
           await close();
           resolveQuestion();
@@ -542,12 +628,29 @@ async function land(p, index) {
       const correctBtn = opts.querySelector(`[data-letter="${q.correct_letter}"]`);
       if (correctBtn) correctBtn.classList.add("correct");
 
-      if (p.shield) {
+      if (p.shield && !isCursed) {
         p.shield = false;
         feedback.textContent = I18N[gameLang].timeExpiredFeedbackShield(q.answer);
         feedback.className = "q-feedback correct";
         log(I18N[gameLang].failedSaltLog(p.name));
         await sleep(1600);
+        await close();
+        resolveQuestion();
+      } else if (p.anchor && p.anchor > 0) {
+        const savedAnchor = p.anchor;
+        p.anchor = 0;
+        p.progress = savedAnchor;
+        renderTokens(p.id);
+        feedback.textContent = I18N[gameLang].anchorSaved(savedAnchor);
+        feedback.className = "q-feedback wrong";
+        front.classList.add("fail");
+        card.classList.add("hit");
+        log(I18N[gameLang].anchorSaved(savedAnchor));
+        if (isCursed) {
+          p.skipTurn = true;
+          log(I18N[gameLang].cursedVictimLog(p.name));
+        }
+        await triggerScreamer();
         await close();
         resolveQuestion();
       } else {
@@ -558,22 +661,33 @@ async function land(p, index) {
         log(I18N[gameLang].timeExpiredLog(p.name));
         p.progress = 0;
         renderTokens(p.id);
-
-        // Instant screamer jumpscare
+        if (isCursed) {
+          p.skipTurn = true;
+          log(I18N[gameLang].cursedVictimLog(p.name));
+        }
         await triggerScreamer();
         await close();
         resolveQuestion();
       }
     };
 
-    // Start countdown timer if enabled
-    if (timerSeconds > 0) {
-      timerWrap.hidden = false;
-      timerWrap.classList.remove("urgent");
-      timerBar.style.width = "100%";
-      timerText.textContent = `${timerSeconds}s`;
+    // Calculate effective timer (Check CAS-03: Time Pressure)
+    let effectiveSeconds = timerSeconds;
+    let isPressured = false;
+    if (p.timePressure) {
+      p.timePressure = false;
+      isPressured = true;
+      effectiveSeconds = Math.max(5, Math.floor(timerSeconds > 0 ? timerSeconds / 2 : 10));
+      log(I18N[gameLang].timePressureLog(p.name));
+    }
 
-      const totalMs = timerSeconds * 1000;
+    if (effectiveSeconds > 0) {
+      timerWrap.hidden = false;
+      timerWrap.classList.toggle("urgent", isPressured || effectiveSeconds <= 5);
+      timerBar.style.width = "100%";
+      timerText.textContent = `${effectiveSeconds}s`;
+
+      const totalMs = effectiveSeconds * 1000;
       const startAt = performance.now();
 
       timerInterval = setInterval(() => {
@@ -585,7 +699,7 @@ async function land(p, index) {
         timerBar.style.width = `${pct}%`;
         timerText.textContent = `${secs}s`;
 
-        if (remainingMs <= 5000) {
+        if (remainingMs <= 5000 || isPressured) {
           timerWrap.classList.add("urgent");
         }
 
@@ -607,6 +721,20 @@ async function land(p, index) {
       b.addEventListener("click", () => handleSelect(b));
       opts.appendChild(b);
     });
+
+    // Check BEN-05: Wisdom Whisper (50/50 effect banishing 2 incorrect options)
+    if (p.fiftyFifty) {
+      p.fiftyFifty = false;
+      const wrongButtons = Array.from(opts.querySelectorAll(".q-opt-btn")).filter(
+        (b) => b.dataset.letter !== q.correct_letter
+      );
+      wrongButtons.sort(() => Math.random() - 0.5);
+      wrongButtons.slice(0, 2).forEach((b) => {
+        b.disabled = true;
+        b.classList.add("banished-option");
+      });
+      log(I18N[gameLang].fiftyFiftyLog(p.name));
+    }
   });
 }
 
@@ -665,6 +793,13 @@ function start(playerNames) {
     name: name,
     color: COLORS[i],
     progress: 0,
+    shield: false,
+    skipQ: false,
+    skipTurn: false,
+    fiftyFifty: false,
+    timePressure: false,
+    cursedWhisper: false,
+    anchor: 0,
   }));
   $("menuBtn").textContent = I18N[gameLang].mainMenu;
   $("rollBtn").textContent = I18N[gameLang].rollBtn;

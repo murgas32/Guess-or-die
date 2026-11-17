@@ -15,8 +15,8 @@ Los jugadores se encuentran en una misteriosa sala oscura iluminada unicamente p
 - Banco Ampliado de Preguntas: Mas de 110 preguntas bilingues clasificadas en 4 categorias (Deportes, Historia, Matematicas y Geografia).
 - Casillas Especiales:
   - Pregunta (?): Pregunta aleatoria del mazo sin repeticion.
-  - Beneficio (+): Vela mas brillante (+2 casillas), Circulo de sal (escudo ante un fallo) o Susurros apagados (salta la proxima pregunta).
-  - Castigo (+): El suelo cede (-2 casillas) o Retencion (pierde el turno).
+  - Beneficio (+): Escudo Espectral (perdona 1 error/tiempo), Paso Veloz (+2 casillas), Susurro Protector (salta la proxima pregunta), Tirada Espectral (lanzamiento extra de dado), Susurro de Sabiduria (elimina 2 opciones 50/50) o Ancla Espectral (fija un checkpoint seguro ante caidas).
+  - Castigo (+): Retroceso Espectral (-2 casillas), Paralisis del Miedo (pierde el turno), Presion Temporal (mitad de tiempo en la siguiente pregunta), Ceguera Amnesica (oculta la categoria y bloquea traduccion) o Maldicion del Susurro (anula escudos y el turno queda congelado).
 - Modo de Calidad (Baja / Alta): Optimizado para correr fluido en cualquier equipo mediante texture baking y modo simplificado.
 
 ## Como jugar
