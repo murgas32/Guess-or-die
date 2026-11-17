@@ -9,12 +9,19 @@ const QUESTIONS = [
       "C) 11",
       "D) 12"
     ],
+    "options_es": [
+      "A) 9",
+      "B) 10",
+      "C) 11",
+      "D) 12"
+    ],
     "answer": "C) 11",
+    "answer_es": "C) 11",
     "correct_letter": "C"
   },
   {
     "category": "Sports",
-    "question_en": "How points is a free throw worth in basketball?",
+    "question_en": "How many points is a free throw worth in basketball?",
     "question_es": "¿Cuántos puntos vale un tiro libre en baloncesto?",
     "options": [
       "A) 1 point",
@@ -22,7 +29,14 @@ const QUESTIONS = [
       "C) 3 points",
       "D) 4 points"
     ],
+    "options_es": [
+      "A) 1 punto",
+      "B) 2 puntos",
+      "C) 3 puntos",
+      "D) 4 puntos"
+    ],
     "answer": "A) 1 point",
+    "answer_es": "A) 1 punto",
     "correct_letter": "A"
   },
   {
@@ -35,7 +49,14 @@ const QUESTIONS = [
       "C) Argentina",
       "D) Germany"
     ],
+    "options_es": [
+      "A) Brasil",
+      "B) Francia",
+      "C) Argentina",
+      "D) Alemania"
+    ],
     "answer": "C) Argentina",
+    "answer_es": "C) Argentina",
     "correct_letter": "C"
   },
   {
@@ -48,7 +69,14 @@ const QUESTIONS = [
       "C) Blue",
       "D) Green"
     ],
+    "options_es": [
+      "A) Amarilla",
+      "B) Roja",
+      "C) Azul",
+      "D) Verde"
+    ],
     "answer": "B) Red",
+    "answer_es": "B) Roja",
     "correct_letter": "B"
   },
   {
@@ -61,7 +89,14 @@ const QUESTIONS = [
       "C) Cycling",
       "D) Basketball"
     ],
+    "options_es": [
+      "A) Natación",
+      "B) Atletismo (carreras)",
+      "C) Ciclismo",
+      "D) Baloncesto"
+    ],
     "answer": "B) Running (Track and Field)",
+    "answer_es": "B) Atletismo (carreras)",
     "correct_letter": "B"
   },
   {
@@ -74,7 +109,14 @@ const QUESTIONS = [
       "C) Michael Jordan",
       "D) Shaquille O'Neal"
     ],
+    "options_es": [
+      "A) LeBron James",
+      "B) Kobe Bryant",
+      "C) Michael Jordan",
+      "D) Shaquille O'Neal"
+    ],
     "answer": "C) Michael Jordan",
+    "answer_es": "C) Michael Jordan",
     "correct_letter": "C"
   },
   {
@@ -87,7 +129,14 @@ const QUESTIONS = [
       "C) Every 4 years",
       "D) Every 5 years"
     ],
+    "options_es": [
+      "A) Cada 2 años",
+      "B) Cada 3 años",
+      "C) Cada 4 años",
+      "D) Cada 5 años"
+    ],
     "answer": "C) Every 4 years",
+    "answer_es": "C) Cada 4 años",
     "correct_letter": "C"
   },
   {
@@ -100,7 +149,14 @@ const QUESTIONS = [
       "C) 10",
       "D) 11"
     ],
+    "options_es": [
+      "A) 7",
+      "B) 9",
+      "C) 10",
+      "D) 11"
+    ],
     "answer": "C) 10",
+    "answer_es": "C) 10",
     "correct_letter": "C"
   },
   {
@@ -113,7 +169,14 @@ const QUESTIONS = [
       "C) 10",
       "D) 11"
     ],
+    "options_es": [
+      "A) 7",
+      "B) 9",
+      "C) 10",
+      "D) 11"
+    ],
     "answer": "A) 7",
+    "answer_es": "A) 7",
     "correct_letter": "A"
   },
   {
@@ -126,7 +189,14 @@ const QUESTIONS = [
       "C) Spain",
       "D) Brazil"
     ],
+    "options_es": [
+      "A) Argentina",
+      "B) Francia",
+      "C) España",
+      "D) Brasil"
+    ],
     "answer": "C) Spain",
+    "answer_es": "C) España",
     "correct_letter": "C"
   },
   {
@@ -139,7 +209,14 @@ const QUESTIONS = [
       "C) 7",
       "D) 11"
     ],
+    "options_es": [
+      "A) 5",
+      "B) 6",
+      "C) 7",
+      "D) 11"
+    ],
     "answer": "B) 6",
+    "answer_es": "B) 6",
     "correct_letter": "B"
   },
   {
@@ -152,7 +229,14 @@ const QUESTIONS = [
       "C) Junior de Barranquilla",
       "D) América de Cali"
     ],
+    "options_es": [
+      "A) Millonarios",
+      "B) Atlético Nacional",
+      "C) Junior de Barranquilla",
+      "D) América de Cali"
+    ],
     "answer": "C) Junior de Barranquilla",
+    "answer_es": "C) Junior de Barranquilla",
     "correct_letter": "C"
   },
   {
@@ -165,7 +249,14 @@ const QUESTIONS = [
       "C) Tennis",
       "D) Baseball"
     ],
+    "options_es": [
+      "A) Baloncesto",
+      "B) Fútbol",
+      "C) Tenis",
+      "D) Béisbol"
+    ],
     "answer": "B) Soccer (Football)",
+    "answer_es": "B) Fútbol",
     "correct_letter": "B"
   },
   {
@@ -178,7 +269,14 @@ const QUESTIONS = [
       "C) George Washington",
       "D) John Adams"
     ],
+    "options_es": [
+      "A) Abraham Lincoln",
+      "B) Thomas Jefferson",
+      "C) George Washington",
+      "D) John Adams"
+    ],
     "answer": "C) George Washington",
+    "answer_es": "C) George Washington",
     "correct_letter": "C"
   },
   {
@@ -191,7 +289,14 @@ const QUESTIONS = [
       "C) Britannic",
       "D) Mayflower"
     ],
+    "options_es": [
+      "A) Santa Maria",
+      "B) Titanic",
+      "C) Britannic",
+      "D) Mayflower"
+    ],
     "answer": "B) Titanic",
+    "answer_es": "B) Titanic",
     "correct_letter": "B"
   },
   {
@@ -204,7 +309,14 @@ const QUESTIONS = [
       "C) Leonardo da Vinci",
       "D) Michelangelo"
     ],
+    "options_es": [
+      "A) Vincent van Gogh",
+      "B) Pablo Picasso",
+      "C) Leonardo da Vinci",
+      "D) Miguel Ángel"
+    ],
     "answer": "C) Leonardo da Vinci",
+    "answer_es": "C) Leonardo da Vinci",
     "correct_letter": "C"
   },
   {
@@ -217,7 +329,14 @@ const QUESTIONS = [
       "C) The Egyptians",
       "D) The Mayans"
     ],
+    "options_es": [
+      "A) Los griegos",
+      "B) Los romanos",
+      "C) Los egipcios",
+      "D) Los mayas"
+    ],
     "answer": "B) The Romans",
+    "answer_es": "B) Los romanos",
     "correct_letter": "B"
   },
   {
@@ -230,7 +349,14 @@ const QUESTIONS = [
       "C) 1945",
       "D) 1950"
     ],
+    "options_es": [
+      "A) 1918",
+      "B) 1939",
+      "C) 1945",
+      "D) 1950"
+    ],
     "answer": "C) 1945",
+    "answer_es": "C) 1945",
     "correct_letter": "C"
   },
   {
@@ -243,7 +369,14 @@ const QUESTIONS = [
       "C) Prince",
       "D) David Bowie"
     ],
+    "options_es": [
+      "A) Elvis Presley",
+      "B) Michael Jackson",
+      "C) Prince",
+      "D) David Bowie"
+    ],
     "answer": "B) Michael Jackson",
+    "answer_es": "B) Michael Jackson",
     "correct_letter": "B"
   },
   {
@@ -256,7 +389,14 @@ const QUESTIONS = [
       "C) Ferdinand Magellan",
       "D) Vasco da Gama"
     ],
+    "options_es": [
+      "A) Cristóbal Colón",
+      "B) Marco Polo",
+      "C) Fernando de Magallanes",
+      "D) Vasco da Gama"
+    ],
     "answer": "A) Christopher Columbus",
+    "answer_es": "A) Cristóbal Colón",
     "correct_letter": "A"
   },
   {
@@ -269,7 +409,14 @@ const QUESTIONS = [
       "C) Hadrian's Wall",
       "D) The Red Wall"
     ],
+    "options_es": [
+      "A) El Muro de Berlín",
+      "B) La Gran Muralla China",
+      "C) El Muro de Adriano",
+      "D) El Muro Rojo"
+    ],
     "answer": "B) The Great Wall of China",
+    "answer_es": "B) La Gran Muralla China",
     "correct_letter": "B"
   },
   {
@@ -282,7 +429,14 @@ const QUESTIONS = [
       "C) Ottoman Empire",
       "D) British Empire"
     ],
+    "options_es": [
+      "A) Imperio persa",
+      "B) Imperio romano",
+      "C) Imperio otomano",
+      "D) Imperio británico"
+    ],
     "answer": "B) Roman Empire",
+    "answer_es": "B) Imperio romano",
     "correct_letter": "B"
   },
   {
@@ -295,7 +449,14 @@ const QUESTIONS = [
       "C) Neil Armstrong",
       "D) John Glenn"
     ],
+    "options_es": [
+      "A) Yuri Gagarin",
+      "B) Buzz Aldrin",
+      "C) Neil Armstrong",
+      "D) John Glenn"
+    ],
     "answer": "C) Neil Armstrong",
+    "answer_es": "C) Neil Armstrong",
     "correct_letter": "C"
   },
   {
@@ -308,7 +469,14 @@ const QUESTIONS = [
       "C) Great Britain",
       "D) Germany"
     ],
+    "options_es": [
+      "A) Estados Unidos",
+      "B) Francia",
+      "C) Gran Bretaña",
+      "D) Alemania"
+    ],
     "answer": "C) Great Britain",
+    "answer_es": "C) Gran Bretaña",
     "correct_letter": "C"
   },
   {
@@ -321,7 +489,14 @@ const QUESTIONS = [
       "C) Hatshepsut",
       "D) Elizabeth I"
     ],
+    "options_es": [
+      "A) Nefertiti",
+      "B) Cleopatra",
+      "C) Hatshepsut",
+      "D) Isabel I"
+    ],
     "answer": "B) Cleopatra",
+    "answer_es": "B) Cleopatra",
     "correct_letter": "B"
   },
   {
@@ -334,7 +509,14 @@ const QUESTIONS = [
       "C) Russian Revolution",
       "D) Industrial Revolution"
     ],
+    "options_es": [
+      "A) Revolución estadounidense",
+      "B) Revolución francesa",
+      "C) Revolución rusa",
+      "D) Revolución industrial"
+    ],
     "answer": "B) French Revolution",
+    "answer_es": "B) Revolución francesa",
     "correct_letter": "B"
   },
   {
@@ -347,7 +529,14 @@ const QUESTIONS = [
       "C) 64",
       "D) 48"
     ],
+    "options_es": [
+      "A) 54",
+      "B) 56",
+      "C) 64",
+      "D) 48"
+    ],
     "answer": "B) 56",
+    "answer_es": "B) 56",
     "correct_letter": "B"
   },
   {
@@ -360,7 +549,14 @@ const QUESTIONS = [
       "C) 7",
       "D) 8"
     ],
+    "options_es": [
+      "A) 5",
+      "B) 6",
+      "C) 7",
+      "D) 8"
+    ],
     "answer": "B) 6",
+    "answer_es": "B) 6",
     "correct_letter": "B"
   },
   {
@@ -373,7 +569,14 @@ const QUESTIONS = [
       "C) 9",
       "D) 10"
     ],
+    "options_es": [
+      "A) 7",
+      "B) 8",
+      "C) 9",
+      "D) 10"
+    ],
     "answer": "C) 9",
+    "answer_es": "C) 9",
     "correct_letter": "C"
   },
   {
@@ -386,7 +589,14 @@ const QUESTIONS = [
       "C) 44",
       "D) 52"
     ],
+    "options_es": [
+      "A) 40",
+      "B) 42",
+      "C) 44",
+      "D) 52"
+    ],
     "answer": "B) 42",
+    "answer_es": "B) 42",
     "correct_letter": "B"
   },
   {
@@ -399,7 +609,14 @@ const QUESTIONS = [
       "C) 70",
       "D) 80"
     ],
+    "options_es": [
+      "A) 50",
+      "B) 60",
+      "C) 70",
+      "D) 80"
+    ],
     "answer": "B) 60",
+    "answer_es": "B) 60",
     "correct_letter": "B"
   },
   {
@@ -412,7 +629,14 @@ const QUESTIONS = [
       "C) 73",
       "D) 53"
     ],
+    "options_es": [
+      "A) 63",
+      "B) 67",
+      "C) 73",
+      "D) 53"
+    ],
     "answer": "A) 63",
+    "answer_es": "A) 63",
     "correct_letter": "A"
   },
   {
@@ -425,7 +649,14 @@ const QUESTIONS = [
       "C) 8",
       "D) 9"
     ],
+    "options_es": [
+      "A) 6",
+      "B) 7",
+      "C) 8",
+      "D) 9"
+    ],
     "answer": "B) 7",
+    "answer_es": "B) 7",
     "correct_letter": "B"
   },
   {
@@ -438,7 +669,14 @@ const QUESTIONS = [
       "C) 144",
       "D) 154"
     ],
+    "options_es": [
+      "A) 124",
+      "B) 134",
+      "C) 144",
+      "D) 154"
+    ],
     "answer": "C) 144",
+    "answer_es": "C) 144",
     "correct_letter": "C"
   },
   {
@@ -451,7 +689,14 @@ const QUESTIONS = [
       "C) 27",
       "D) 81"
     ],
+    "options_es": [
+      "A) 9",
+      "B) 18",
+      "C) 27",
+      "D) 81"
+    ],
     "answer": "C) 27",
+    "answer_es": "C) 27",
     "correct_letter": "C"
   },
   {
@@ -464,7 +709,14 @@ const QUESTIONS = [
       "C) 50",
       "D) 100"
     ],
+    "options_es": [
+      "A) 5",
+      "B) 10",
+      "C) 50",
+      "D) 100"
+    ],
     "answer": "B) 10",
+    "answer_es": "B) 10",
     "correct_letter": "B"
   },
   {
@@ -477,7 +729,14 @@ const QUESTIONS = [
       "C) 12",
       "D) 14"
     ],
+    "options_es": [
+      "A) 10",
+      "B) 11",
+      "C) 12",
+      "D) 14"
+    ],
     "answer": "C) 12",
+    "answer_es": "C) 12",
     "correct_letter": "C"
   },
   {
@@ -490,7 +749,14 @@ const QUESTIONS = [
       "C) Paris",
       "D) Berlin"
     ],
+    "options_es": [
+      "A) Roma",
+      "B) Madrid",
+      "C) París",
+      "D) Berlín"
+    ],
     "answer": "C) Paris",
+    "answer_es": "C) París",
     "correct_letter": "C"
   },
   {
@@ -503,7 +769,14 @@ const QUESTIONS = [
       "C) Pacific Ocean",
       "D) Arctic Ocean"
     ],
+    "options_es": [
+      "A) Océano Atlántico",
+      "B) Océano Índico",
+      "C) Océano Pacífico",
+      "D) Océano Ártico"
+    ],
     "answer": "C) Pacific Ocean",
+    "answer_es": "C) Océano Pacífico",
     "correct_letter": "C"
   },
   {
@@ -516,7 +789,14 @@ const QUESTIONS = [
       "C) Asia",
       "D) North America"
     ],
+    "options_es": [
+      "A) África",
+      "B) Sudamérica",
+      "C) Asia",
+      "D) Norteamérica"
+    ],
     "answer": "B) South America",
+    "answer_es": "B) Sudamérica",
     "correct_letter": "B"
   },
   {
@@ -529,7 +809,14 @@ const QUESTIONS = [
       "C) United States",
       "D) Russia"
     ],
+    "options_es": [
+      "A) China",
+      "B) Canadá",
+      "C) Estados Unidos",
+      "D) Rusia"
+    ],
     "answer": "D) Russia",
+    "answer_es": "D) Rusia",
     "correct_letter": "D"
   },
   {
@@ -542,7 +829,14 @@ const QUESTIONS = [
       "C) Mississippi River",
       "D) Yangtze River"
     ],
+    "options_es": [
+      "A) Río Amazonas",
+      "B) Río Nilo",
+      "C) Río Misisipi",
+      "D) Río Yangtsé"
+    ],
     "answer": "B) Nile River",
+    "answer_es": "B) Río Nilo",
     "correct_letter": "B"
   },
   {
@@ -555,7 +849,14 @@ const QUESTIONS = [
       "C) Tokyo",
       "D) Bangkok"
     ],
+    "options_es": [
+      "A) Pekín",
+      "B) Seúl",
+      "C) Tokio",
+      "D) Bangkok"
+    ],
     "answer": "C) Tokyo",
+    "answer_es": "C) Tokio",
     "correct_letter": "C"
   },
   {
@@ -568,7 +869,14 @@ const QUESTIONS = [
       "C) Africa",
       "D) South America"
     ],
+    "options_es": [
+      "A) Asia",
+      "B) Europa",
+      "C) África",
+      "D) Sudamérica"
+    ],
     "answer": "C) Africa",
+    "answer_es": "C) África",
     "correct_letter": "C"
   },
   {
@@ -581,7 +889,14 @@ const QUESTIONS = [
       "C) The Himalayas",
       "D) The Rockies"
     ],
+    "options_es": [
+      "A) Los Andes",
+      "B) Los Alpes",
+      "C) El Himalaya",
+      "D) Las Montañas Rocosas"
+    ],
     "answer": "C) The Himalayas",
+    "answer_es": "C) El Himalaya",
     "correct_letter": "C"
   },
   {
@@ -594,7 +909,14 @@ const QUESTIONS = [
       "C) Canberra",
       "D) Brisbane"
     ],
+    "options_es": [
+      "A) Sídney",
+      "B) Melbourne",
+      "C) Canberra",
+      "D) Brisbane"
+    ],
     "answer": "C) Canberra",
+    "answer_es": "C) Canberra",
     "correct_letter": "C"
   },
   {
@@ -607,7 +929,14 @@ const QUESTIONS = [
       "C) Greece",
       "D) Portugal"
     ],
+    "options_es": [
+      "A) España",
+      "B) Italia",
+      "C) Grecia",
+      "D) Portugal"
+    ],
     "answer": "B) Italy",
+    "answer_es": "B) Italia",
     "correct_letter": "B"
   },
   {
@@ -620,7 +949,14 @@ const QUESTIONS = [
       "C) Antarctica",
       "D) Asia"
     ],
+    "options_es": [
+      "A) Europa",
+      "B) Norteamérica",
+      "C) Antártida",
+      "D) Asia"
+    ],
     "answer": "C) Antarctica",
+    "answer_es": "C) Antártida",
     "correct_letter": "C"
   },
   {
@@ -633,7 +969,14 @@ const QUESTIONS = [
       "C) Sahara Desert",
       "D) Kalahari Desert"
     ],
+    "options_es": [
+      "A) Desierto de Gobi",
+      "B) Desierto de Atacama",
+      "C) Desierto del Sahara",
+      "D) Desierto de Kalahari"
+    ],
     "answer": "C) Sahara Desert",
+    "answer_es": "C) Desierto del Sahara",
     "correct_letter": "C"
   },
   {
@@ -646,7 +989,14 @@ const QUESTIONS = [
       "C) Montreal",
       "D) Ottawa"
     ],
+    "options_es": [
+      "A) Toronto",
+      "B) Vancouver",
+      "C) Montreal",
+      "D) Ottawa"
+    ],
     "answer": "D) Ottawa",
+    "answer_es": "D) Ottawa",
     "correct_letter": "D"
   },
   {
@@ -659,7 +1009,14 @@ const QUESTIONS = [
       "C) Ecuador and Peru",
       "D) Brazil"
     ],
+    "options_es": [
+      "A) Panamá",
+      "B) Venezuela",
+      "C) Ecuador y Perú",
+      "D) Brasil"
+    ],
     "answer": "C) Ecuador and Peru",
+    "answer_es": "C) Ecuador y Perú",
     "correct_letter": "C"
   },
   {
@@ -672,7 +1029,14 @@ const QUESTIONS = [
       "C) Cuba",
       "D) Peru"
     ],
+    "options_es": [
+      "A) España",
+      "B) México",
+      "C) Cuba",
+      "D) Perú"
+    ],
     "answer": "B) Mexico",
+    "answer_es": "B) México",
     "correct_letter": "B"
   },
   {
@@ -685,7 +1049,14 @@ const QUESTIONS = [
       "C) Roland Garros (French Open)",
       "D) Australian Open"
     ],
+    "options_es": [
+      "A) Wimbledon",
+      "B) US Open",
+      "C) Roland Garros (Abierto de Francia)",
+      "D) Abierto de Australia"
+    ],
     "answer": "C) Roland Garros (French Open)",
+    "answer_es": "C) Roland Garros (Abierto de Francia)",
     "correct_letter": "C"
   },
   {
@@ -698,7 +1069,14 @@ const QUESTIONS = [
       "C) Breaststroke",
       "D) Backstroke"
     ],
+    "options_es": [
+      "A) Estilo libre",
+      "B) Mariposa",
+      "C) Pecho",
+      "D) Espalda"
+    ],
     "answer": "B) Butterfly",
+    "answer_es": "B) Mariposa",
     "correct_letter": "B"
   },
   {
@@ -711,7 +1089,14 @@ const QUESTIONS = [
       "C) 100 minutes",
       "D) 120 minutes"
     ],
+    "options_es": [
+      "A) 80 minutos",
+      "B) 90 minutos",
+      "C) 100 minutos",
+      "D) 120 minutos"
+    ],
     "answer": "B) 90 minutes",
+    "answer_es": "B) 90 minutos",
     "correct_letter": "B"
   },
   {
@@ -724,7 +1109,14 @@ const QUESTIONS = [
       "C) 4 minutes",
       "D) 5 minutes"
     ],
+    "options_es": [
+      "A) 2 minutos",
+      "B) 3 minutos",
+      "C) 4 minutos",
+      "D) 5 minutos"
+    ],
     "answer": "B) 3 minutes",
+    "answer_es": "B) 3 minutos",
     "correct_letter": "B"
   },
   {
@@ -737,7 +1129,14 @@ const QUESTIONS = [
       "C) 42.195 km",
       "D) 50.000 km"
     ],
+    "options_es": [
+      "A) 21,097 km",
+      "B) 35,000 km",
+      "C) 42,195 km",
+      "D) 50,000 km"
+    ],
     "answer": "C) 42.195 km",
+    "answer_es": "C) 42,195 km",
     "correct_letter": "C"
   },
   {
@@ -750,7 +1149,14 @@ const QUESTIONS = [
       "C) 4",
       "D) 5"
     ],
+    "options_es": [
+      "A) 2",
+      "B) 3",
+      "C) 4",
+      "D) 5"
+    ],
     "answer": "B) 3",
+    "answer_es": "B) 3",
     "correct_letter": "B"
   },
   {
@@ -763,7 +1169,14 @@ const QUESTIONS = [
       "C) 6",
       "D) 7"
     ],
+    "options_es": [
+      "A) 4",
+      "B) 5",
+      "C) 6",
+      "D) 7"
+    ],
     "answer": "B) 5",
+    "answer_es": "B) 5",
     "correct_letter": "B"
   },
   {
@@ -776,7 +1189,14 @@ const QUESTIONS = [
       "C) 7 points",
       "D) 8 points"
     ],
+    "options_es": [
+      "A) 3 puntos",
+      "B) 6 puntos",
+      "C) 7 puntos",
+      "D) 8 puntos"
+    ],
     "answer": "B) 6 points",
+    "answer_es": "B) 6 puntos",
     "correct_letter": "B"
   },
   {
@@ -789,7 +1209,14 @@ const QUESTIONS = [
       "C) Tour de France",
       "D) Paris-Roubaix"
     ],
+    "options_es": [
+      "A) Giro de Italia",
+      "B) Vuelta a España",
+      "C) Tour de Francia",
+      "D) París-Roubaix"
+    ],
     "answer": "C) Tour de France",
+    "answer_es": "C) Tour de Francia",
     "correct_letter": "C"
   },
   {
@@ -802,7 +1229,14 @@ const QUESTIONS = [
       "C) Red flag",
       "D) Checkered black and white flag"
     ],
+    "options_es": [
+      "A) Bandera amarilla",
+      "B) Bandera verde",
+      "C) Bandera roja",
+      "D) Bandera de cuadros blanco y negro"
+    ],
     "answer": "D) Checkered black and white flag",
+    "answer_es": "D) Bandera de cuadros blanco y negro",
     "correct_letter": "D"
   },
   {
@@ -815,7 +1249,14 @@ const QUESTIONS = [
       "C) Argentina",
       "D) Italy"
     ],
+    "options_es": [
+      "A) Brasil",
+      "B) Uruguay",
+      "C) Argentina",
+      "D) Italia"
+    ],
     "answer": "B) Uruguay",
+    "answer_es": "B) Uruguay",
     "correct_letter": "B"
   },
   {
@@ -823,12 +1264,19 @@ const QUESTIONS = [
     "question_en": "In chess, which piece can only move diagonally across the board?",
     "question_es": "En el ajedrez, ¿qué pieza solo puede moverse en diagonal?",
     "options": [
-      "A) Rook (Torre)",
-      "B) Knight (Caballo)",
-      "C) Bishop (Alfil)",
-      "D) Pawn (Peón)"
+      "A) Rook",
+      "B) Knight",
+      "C) Bishop",
+      "D) Pawn"
     ],
-    "answer": "C) Bishop (Alfil)",
+    "options_es": [
+      "A) Torre",
+      "B) Caballo",
+      "C) Alfil",
+      "D) Peón"
+    ],
+    "answer": "C) Bishop",
+    "answer_es": "C) Alfil",
     "correct_letter": "C"
   },
   {
@@ -841,7 +1289,14 @@ const QUESTIONS = [
       "C) Ping-Pong",
       "D) Racquetball"
     ],
+    "options_es": [
+      "A) Squash",
+      "B) Bádminton",
+      "C) Ping-Pong",
+      "D) Racquetbol"
+    ],
     "answer": "C) Ping-Pong",
+    "answer_es": "C) Ping-Pong",
     "correct_letter": "C"
   },
   {
@@ -854,7 +1309,14 @@ const QUESTIONS = [
       "C) Eagle",
       "D) Albatross"
     ],
+    "options_es": [
+      "A) Bogey",
+      "B) Birdie",
+      "C) Eagle",
+      "D) Albatros"
+    ],
     "answer": "B) Birdie",
+    "answer_es": "B) Birdie",
     "correct_letter": "B"
   },
   {
@@ -867,7 +1329,14 @@ const QUESTIONS = [
       "C) Paris",
       "D) Rome"
     ],
+    "options_es": [
+      "A) Londres",
+      "B) Madrid",
+      "C) París",
+      "D) Roma"
+    ],
     "answer": "C) Paris",
+    "answer_es": "C) París",
     "correct_letter": "C"
   },
   {
@@ -880,7 +1349,14 @@ const QUESTIONS = [
       "C) Athens",
       "D) Alexandria"
     ],
+    "options_es": [
+      "A) Cartago",
+      "B) Pompeya",
+      "C) Atenas",
+      "D) Alejandría"
+    ],
     "answer": "B) Pompeii",
+    "answer_es": "B) Pompeya",
     "correct_letter": "B"
   },
   {
@@ -893,7 +1369,14 @@ const QUESTIONS = [
       "C) Bernardo O'Higgins",
       "D) Francisco de Miranda"
     ],
+    "options_es": [
+      "A) José de San Martín",
+      "B) Simón Bolívar",
+      "C) Bernardo O'Higgins",
+      "D) Francisco de Miranda"
+    ],
     "answer": "B) Simón Bolívar",
+    "answer_es": "B) Simón Bolívar",
     "correct_letter": "B"
   },
   {
@@ -906,7 +1389,14 @@ const QUESTIONS = [
       "C) Obelisks",
       "D) Colosseums"
     ],
+    "options_es": [
+      "A) Zigurats",
+      "B) Pirámides",
+      "C) Obeliscos",
+      "D) Coliseos"
+    ],
     "answer": "B) Pyramids",
+    "answer_es": "B) Pirámides",
     "correct_letter": "B"
   },
   {
@@ -916,10 +1406,17 @@ const QUESTIONS = [
     "options": [
       "A) Leonardo da Vinci",
       "B) Raphael",
-      "C) Michelangelo (Miguel Ángel)",
+      "C) Michelangelo",
       "D) Donatello"
     ],
-    "answer": "C) Michelangelo (Miguel Ángel)",
+    "options_es": [
+      "A) Leonardo da Vinci",
+      "B) Rafael",
+      "C) Miguel Ángel",
+      "D) Donatello"
+    ],
+    "answer": "C) Michelangelo",
+    "answer_es": "C) Miguel Ángel",
     "correct_letter": "C"
   },
   {
@@ -932,7 +1429,14 @@ const QUESTIONS = [
       "C) Athens",
       "D) Thebes"
     ],
+    "options_es": [
+      "A) Esparta",
+      "B) Corinto",
+      "C) Atenas",
+      "D) Tebas"
+    ],
     "answer": "C) Athens",
+    "answer_es": "C) Atenas",
     "correct_letter": "C"
   },
   {
@@ -945,7 +1449,14 @@ const QUESTIONS = [
       "C) 1918",
       "D) 1939"
     ],
+    "options_es": [
+      "A) 1912",
+      "B) 1914",
+      "C) 1918",
+      "D) 1939"
+    ],
     "answer": "B) 1914",
+    "answer_es": "B) 1914",
     "correct_letter": "B"
   },
   {
@@ -958,7 +1469,14 @@ const QUESTIONS = [
       "C) Vostok 1",
       "D) Voyager 1"
     ],
+    "options_es": [
+      "A) Apolo 11",
+      "B) Sputnik 1",
+      "C) Vostok 1",
+      "D) Voyager 1"
+    ],
     "answer": "B) Sputnik 1",
+    "answer_es": "B) Sputnik 1",
     "correct_letter": "B"
   },
   {
@@ -966,12 +1484,19 @@ const QUESTIONS = [
     "question_en": "Which devastating pandemic wiped out a large portion of Europe's population in the 14th century?",
     "question_es": "¿Qué devastadora pandemia acabó con gran parte de la población europea en el siglo XIV?",
     "options": [
-      "A) The Black Death (Peste Negra)",
+      "A) The Black Death",
       "B) Spanish Flu",
       "C) Cholera",
       "D) Smallpox"
     ],
-    "answer": "A) The Black Death (Peste Negra)",
+    "options_es": [
+      "A) La Peste Negra",
+      "B) Gripe española",
+      "C) Cólera",
+      "D) Viruela"
+    ],
+    "answer": "A) The Black Death",
+    "answer_es": "A) La Peste Negra",
     "correct_letter": "A"
   },
   {
@@ -984,7 +1509,14 @@ const QUESTIONS = [
       "C) 1789",
       "D) 1804"
     ],
+    "options_es": [
+      "A) 1765",
+      "B) 1776",
+      "C) 1789",
+      "D) 1804"
+    ],
     "answer": "B) 1776",
+    "answer_es": "B) 1776",
     "correct_letter": "B"
   },
   {
@@ -997,7 +1529,14 @@ const QUESTIONS = [
       "C) Albert Einstein",
       "D) Niels Bohr"
     ],
+    "options_es": [
+      "A) Isaac Newton",
+      "B) Nikola Tesla",
+      "C) Albert Einstein",
+      "D) Niels Bohr"
+    ],
     "answer": "C) Albert Einstein",
+    "answer_es": "C) Albert Einstein",
     "correct_letter": "C"
   },
   {
@@ -1010,7 +1549,14 @@ const QUESTIONS = [
       "C) The Maginot Line",
       "D) The Rhine Wall"
     ],
+    "options_es": [
+      "A) El Telón de Acero",
+      "B) El Muro de Berlín",
+      "C) La Línea Maginot",
+      "D) El Muro del Rin"
+    ],
     "answer": "B) The Berlin Wall",
+    "answer_es": "B) El Muro de Berlín",
     "correct_letter": "B"
   },
   {
@@ -1023,7 +1569,14 @@ const QUESTIONS = [
       "C) Kofi Annan",
       "D) Steve Biko"
     ],
+    "options_es": [
+      "A) Desmond Tutu",
+      "B) Nelson Mandela",
+      "C) Kofi Annan",
+      "D) Steve Biko"
+    ],
     "answer": "B) Nelson Mandela",
+    "answer_es": "B) Nelson Mandela",
     "correct_letter": "B"
   },
   {
@@ -1036,7 +1589,14 @@ const QUESTIONS = [
       "C) Rabindranath Tagore",
       "D) Subhas Chandra Bose"
     ],
+    "options_es": [
+      "A) Jawaharlal Nehru",
+      "B) Mahatma Gandhi",
+      "C) Rabindranath Tagore",
+      "D) Subhas Chandra Bose"
+    ],
     "answer": "B) Mahatma Gandhi",
+    "answer_es": "B) Mahatma Gandhi",
     "correct_letter": "B"
   },
   {
@@ -1049,7 +1609,14 @@ const QUESTIONS = [
       "C) Tenochtitlan",
       "D) Tikal"
     ],
+    "options_es": [
+      "A) Teotihuacán",
+      "B) Chichén Itzá",
+      "C) Tenochtitlan",
+      "D) Tikal"
+    ],
     "answer": "C) Tenochtitlan",
+    "answer_es": "C) Tenochtitlan",
     "correct_letter": "C"
   },
   {
@@ -1062,7 +1629,14 @@ const QUESTIONS = [
       "C) Leonardo da Vinci",
       "D) Martin Luther"
     ],
+    "options_es": [
+      "A) Johannes Gutenberg",
+      "B) Galileo Galilei",
+      "C) Leonardo da Vinci",
+      "D) Martín Lutero"
+    ],
     "answer": "A) Johannes Gutenberg",
+    "answer_es": "A) Johannes Gutenberg",
     "correct_letter": "A"
   },
   {
@@ -1075,7 +1649,14 @@ const QUESTIONS = [
       "C) 270 degrees",
       "D) 360 degrees"
     ],
+    "options_es": [
+      "A) 90 grados",
+      "B) 180 grados",
+      "C) 270 grados",
+      "D) 360 grados"
+    ],
     "answer": "B) 180 degrees",
+    "answer_es": "B) 180 grados",
     "correct_letter": "B"
   },
   {
@@ -1088,7 +1669,14 @@ const QUESTIONS = [
       "C) 89",
       "D) 99"
     ],
+    "options_es": [
+      "A) 72",
+      "B) 81",
+      "C) 89",
+      "D) 99"
+    ],
     "answer": "B) 81",
+    "answer_es": "B) 81",
     "correct_letter": "B"
   },
   {
@@ -1101,7 +1689,14 @@ const QUESTIONS = [
       "C) Nonagon",
       "D) Decagon"
     ],
+    "options_es": [
+      "A) Heptágono",
+      "B) Octágono",
+      "C) Nonágono",
+      "D) Decágono"
+    ],
     "answer": "B) Octagon",
+    "answer_es": "B) Octágono",
     "correct_letter": "B"
   },
   {
@@ -1114,7 +1709,14 @@ const QUESTIONS = [
       "C) 15",
       "D) 40"
     ],
+    "options_es": [
+      "A) 5",
+      "B) 10",
+      "C) 15",
+      "D) 40"
+    ],
     "answer": "B) 10",
+    "answer_es": "B) 10",
     "correct_letter": "B"
   },
   {
@@ -1127,7 +1729,14 @@ const QUESTIONS = [
       "C) 50",
       "D) 75"
     ],
+    "options_es": [
+      "A) 25",
+      "B) 40",
+      "C) 50",
+      "D) 75"
+    ],
     "answer": "C) 50",
+    "answer_es": "C) 50",
     "correct_letter": "C"
   },
   {
@@ -1140,7 +1749,14 @@ const QUESTIONS = [
       "C) 1",
       "D) Infinity"
     ],
+    "options_es": [
+      "A) -1",
+      "B) 0",
+      "C) 1",
+      "D) Infinito"
+    ],
     "answer": "B) 0",
+    "answer_es": "B) 0",
     "correct_letter": "B"
   },
   {
@@ -1153,7 +1769,14 @@ const QUESTIONS = [
       "C) 60",
       "D) 65"
     ],
+    "options_es": [
+      "A) 45",
+      "B) 50",
+      "C) 60",
+      "D) 65"
+    ],
     "answer": "C) 60",
+    "answer_es": "C) 60",
     "correct_letter": "C"
   },
   {
@@ -1166,7 +1789,14 @@ const QUESTIONS = [
       "C) 36 cm",
       "D) 48 cm"
     ],
+    "options_es": [
+      "A) 12 cm",
+      "B) 24 cm",
+      "C) 36 cm",
+      "D) 48 cm"
+    ],
     "answer": "B) 24 cm",
+    "answer_es": "B) 24 cm",
     "correct_letter": "B"
   },
   {
@@ -1179,7 +1809,14 @@ const QUESTIONS = [
       "C) 32",
       "D) 64"
     ],
+    "options_es": [
+      "A) 10",
+      "B) 25",
+      "C) 32",
+      "D) 64"
+    ],
     "answer": "C) 32",
+    "answer_es": "C) 32",
     "correct_letter": "C"
   },
   {
@@ -1192,7 +1829,14 @@ const QUESTIONS = [
       "C) 13",
       "D) 14"
     ],
+    "options_es": [
+      "A) 11",
+      "B) 12",
+      "C) 13",
+      "D) 14"
+    ],
     "answer": "B) 12",
+    "answer_es": "B) 12",
     "correct_letter": "B"
   },
   {
@@ -1205,7 +1849,14 @@ const QUESTIONS = [
       "C) 4",
       "D) 6"
     ],
+    "options_es": [
+      "A) 0",
+      "B) 2",
+      "C) 4",
+      "D) 6"
+    ],
     "answer": "B) 2",
+    "answer_es": "B) 2",
     "correct_letter": "B"
   },
   {
@@ -1218,7 +1869,14 @@ const QUESTIONS = [
       "C) 500",
       "D) 1000"
     ],
+    "options_es": [
+      "A) 50",
+      "B) 100",
+      "C) 500",
+      "D) 1000"
+    ],
     "answer": "A) 50",
+    "answer_es": "A) 50",
     "correct_letter": "A"
   },
   {
@@ -1231,7 +1889,14 @@ const QUESTIONS = [
       "C) 75",
       "D) 100"
     ],
+    "options_es": [
+      "A) 25",
+      "B) 50",
+      "C) 75",
+      "D) 100"
+    ],
     "answer": "B) 50",
+    "answer_es": "B) 50",
     "correct_letter": "B"
   },
   {
@@ -1244,7 +1909,14 @@ const QUESTIONS = [
       "C) 42",
       "D) 45"
     ],
+    "options_es": [
+      "A) 39",
+      "B) 41",
+      "C) 42",
+      "D) 45"
+    ],
     "answer": "B) 41",
+    "answer_es": "B) 41",
     "correct_letter": "B"
   },
   {
@@ -1257,7 +1929,14 @@ const QUESTIONS = [
       "C) Hypotenuse",
       "D) Median"
     ],
+    "options_es": [
+      "A) Cateto adyacente",
+      "B) Cateto opuesto",
+      "C) Hipotenusa",
+      "D) Mediana"
+    ],
     "answer": "C) Hypotenuse",
+    "answer_es": "C) Hipotenusa",
     "correct_letter": "C"
   },
   {
@@ -1270,7 +1949,14 @@ const QUESTIONS = [
       "C) 49",
       "D) 56"
     ],
+    "options_es": [
+      "A) 14",
+      "B) 42",
+      "C) 49",
+      "D) 56"
+    ],
     "answer": "C) 49",
+    "answer_es": "C) 49",
     "correct_letter": "C"
   },
   {
@@ -1283,7 +1969,14 @@ const QUESTIONS = [
       "C) 131",
       "D) 141"
     ],
+    "options_es": [
+      "A) 111",
+      "B) 121",
+      "C) 131",
+      "D) 141"
+    ],
     "answer": "B) 121",
+    "answer_es": "B) 121",
     "correct_letter": "B"
   },
   {
@@ -1296,7 +1989,14 @@ const QUESTIONS = [
       "C) The Andes",
       "D) The Himalayas"
     ],
+    "options_es": [
+      "A) Las Montañas Rocosas",
+      "B) Los Alpes",
+      "C) Los Andes",
+      "D) El Himalaya"
+    ],
     "answer": "C) The Andes",
+    "answer_es": "C) Los Andes",
     "correct_letter": "C"
   },
   {
@@ -1305,11 +2005,18 @@ const QUESTIONS = [
     "question_es": "¿Qué río atraviesa la ciudad de Londres?",
     "options": [
       "A) Seine",
-      "B) River Thames (Támesis)",
+      "B) River Thames",
       "C) Danube",
       "D) Rhine"
     ],
-    "answer": "B) River Thames (Támesis)",
+    "options_es": [
+      "A) Sena",
+      "B) Río Támesis",
+      "C) Danubio",
+      "D) Rin"
+    ],
+    "answer": "B) River Thames",
+    "answer_es": "B) Río Támesis",
     "correct_letter": "B"
   },
   {
@@ -1318,11 +2025,18 @@ const QUESTIONS = [
     "question_es": "¿Cuál es la isla más grande del mundo por superficie?",
     "options": [
       "A) Madagascar",
-      "B) Greenland (Groenlandia)",
+      "B) Greenland",
       "C) New Guinea",
       "D) Iceland"
     ],
-    "answer": "B) Greenland (Groenlandia)",
+    "options_es": [
+      "A) Madagascar",
+      "B) Groenlandia",
+      "C) Nueva Guinea",
+      "D) Islandia"
+    ],
+    "answer": "B) Greenland",
+    "answer_es": "B) Groenlandia",
     "correct_letter": "B"
   },
   {
@@ -1335,7 +2049,14 @@ const QUESTIONS = [
       "C) Valencia",
       "D) Seville"
     ],
+    "options_es": [
+      "A) Barcelona",
+      "B) Madrid",
+      "C) Valencia",
+      "D) Sevilla"
+    ],
     "answer": "B) Madrid",
+    "answer_es": "B) Madrid",
     "correct_letter": "B"
   },
   {
@@ -1348,7 +2069,14 @@ const QUESTIONS = [
       "C) Africa",
       "D) Middle East"
     ],
+    "options_es": [
+      "A) Asia",
+      "B) Europa",
+      "C) África",
+      "D) Oriente Medio"
+    ],
     "answer": "C) Africa",
+    "answer_es": "C) África",
     "correct_letter": "C"
   },
   {
@@ -1361,7 +2089,14 @@ const QUESTIONS = [
       "C) Indian Ocean",
       "D) Arctic Ocean"
     ],
+    "options_es": [
+      "A) Océano Pacífico",
+      "B) Océano Atlántico",
+      "C) Océano Índico",
+      "D) Océano Ártico"
+    ],
     "answer": "B) Atlantic Ocean",
+    "answer_es": "B) Océano Atlántico",
     "correct_letter": "B"
   },
   {
@@ -1374,7 +2109,14 @@ const QUESTIONS = [
       "C) Japan",
       "D) Indonesia"
     ],
+    "options_es": [
+      "A) China",
+      "B) Corea del Sur",
+      "C) Japón",
+      "D) Indonesia"
+    ],
     "answer": "C) Japan",
+    "answer_es": "C) Japón",
     "correct_letter": "C"
   },
   {
@@ -1387,7 +2129,14 @@ const QUESTIONS = [
       "C) Australia",
       "D) United States"
     ],
+    "options_es": [
+      "A) Brasil",
+      "B) México",
+      "C) Australia",
+      "D) Estados Unidos"
+    ],
     "answer": "D) United States",
+    "answer_es": "D) Estados Unidos",
     "correct_letter": "D"
   },
   {
@@ -1400,7 +2149,14 @@ const QUESTIONS = [
       "C) Lake Baikal",
       "D) Caspian Sea"
     ],
+    "options_es": [
+      "A) Lago Superior",
+      "B) Lago Victoria",
+      "C) Lago Baikal",
+      "D) Mar Caspio"
+    ],
     "answer": "C) Lake Baikal",
+    "answer_es": "C) Lago Baikal",
     "correct_letter": "C"
   },
   {
@@ -1413,7 +2169,14 @@ const QUESTIONS = [
       "C) Venezuela",
       "D) Peru"
     ],
+    "options_es": [
+      "A) Colombia",
+      "B) Brasil",
+      "C) Venezuela",
+      "D) Perú"
+    ],
     "answer": "C) Venezuela",
+    "answer_es": "C) Venezuela",
     "correct_letter": "C"
   },
   {
@@ -1426,7 +2189,14 @@ const QUESTIONS = [
       "C) Barranquilla",
       "D) Bogotá"
     ],
+    "options_es": [
+      "A) Medellín",
+      "B) Cali",
+      "C) Barranquilla",
+      "D) Bogotá"
+    ],
     "answer": "D) Bogotá",
+    "answer_es": "D) Bogotá",
     "correct_letter": "D"
   },
   {
@@ -1439,7 +2209,14 @@ const QUESTIONS = [
       "C) Black Sea",
       "D) Baltic Sea"
     ],
+    "options_es": [
+      "A) Mar Rojo",
+      "B) Mar Mediterráneo",
+      "C) Mar Negro",
+      "D) Mar Báltico"
+    ],
     "answer": "B) Mediterranean Sea",
+    "answer_es": "B) Mar Mediterráneo",
     "correct_letter": "B"
   },
   {
@@ -1452,7 +2229,14 @@ const QUESTIONS = [
       "C) Chile and Argentina",
       "D) Brazil and Bolivia"
     ],
+    "options_es": [
+      "A) Rusia y China",
+      "B) Estados Unidos y Canadá",
+      "C) Chile y Argentina",
+      "D) Brasil y Bolivia"
+    ],
     "answer": "B) United States and Canada",
+    "answer_es": "B) Estados Unidos y Canadá",
     "correct_letter": "B"
   },
   {
@@ -1465,7 +2249,14 @@ const QUESTIONS = [
       "C) Berlin",
       "D) Hamburg"
     ],
+    "options_es": [
+      "A) Múnich",
+      "B) Fráncfort",
+      "C) Berlín",
+      "D) Hamburgo"
+    ],
     "answer": "C) Berlin",
+    "answer_es": "C) Berlín",
     "correct_letter": "C"
   },
   {
@@ -1474,11 +2265,18 @@ const QUESTIONS = [
     "question_es": "¿Cuál es el sistema de arrecifes de coral más grande de la Tierra, situado en Australia?",
     "options": [
       "A) Mesoamerican Barrier Reef",
-      "B) The Great Barrier Reef (Gran Barrera de Coral)",
+      "B) The Great Barrier Reef",
       "C) Red Sea Reef",
       "D) New Caledonia Barrier Reef"
     ],
-    "answer": "B) The Great Barrier Reef (Gran Barrera de Coral)",
+    "options_es": [
+      "A) Barrera de Coral Mesoamericana",
+      "B) La Gran Barrera de Coral",
+      "C) Arrecife del Mar Rojo",
+      "D) Barrera de Coral de Nueva Caledonia"
+    ],
+    "answer": "B) The Great Barrier Reef",
+    "answer_es": "B) La Gran Barrera de Coral",
     "correct_letter": "B"
   }
 ];
