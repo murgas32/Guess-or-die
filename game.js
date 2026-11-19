@@ -2,15 +2,8 @@
 
 const BOARD_SIZE = 24;
 // S = start, Q = question (12), B = benefit (6), P = punishment (5)
-// Distribución base (cantidades fijas). En cada partida se reordena al azar con randomizeLayout().
-const LAYOUT_BASE = "SQQBQPQBQQPQBQPQBQQPQBPB";
-let LAYOUT = LAYOUT_BASE;
+const LAYOUT = "SQQBQPQBQQPQBQPQBQQPQBPB";
 const COLORS = ["#d9b25a", "#8fb3c4", "#c0708a", "#8aa05c"];
-// Beneficio "dado doble": "sum" suma las dos tiradas, "best" se queda con la mayor.
-const DOUBLE_DICE_MODE = "sum";
-// Castigo "La vela se consume": segundos de la siguiente pregunta cuando el temporizador está desactivado.
-// Con temporizador activo se reduce a la mitad (mínimo 5s).
-const RUSH_FALLBACK_SECONDS = 10;
 
 const $ = (id) => document.getElementById(id);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -20,11 +13,10 @@ const I18N = {
   es: {
     tag: "Una sola respuesta incorrecta te devolverá al inicio.",
     note: "Todos juegan en esta computadora, por turnos. El primero en volver al inicio gana.",
-    noteSolo: "Juegas solo: completa la vuelta al tablero sin fallar.",
-    langLabel: "Idioma / Language:",
-    timerLabel: "Tiempo por pregunta:",
+    langLabel: "Idioma de las preguntas / Language:",
+    timerLabel: "Tiempo por pregunta / Question timer:",
     timerOff: "Sin límite",
-    playersLabel: "¿Cuántos jugadores?",
+    playersLabel: "¿Cuántos jugadores? / How many players?",
     namesLabel: "Nombres de los jugadores:",
     defaultPlayer: (i) => `Jugador ${i}`,
     startBtn: "Entrar a la oscuridad",
@@ -70,22 +62,6 @@ const I18N = {
     multiWinText: "Todos los demás han quedado atrapados en la oscuridad.",
     playAgain: "Jugar de nuevo",
     preparing: "Preparando la sala...",
-    rollAgainPrompt: "lanza el dado otra vez (dado doble)",
-    doubleRolled: (name, a, b, total) => `${name} sacó ${a} y ${b}: avanza ${total}.`,
-    fiftyHint: "Los susurros eliminaron dos respuestas incorrectas.",
-    wrongFeedbackAnchor: (ans) => `Incorrecto. ${ans}. Pero el ancla te sujeta: vuelves a la casilla fijada, no al inicio.`,
-    timeExpiredFeedbackAnchor: (ans) => `Tiempo agotado. ${ans}. Pero el ancla te sujeta: vuelves a la casilla fijada.`,
-    failedAnchorLog: (name) => `${name} falló, pero el ancla evitó que volviera al inicio.`,
-    rushHint: (s) => `La vela se consume: solo tienes ${s}s.`,
-    blindHint: "La niebla oculta la categoría de la pregunta.",
-    cursedHint: "El susurro maldito te acecha: aunque aciertes, no avanzarás.",
-    cursedSoftHint: "El ancla debilita la maldición: aunque aciertes, no avanzarás.",
-    cursedCorrect: "Correcto, pero la maldición te devuelve a donde estabas.",
-    cursedFailMulti: "La maldición rompe tus protecciones y pierdes tu próximo turno.",
-    cursedFailSolo: "La maldición rompe tus protecciones.",
-    cursedCorrectLog: (name) => `${name} acertó, pero la maldición le impidió avanzar.`,
-    cursedFailLog: (name) => `${name} falló bajo el susurro maldito: doble castigo.`,
-    status: { shield: "círculo de sal", skipQ: "susurros apagados", doubleDice: "dado doble", fifty: "50/50", anchor: "ancla", rush: "vela débil", blind: "niebla", cursed: "maldito" },
     effects: {
       B1: { title: "Escudo Espectral", text: "Un aura espectral te protege. Tu siguiente error o tiempo agotado será perdonado sin enviarte al inicio." },
       B2: { title: "Paso Veloz", text: "Una ráfaga de viento frío te impulsa 2 casillas hacia adelante de inmediato." },
@@ -102,11 +78,10 @@ const I18N = {
   en: {
     tag: "One wrong answer sends you back to the start.",
     note: "Everyone plays on this computer, taking turns. First back to the start wins.",
-    noteSolo: "Playing solo: complete the lap around the board without failing.",
-    langLabel: "Language / Idioma:",
-    timerLabel: "Time per question:",
+    langLabel: "Questions Language / Idioma:",
+    timerLabel: "Question timer / Tiempo por pregunta:",
     timerOff: "No limit",
-    playersLabel: "How many players?",
+    playersLabel: "How many players? / ¿Cuántos jugadores?",
     namesLabel: "Player names:",
     defaultPlayer: (i) => `Player ${i}`,
     startBtn: "Enter the Dark",
@@ -152,22 +127,6 @@ const I18N = {
     multiWinText: "Everyone else is lost in the dark.",
     playAgain: "Play again",
     preparing: "Preparing the room...",
-    rollAgainPrompt: "roll the die again (double roll)",
-    doubleRolled: (name, a, b, total) => `${name} rolled ${a} and ${b}: moves ${total}.`,
-    fiftyHint: "The whispers removed two wrong answers.",
-    wrongFeedbackAnchor: (ans) => `Wrong. ${ans}. But the anchor holds: you return to the marked tile, not the start.`,
-    timeExpiredFeedbackAnchor: (ans) => `Time expired. ${ans}. But the anchor holds: you return to the marked tile.`,
-    failedAnchorLog: (name) => `${name} failed, but the anchor kept them from going back to the start.`,
-    rushHint: (s) => `The candle gutters: you only have ${s}s.`,
-    blindHint: "The fog hides the category of the question.",
-    cursedHint: "The cursed whisper stalks you: even if you answer right, you will not advance.",
-    cursedSoftHint: "The anchor weakens the curse: even if you answer right, you will not advance.",
-    cursedCorrect: "Correct, but the curse drags you back to where you were.",
-    cursedFailMulti: "The curse shatters your protections and you lose your next turn.",
-    cursedFailSolo: "The curse shatters your protections.",
-    cursedCorrectLog: (name) => `${name} answered correctly, but the curse kept them from advancing.`,
-    cursedFailLog: (name) => `${name} failed under the cursed whisper: double punishment.`,
-    status: { shield: "salt circle", skipQ: "whispers silenced", doubleDice: "double roll", fifty: "50/50", anchor: "anchor", rush: "weak candle", blind: "fog", cursed: "cursed" },
     effects: {
       B1: { title: "Spectral Shield", text: "A spectral aura protects you. Your next failed question or timeout will be forgiven." },
       B2: { title: "Swift Step", text: "A gust of cold wind propels you forward 2 tiles immediately." },
@@ -308,28 +267,13 @@ function log(text) {
   while ($("log").children.length > 4) $("log").lastChild.remove();
 }
 
-// Beneficios que el jugador tiene guardados (se muestran junto a su nombre).
-function statusBadges(p) {
-  const t = I18N[gameLang].status;
-  const on = [];
-  if (p.shield) on.push(t.shield);
-  if (p.skipQ) on.push(t.skipQ);
-  if (p.doubleDice) on.push(t.doubleDice);
-  if (p.fifty) on.push(t.fifty);
-  if (p.anchor) on.push(t.anchor);
-  if (p.rush) on.push(t.rush);
-  if (p.blind) on.push(t.blind);
-  if (p.cursed) on.push(t.cursed);
-  return on.length ? `<small class="st">${on.join(" · ")}</small>` : "";
-}
-
 function renderOrder(activeId) {
   const ol = $("order");
   ol.innerHTML = "";
   order.forEach((p) => {
     const li = document.createElement("li");
     if (p.id === activeId) li.className = "active";
-    li.innerHTML = `<i style="background:${p.color}"></i>${p.name}${statusBadges(p)}`;
+    li.innerHTML = `<i style="background:${p.color}"></i>${p.name}`;
     ol.appendChild(li);
   });
 }
@@ -389,41 +333,11 @@ function setLite(on) {
   $("qualityBtn").textContent = on ? I18N[gameLang].qualityLow : I18N[gameLang].qualityHigh;
 }
 
-// Fisher-Yates (Array.sort with a random comparator is biased)
-function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-// Baraja las casillas (la de inicio "S" siempre queda en la posición 0, y se mantiene la cantidad
-// de cada tipo). Para que el tablero no quede injusto, se descartan barajas con 3 o más casillas
-// iguales de beneficio/castigo seguidas.
-function randomizeLayout() {
-  const rest = LAYOUT_BASE.slice(1).split("");
-  const clustered = (l) => {
-    for (let i = 0; i < l.length; i++) {
-      const a = l[i];
-      if (a !== "Q" && a === l[(i + 1) % l.length] && a === l[(i + 2) % l.length]) return true;
-    }
-    return false;
-  };
-  let layout;
-  let tries = 0;
-  do {
-    layout = "S" + shuffle(rest.slice()).join("");
-    tries++;
-  } while (clustered(layout) && tries < 200);
-  LAYOUT = layout;
-}
-
 let questionDeck = [];
 function getNextQuestion() {
   if (!questionDeck.length) {
     questionDeck = (typeof QUESTIONS !== "undefined" && QUESTIONS.length)
-      ? shuffle([...QUESTIONS])
+      ? [...QUESTIONS].sort(() => Math.random() - 0.5)
       : [];
   }
   return questionDeck.pop();
@@ -470,35 +384,6 @@ const EFFECTS = {
     { id: "P5", run: async (p) => { p.cursedWhisper = true; } },
   ],
 };
-
-// Protecciones ante un fallo, por orden de prioridad: círculo de sal y luego ancla.
-// Devuelve null si no hay ninguna.
-function useGuard(p) {
-  if (p.shield) { p.shield = false; return { type: "shield" }; }
-  if (p.anchor) { const pos = p.anchor.pos; p.anchor = null; return { type: "anchor", pos }; }
-  return null;
-}
-
-// Al terminar un turno jugado, el ancla gasta una ronda.
-function tickAnchor(p) {
-  if (p.anchor && --p.anchor.turns <= 0) p.anchor = null;
-}
-
-// P5: acertar bajo la maldición anula el avance de este turno (vuelve a donde estaba al tirar).
-async function undoAdvance(p) {
-  while (p.progress > p.turnStart) {
-    p.progress--;
-    renderTokens(p.id);
-    await sleep(140);
-  }
-}
-
-// P5: fallar bajo la maldición completa ("full") rompe círculo de sal y ancla y cuesta el siguiente turno.
-function curseBacklash(p) {
-  p.shield = false;
-  p.anchor = null;
-  if (players.length > 1) p.skipTurn = true;
-}
 
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -566,7 +451,7 @@ async function land(p, index) {
     body.innerHTML = "";
   };
 
-  let q = null, effect = null, scene = null, anchored = false;
+  let q = null, effect = null, scene = null;
   if (type === "Q") {
     if (p.skipQ) {
       p.skipQ = false;
@@ -586,13 +471,8 @@ async function land(p, index) {
       }
     }
   } else {
-    // Punishments that only make sense with other players (e.g. losing a turn) are dropped in solo mode
-    const pool = EFFECTS[type].filter((e) => !(e.multiOnly && players.length === 1));
-    effect = pick(pool);
-    // B6: el ancla suaviza los castigos severos (los que tienen versión "soft").
-    anchored = type === "P" && !!effect.soft && !!p.anchor;
-    if (anchored) p.anchor = null;
-    const info = I18N[gameLang].effects[effect.id + (anchored ? "_anchor" : "")];
+    effect = pick(EFFECTS[type]);
+    const info = I18N[gameLang].effects[effect.id];
     scene = { icon: type === "B" ? "+" : "\u2020", title: info.title, text: info.text };
     log(`${p.name}: ${info.title}.`);
   }
@@ -609,7 +489,7 @@ async function land(p, index) {
     btn.focus({ preventScroll: true });
     await waitContinue();
     await close();
-    if (effect) await (anchored ? effect.soft : effect.run)(p);
+    if (effect) await effect.run(p);
     return;
   }
 
@@ -627,29 +507,12 @@ async function land(p, index) {
   }
 
   $("frontIcon").textContent = "?";
-  const fullTitle = `${p.name} \u2014 ${catName.toUpperCase()}`;
-  $("frontTitle").textContent = blinded ? `${p.name} \u2014 ???` : fullTitle;
-  const revealCategory = () => { $("frontTitle").textContent = fullTitle; };
+  $("frontTitle").textContent = `${p.name} \u2014 ${catName.toUpperCase()}`;
 
   const isEs = (gameLang === "es");
   const primaryText = isEs ? q.question_es : q.question_en;
   const secondaryText = isEs ? q.question_en : q.question_es;
   const n = primaryText.split(" ").length;
-  let optsPrimary = (isEs && q.options_es) ? q.options_es : q.options;
-  let optsSecondary = (isEs ? q.options : q.options_es) || q.options;
-  // B5: elimina dos respuestas incorrectas (queda la correcta y una incorrecta).
-  let fiftyApplied = false;
-  if (p.fifty && optsPrimary.length > 2) {
-    p.fifty = false;
-    fiftyApplied = true;
-    const letterOf = (o) => o.trim()[0];
-    const keepWrong = pick(optsPrimary.map(letterOf).filter((l) => l !== q.correct_letter));
-    const keep = (o) => letterOf(o) === q.correct_letter || letterOf(o) === keepWrong;
-    optsPrimary = optsPrimary.filter(keep);
-    optsSecondary = optsSecondary.filter(keep);
-  }
-  const answerPrimary = (isEs && q.answer_es) ? q.answer_es : q.answer;
-
 
   $("frontText").innerHTML =
     `<span class="q-en notranslate" translate="no">${words(primaryText)}</span>` +
@@ -660,7 +523,7 @@ async function land(p, index) {
   tBtn.addEventListener("click", () => {
     const show = esBox.hidden;
     esBox.hidden = !show;
-    esBox.textContent = show ? `${secondaryText}\n${optsSecondary.join("\n")}` : "";
+    esBox.textContent = show ? secondaryText : "";
     tBtn.textContent = show ? I18N[gameLang].translateBtnHide : I18N[gameLang].translateBtnShow;
   });
 
@@ -669,8 +532,6 @@ async function land(p, index) {
   const feedback = document.createElement("p");
   feedback.className = "q-feedback";
 
-  if (fiftyApplied) hints.unshift(I18N[gameLang].fiftyHint);
-  feedback.textContent = hints.join(" ");
   body.appendChild(opts);
   body.appendChild(feedback);
   open();
@@ -683,7 +544,6 @@ async function land(p, index) {
       if (resolved) return;
       resolved = true;
       stopTimer();
-      revealCategory();
 
       opts.querySelectorAll(".q-opt-btn").forEach((x) => (x.disabled = true));
       const correctBtn = opts.querySelector(`[data-letter="${q.correct_letter}"]`);
@@ -705,7 +565,6 @@ async function land(p, index) {
         log(I18N[gameLang].answeredCorrectLog(p.name));
         await sleep(900);
         await close();
-        if (curse) await undoAdvance(p); // P5: acertar no avanza
         resolveQuestion();
       } else {
         // WRONG ANSWER
@@ -746,11 +605,6 @@ async function land(p, index) {
           front.classList.add("fail");
           card.classList.add("hit");
           log(I18N[gameLang].failedLog(p.name));
-          if (curse === "full") {
-            curseBacklash(p);
-            feedback.textContent += " " + (players.length > 1 ? I18N[gameLang].cursedFailMulti : I18N[gameLang].cursedFailSolo);
-            log(I18N[gameLang].cursedFailLog(p.name));
-          }
           p.progress = 0;
           renderTokens(p.id);
           if (isCursed) {
@@ -769,7 +623,6 @@ async function land(p, index) {
       if (resolved) return;
       resolved = true;
       stopTimer();
-      revealCategory();
 
       opts.querySelectorAll(".q-opt-btn").forEach((x) => (x.disabled = true));
       const correctBtn = opts.querySelector(`[data-letter="${q.correct_letter}"]`);
@@ -801,16 +654,11 @@ async function land(p, index) {
         await close();
         resolveQuestion();
       } else {
-        feedback.textContent = I18N[gameLang].timeExpiredFeedbackDeath(answerPrimary);
+        feedback.textContent = I18N[gameLang].timeExpiredFeedbackDeath(q.answer);
         feedback.className = "q-feedback wrong";
         front.classList.add("fail");
         card.classList.add("hit");
         log(I18N[gameLang].timeExpiredLog(p.name));
-        if (curse === "full") {
-          curseBacklash(p);
-          feedback.textContent += " " + (players.length > 1 ? I18N[gameLang].cursedFailMulti : I18N[gameLang].cursedFailSolo);
-          log(I18N[gameLang].cursedFailLog(p.name));
-        }
         p.progress = 0;
         renderTokens(p.id);
         if (isCursed) {
@@ -862,7 +710,7 @@ async function land(p, index) {
     }
 
     // Build answer buttons
-    optsPrimary.forEach((optText, idx) => {
+    q.options.forEach((optText, idx) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "q-opt-btn notranslate";
@@ -905,21 +753,12 @@ async function play() {
       turn++;
       continue;
     }
-    p.turnStart = p.progress; // P5: casilla de la que partió este turno
-    let v = await askRoll(p, I18N[gameLang].rollPrompt);
+    const v = await askRoll(p, I18N[gameLang].rollPrompt);
     log(I18N[gameLang].rolled(p.name, v));
-    if (p.doubleDice) { // B4: segunda tirada
-      p.doubleDice = false;
-      const v2 = await askRoll(p, I18N[gameLang].rollAgainPrompt);
-      const total = DOUBLE_DICE_MODE === "best" ? Math.max(v, v2) : v + v2;
-      log(I18N[gameLang].doubleRolled(p.name, v, v2, total));
-      v = total;
-    }
     await move(p, v);
     if (p.progress >= BOARD_SIZE) return finish(p);
     await land(p, p.progress % BOARD_SIZE);
     if (p.progress >= BOARD_SIZE) return finish(p);
-    tickAnchor(p);
     turn++;
   }
 }
@@ -963,11 +802,9 @@ function start(playerNames) {
     anchor: 0,
   }));
   $("menuBtn").textContent = I18N[gameLang].mainMenu;
-  setLite($("game").classList.contains("lite"));
   $("rollBtn").textContent = I18N[gameLang].rollBtn;
   $("setup").hidden = true;
   $("game").hidden = false;
-  randomizeLayout();
   buildBoard();
   buildDice();
   renderTokens();
@@ -1008,9 +845,8 @@ function renderPlayerInputs(n) {
 
 function updateSetupTexts() {
   const t = I18N[gameLang];
-  document.documentElement.lang = gameLang;
   $("setupTag").textContent = t.tag;
-  $("setupNote").textContent = selectedPlayerCount === 1 ? t.noteSolo : t.note;
+  $("setupNote").textContent = t.note;
   $("langLabel").textContent = t.langLabel;
   $("timerLabel").textContent = t.timerLabel;
   $("timerOffBtn").textContent = t.timerOff;
@@ -1054,7 +890,6 @@ document.querySelectorAll(".count-btn").forEach((btn) => {
     btn.classList.add("active");
     selectedPlayerCount = Number(btn.dataset.n);
     renderPlayerInputs(selectedPlayerCount);
-    updateSetupTexts();
   });
 });
 
