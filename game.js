@@ -2,11 +2,81 @@
 
 const BOARD_SIZE = 24;
 // S = start, Q = question (12), B = benefit (6), P = punishment (5)
-const LAYOUT = "SQQBQPQBQQPQBQPQBQQPQBPB";
+let LAYOUT = "SQQBQPQBQQPQBQPQBQQPQBPB"; // replaced by makeLayout() at the start of every game
 const COLORS = ["#d9b25a", "#8fb3c4", "#c0708a", "#8aa05c"];
 
 const $ = (id) => document.getElementById(id);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Your own screamer files go here, e.g. "assets/screamers/1.jpg" and "assets/screamers/1.mp3".
+// While these lists are empty, the built-in face and a synthesized scream are used.
+const SCREAMER_IMAGES = [];
+const SCREAMER_SOUNDS = [];
+
+// Fisher-Yates: an unbiased shuffle.
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// A new random board for every game: tile 0 is the start pedestal; the other 23 tiles are
+// 12 questions, 6 benefits and 5 punishments in random order, with a few fairness rules.
+function validLayout(L) {
+  if (L[1] === "P" || L[BOARD_SIZE - 1] === "P") return false; // no punishment right next to the start
+  let run = 1;
+  for (let i = 2; i < BOARD_SIZE; i++) {
+    run = L[i] === L[i - 1] ? run + 1 : 1;
+    if (L[i] === "P" && L[i - 1] === "P") return false;        // never two punishments in a row
+    if (L[i] !== "Q" && run >= 3) return false;                // no trio of benefits or punishments
+    if (L[i] === "Q" && run >= 5) return false;                // no wall of five questions
+  }
+  return true;
+}
+function makeLayout() {
+  const kinds = [..."Q".repeat(12), ..."B".repeat(6), ..."P".repeat(5)];
+  for (let attempt = 0; attempt < 1000; attempt++) {
+    const L = "S" + shuffle(kinds).join("");
+    if (validLayout(L)) return L;
+  }
+  return "SQQBQPQBQQPQBQPQBQQPQBPB";
+}
+
+// ---- Sound ----
+let audioCtx = null, soundOn = true;
+function audio() {
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { /* no audio */ } }
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+function playScream() {
+  if (!soundOn) return;
+  if (SCREAMER_SOUNDS.length) {
+    new Audio(SCREAMER_SOUNDS[Math.floor(Math.random() * SCREAMER_SOUNDS.length)]).play().catch(() => {});
+    return;
+  }
+  const c = audio();
+  if (!c) return;
+  const t = c.currentTime, out = c.createGain();
+  out.gain.setValueAtTime(0.0001, t);
+  out.gain.exponentialRampToValueAtTime(0.6, t + 0.02);
+  out.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+  out.connect(c.destination);
+  const buf = c.createBuffer(1, Math.floor(c.sampleRate * 1.3), c.sampleRate), data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const noise = c.createBufferSource(), band = c.createBiquadFilter();
+  noise.buffer = buf; band.type = "bandpass"; band.Q.value = 0.8;
+  band.frequency.setValueAtTime(2500, t); band.frequency.exponentialRampToValueAtTime(400, t + 1.2);
+  noise.connect(band); band.connect(out); noise.start(t);
+  const screech = c.createOscillator(); screech.type = "sawtooth";
+  screech.frequency.setValueAtTime(1400, t); screech.frequency.exponentialRampToValueAtTime(180, t + 1.1);
+  screech.connect(out); screech.start(t); screech.stop(t + 1.3);
+  const boom = c.createOscillator(); boom.type = "sine";
+  boom.frequency.setValueAtTime(90, t); boom.frequency.exponentialRampToValueAtTime(35, t + 0.6);
+  boom.connect(out); boom.start(t); boom.stop(t + 0.8);
+}
 
 // Multi-language dictionary
 const I18N = {
@@ -24,6 +94,10 @@ const I18N = {
     qualityHigh: "Calidad: alta",
     qualityLow: "Calidad: baja",
     mainMenu: "Menú principal",
+    soundOn: "Sonido: sí",
+    soundOff: "Sonido: no",
+    warning: "Aviso: este juego contiene sustos repentinos y sonidos fuertes.",
+    levels: ["Fácil", "Media", "Difícil"],
     confirmLeave: "¿Abandonar la partida y regresar al menú principal?",
     rollOrderPrompt: "lanza para decidir el orden de turnos",
     rollPrompt: "lanza el dado",
@@ -89,6 +163,10 @@ const I18N = {
     qualityHigh: "Quality: high",
     qualityLow: "Quality: low",
     mainMenu: "Main menu",
+    soundOn: "Sound: on",
+    soundOff: "Sound: off",
+    warning: "Warning: this game contains sudden scares and loud sounds.",
+    levels: ["Easy", "Medium", "Hard"],
     confirmLeave: "Leave the game and return to the main menu?",
     rollOrderPrompt: "roll to decide the turn order",
     rollPrompt: "roll the die",
@@ -273,7 +351,10 @@ function renderOrder(activeId) {
   order.forEach((p) => {
     const li = document.createElement("li");
     if (p.id === activeId) li.className = "active";
-    li.innerHTML = `<i style="background:${p.color}"></i>${p.name}`;
+    const dot = document.createElement("i");
+    dot.style.background = p.color;
+    li.appendChild(dot);
+    li.appendChild(document.createTextNode(p.name));
     ol.appendChild(li);
   });
 }
@@ -333,14 +414,52 @@ function setLite(on) {
   $("qualityBtn").textContent = on ? I18N[gameLang].qualityLow : I18N[gameLang].qualityHigh;
 }
 
-let questionDeck = [];
-function getNextQuestion() {
-  if (!questionDeck.length) {
-    questionDeck = (typeof QUESTIONS !== "undefined" && QUESTIONS.length)
-      ? [...QUESTIONS].sort(() => Math.random() - 0.5)
-      : [];
+// Questions already asked are remembered between games (localStorage), so every question
+// in the bank appears before any of them repeats. Clear the browser's site data to reset it.
+const SEEN_KEY = "guessOrDie.seen.v1";
+const questionId = (q) => q.question_en;
+function loadSeen() {
+  try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]")); } catch (e) { return new Set(); }
+}
+function saveSeen(set) {
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify([...set])); } catch (e) { /* private mode: keep in memory */ }
+}
+let seenQuestions = loadSeen();
+
+// Difficulty by position on the board: first third easy, middle third medium, last third hard.
+const levelFor = (progress) => (progress < BOARD_SIZE / 3 ? 1 : progress < (2 * BOARD_SIZE) / 3 ? 2 : 3);
+
+function getNextQuestion(progress, afterReset = false) {
+  if (typeof QUESTIONS === "undefined" || !QUESTIONS.length) return undefined;
+  const level = levelFor(progress);
+  const fallback = level === 1 ? [1, 2, 3] : level === 2 ? [2, 1, 3] : [3, 2, 1];
+  for (const lv of fallback) {
+    const pool = QUESTIONS.filter((q) => (q.difficulty || 2) === lv && !seenQuestions.has(questionId(q)));
+    if (pool.length) {
+      const q = pool[Math.floor(Math.random() * pool.length)];
+      seenQuestions.add(questionId(q));
+      saveSeen(seenQuestions);
+      return q;
+    }
   }
-  return questionDeck.pop();
+  if (afterReset) return pick(QUESTIONS);
+  seenQuestions = new Set(); // the whole bank has been asked: start a new cycle
+  saveSeen(seenQuestions);
+  return getNextQuestion(progress, true);
+}
+
+// Options in random order (so the right answer is not always B or C), relabelled A-D,
+// in the chosen language (options_es holds the Spanish text).
+const LABELS = ["A", "B", "C", "D"];
+const stripLabel = (t) => t.replace(/^[A-D]\)\s*/, "").trim();
+function buildChoices(q) {
+  const es = gameLang === "es" && Array.isArray(q.options_es);
+  const items = q.options.map((o, i) => ({
+    text: stripLabel(es ? q.options_es[i] : o),
+    correct: o.trim()[0] === q.correct_letter,
+  }));
+  shuffle(items);
+  return items.map((it, i) => ({ letter: LABELS[i], text: `${LABELS[i]}) ${it.text}`, correct: it.correct }));
 }
 
 // 6 Benefits and 5 Punishments fully adapted to game mechanics.
@@ -359,6 +478,7 @@ const EFFECTS = {
         const v = await askRoll(p, I18N[gameLang].extraRollPrompt);
         log(I18N[gameLang].rolled(p.name, v));
         await move(p, v);
+        if (p.progress < BOARD_SIZE) await land(p, p.progress % BOARD_SIZE);
       }
     },
     // BEN-05: Wisdom Whisper / Susurro de Sabiduria (50/50 en la siguiente pregunta)
@@ -404,10 +524,14 @@ function setFx(type) {
   }
 }
 
-// Instant screamer jumpscare execution
+// Instant screamer: one flash, a lunge and a scream (see .screamer-* in style.css).
 async function triggerScreamer() {
   const overlay = $("screamerOverlay");
+  const custom = SCREAMER_IMAGES.length > 0;
+  overlay.classList.toggle("custom", custom);
+  if (custom) overlay.style.setProperty("--scream-img", `url("${pick(SCREAMER_IMAGES)}")`);
   overlay.hidden = false;
+  playScream();
   await sleep(1350);
   overlay.hidden = true;
 }
@@ -461,7 +585,7 @@ async function land(p, index) {
         text: I18N[gameLang].whispersFadeText
       };
     } else {
-      q = getNextQuestion();
+      q = getNextQuestion(p.progress);
       if (!q) {
         scene = {
           icon: "?",
@@ -507,12 +631,17 @@ async function land(p, index) {
   }
 
   $("frontIcon").textContent = "?";
-  $("frontTitle").textContent = `${p.name} \u2014 ${catName.toUpperCase()}`;
+  $("frontTitle").textContent = `${p.name} \u2014 ${catName.toUpperCase()} \u00b7 ${I18N[gameLang].levels[(q.difficulty || 2) - 1].toUpperCase()}`;
 
   const isEs = (gameLang === "es");
   const primaryText = isEs ? q.question_es : q.question_en;
   const secondaryText = isEs ? q.question_en : q.question_es;
   const n = primaryText.split(" ").length;
+
+  const choices = buildChoices(q);
+  const correctChoice = choices.find((c) => c.correct);
+  const correctLetter = correctChoice.letter;
+  const answerText = correctChoice.text;
 
   $("frontText").innerHTML =
     `<span class="q-en notranslate" translate="no">${words(primaryText)}</span>` +
@@ -546,9 +675,9 @@ async function land(p, index) {
       stopTimer();
 
       opts.querySelectorAll(".q-opt-btn").forEach((x) => (x.disabled = true));
-      const correctBtn = opts.querySelector(`[data-letter="${q.correct_letter}"]`);
+      const correctBtn = opts.querySelector(`[data-letter="${correctLetter}"]`);
 
-      if (b && b.dataset.letter === q.correct_letter) {
+      if (b && b.dataset.letter === correctLetter) {
         // CORRECT ANSWER
         b.classList.add("correct");
         if (isCursed) {
@@ -574,7 +703,7 @@ async function land(p, index) {
         if (p.shield && !isCursed) {
           // Protected by Spectral Shield
           p.shield = false;
-          feedback.textContent = I18N[gameLang].wrongFeedbackShield(q.answer);
+          feedback.textContent = I18N[gameLang].wrongFeedbackShield(answerText);
           feedback.className = "q-feedback correct";
           log(I18N[gameLang].failedSaltLog(p.name));
           await sleep(1600);
@@ -600,7 +729,7 @@ async function land(p, index) {
           resolveQuestion();
         } else {
           // Standard full demise: reset to start + screamer
-          feedback.textContent = I18N[gameLang].wrongFeedbackDeath(q.answer);
+          feedback.textContent = I18N[gameLang].wrongFeedbackDeath(answerText);
           feedback.className = "q-feedback wrong";
           front.classList.add("fail");
           card.classList.add("hit");
@@ -625,12 +754,12 @@ async function land(p, index) {
       stopTimer();
 
       opts.querySelectorAll(".q-opt-btn").forEach((x) => (x.disabled = true));
-      const correctBtn = opts.querySelector(`[data-letter="${q.correct_letter}"]`);
+      const correctBtn = opts.querySelector(`[data-letter="${correctLetter}"]`);
       if (correctBtn) correctBtn.classList.add("correct");
 
       if (p.shield && !isCursed) {
         p.shield = false;
-        feedback.textContent = I18N[gameLang].timeExpiredFeedbackShield(q.answer);
+        feedback.textContent = I18N[gameLang].timeExpiredFeedbackShield(answerText);
         feedback.className = "q-feedback correct";
         log(I18N[gameLang].failedSaltLog(p.name));
         await sleep(1600);
@@ -654,7 +783,7 @@ async function land(p, index) {
         await close();
         resolveQuestion();
       } else {
-        feedback.textContent = I18N[gameLang].timeExpiredFeedbackDeath(q.answer);
+        feedback.textContent = I18N[gameLang].timeExpiredFeedbackDeath(answerText);
         feedback.className = "q-feedback wrong";
         front.classList.add("fail");
         card.classList.add("hit");
@@ -681,52 +810,51 @@ async function land(p, index) {
       log(I18N[gameLang].timePressureLog(p.name));
     }
 
+    // Countdown: it starts once the options are visible, so reading time is not lost.
+    let timerStarted = false;
+    const beginCountdown = () => {
+      if (timerStarted || resolved || effectiveSeconds <= 0) return;
+      timerStarted = true;
+      const totalMs = effectiveSeconds * 1000;
+      const startAt = performance.now();
+      timerInterval = setInterval(() => {
+        const remainingMs = Math.max(0, totalMs - (performance.now() - startAt));
+        timerBar.style.width = `${(remainingMs / totalMs) * 100}%`;
+        timerText.textContent = `${Math.ceil(remainingMs / 1000)}s`;
+        if (remainingMs <= 5000 || isPressured) timerWrap.classList.add("urgent");
+        if (remainingMs <= 0) handleTimeout();
+      }, 100);
+    };
     if (effectiveSeconds > 0) {
       timerWrap.hidden = false;
       timerWrap.classList.toggle("urgent", isPressured || effectiveSeconds <= 5);
       timerBar.style.width = "100%";
       timerText.textContent = `${effectiveSeconds}s`;
-
-      const totalMs = effectiveSeconds * 1000;
-      const startAt = performance.now();
-
-      timerInterval = setInterval(() => {
-        const elapsed = performance.now() - startAt;
-        const remainingMs = Math.max(0, totalMs - elapsed);
-        const pct = Math.max(0, (remainingMs / totalMs) * 100);
-        const secs = Math.ceil(remainingMs / 1000);
-
-        timerBar.style.width = `${pct}%`;
-        timerText.textContent = `${secs}s`;
-
-        if (remainingMs <= 5000 || isPressured) {
-          timerWrap.classList.add("urgent");
-        }
-
-        if (remainingMs <= 0) {
-          handleTimeout();
-        }
-      }, 100);
     }
 
     // Build answer buttons
-    q.options.forEach((optText, idx) => {
+    choices.forEach((choice, idx) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "q-opt-btn notranslate";
       b.setAttribute("translate", "no");
-      b.textContent = optText;
-      b.dataset.letter = optText.trim()[0];
+      b.textContent = choice.text;
+      b.dataset.letter = choice.letter;
       b.style.animationDelay = `${(0.35 + n * 0.05 + idx * 0.12).toFixed(2)}s`;
       b.addEventListener("click", () => handleSelect(b));
       opts.appendChild(b);
     });
 
+    if (effectiveSeconds > 0) {
+      opts.lastElementChild.addEventListener("animationend", beginCountdown, { once: true });
+      setTimeout(beginCountdown, Math.round((0.35 + n * 0.05 + 3 * 0.12 + 0.6) * 1000) + 700); // fallback
+    }
+
     // Check BEN-05: Wisdom Whisper (50/50 effect banishing 2 incorrect options)
     if (p.fiftyFifty) {
       p.fiftyFifty = false;
       const wrongButtons = Array.from(opts.querySelectorAll(".q-opt-btn")).filter(
-        (b) => b.dataset.letter !== q.correct_letter
+        (b) => b.dataset.letter !== correctLetter
       );
       wrongButtons.sort(() => Math.random() - 0.5);
       wrongButtons.slice(0, 2).forEach((b) => {
@@ -774,11 +902,13 @@ function finish(winner) {
 }
 
 async function warmUp() {
-  const game = $("game"), cover = $("cover");
+  const game = $("game"), cover = $("cover"), scare = $("screamerOverlay");
   $("coverText").textContent = I18N[gameLang].preparing;
   cover.hidden = false;
   game.classList.add("warm");
+  scare.hidden = false; // drawn once behind the cover so the first scare does not stutter
   await sleep(500);
+  scare.hidden = true;
   game.classList.add("to-front");
   await sleep(700);
   game.classList.remove("to-front");
@@ -801,7 +931,11 @@ function start(playerNames) {
     cursedWhisper: false,
     anchor: 0,
   }));
+  audio(); // created inside a click, so the browser allows the scream later
+  LAYOUT = makeLayout(); // a different board every game
   $("menuBtn").textContent = I18N[gameLang].mainMenu;
+  $("qualityBtn").textContent = I18N[gameLang].qualityHigh;
+  $("soundBtn").textContent = I18N[gameLang].soundOn;
   $("rollBtn").textContent = I18N[gameLang].rollBtn;
   $("setup").hidden = true;
   $("game").hidden = false;
@@ -853,6 +987,7 @@ function updateSetupTexts() {
   $("playersLabel").textContent = t.playersLabel;
   $("namesLabel").textContent = t.namesLabel;
   $("startBtn").textContent = t.startBtn;
+  $("setupWarn").textContent = t.warning;
 
   // Update existing inputs if they still hold default names
   const inputs = document.querySelectorAll(".player-name-input");
@@ -906,6 +1041,10 @@ $("startBtn").addEventListener("click", () => {
 $("again").addEventListener("click", () => location.reload());
 $("menuBtn").addEventListener("click", () => {
   if (confirm(I18N[gameLang].confirmLeave)) location.reload();
+});
+$("soundBtn").addEventListener("click", () => {
+  soundOn = !soundOn;
+  $("soundBtn").textContent = soundOn ? I18N[gameLang].soundOn : I18N[gameLang].soundOff;
 });
 $("qualityBtn").addEventListener("click", () => setLite(!$("game").classList.contains("lite")));
 

@@ -1,3 +1,11 @@
+/* Fonts are bundled in assets/fonts, so the game looks the same without internet. */
+@font-face { font-family: "Cinzel"; font-weight: 600; font-style: normal; font-display: swap; src: url("assets/fonts/cinzel-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Cinzel"; font-weight: 700; font-style: normal; font-display: swap; src: url("assets/fonts/cinzel-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Cinzel"; font-weight: 800; font-style: normal; font-display: swap; src: url("assets/fonts/cinzel-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Crimson Pro"; font-weight: 400; font-style: normal; font-display: swap; src: url("assets/fonts/crimson-pro-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Crimson Pro"; font-weight: 600; font-style: normal; font-display: swap; src: url("assets/fonts/crimson-pro-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Crimson Pro"; font-weight: 700; font-style: normal; font-display: swap; src: url("assets/fonts/crimson-pro-latin-700-normal.woff2") format("woff2"); }
+
 :root {
   --head-turn-dur: 0.65s;
   --head-turn-ease: cubic-bezier(0.25, 1, 0.4, 1);
@@ -207,7 +215,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 #board {
   position: absolute; left: -340px; top: -340px; width: 680px; height: 680px;
   display: grid; grid-template: repeat(7, 1fr) / repeat(7, 1fr); gap: 4px;
-  transform: translate3d(0, 758px, 240px) rotateX(90deg); /* lies flat on the table top */
+  transform: translate3d(0, 758px, 240px) rotateX(90deg) scale(1.2); /* lies flat on the table top */
   transform-style: preserve-3d;
   border-radius: 4px;
   /* black lacquer, like a spirit board */
@@ -309,11 +317,11 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 @keyframes hop { 50% { translate: 0 0 18px; } }
 
 #dice { /* a real cube standing on the table */
-  --d: 84px; position: absolute; left: calc(var(--d) / -2); top: calc(var(--d) / -2); width: var(--d); height: var(--d);
+  --d: 100px; position: absolute; left: calc(var(--d) / -2); top: calc(var(--d) / -2); width: var(--d); height: var(--d);
   transform: translate3d(0, calc(758px - var(--d) / 2), 240px); transform-style: preserve-3d;
 }
 #dieShadow {
-  position: absolute; left: -62px; top: -62px; width: 124px; height: 124px; border-radius: 50%;
+  position: absolute; left: -74px; top: -74px; width: 148px; height: 148px; border-radius: 50%;
   background: radial-gradient(rgba(0, 0, 0, .8), transparent 68%);
   transform: translate3d(0, 759px, 240px) rotateX(90deg);
 }
@@ -451,7 +459,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   box-shadow: 0 0 12px rgba(231, 76, 60, .9);
 }
 .timer-wrap.urgent .timer-flame {
-  animation: flicker .3s infinite;
+  animation: flicker .8s infinite;
   box-shadow: 0 0 16px 5px rgba(255, 60, 60, .85);
 }
 .timer-text {
@@ -466,7 +474,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 .timer-wrap.urgent .timer-text {
   color: #ff6b78;
   text-shadow: 0 0 10px rgba(255, 80, 80, .9);
-  animation: pulse .5s infinite;
+  animation: pulse .8s infinite;
 }
 .front-icon { font-family: var(--display); font-size: clamp(2.4rem, 8vw, 3.8rem); line-height: 1; font-style: normal; font-weight: 700; margin-bottom: .3rem; }
 .front-card h2 { font-family: var(--display); font-weight: 700; font-style: normal; font-size: clamp(1.4rem, 4.6vw, 2.2rem); letter-spacing: .05em; text-transform: uppercase; margin: .2rem 0 .8rem; }
@@ -627,6 +635,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 #order { position: absolute; top: .9rem; right: .9rem; margin: 0; padding: .6rem .9rem; flex-direction: column; flex-wrap: nowrap; align-items: flex-start; justify-content: flex-start; gap: .35rem; font-size: .9rem; background: rgba(10, 5, 6, .65); border: 1px solid rgba(230, 220, 203, .15); border-radius: 4px; }
 #order:empty { display: none; }
 #log { position: absolute; left: .9rem; bottom: 1.6rem; max-height: none; text-align: left; font-size: .8rem; text-shadow: 0 1px 4px #000; }
+#soundBtn { position: absolute; right: .9rem; bottom: 3.6rem; font-size: .8rem; padding: .35rem .8rem; background: rgba(10, 5, 6, .65); }
 #qualityBtn { position: absolute; right: .9rem; bottom: 1.6rem; font-size: .8rem; padding: .35rem .8rem; background: rgba(10, 5, 6, .65); }
 #game.to-front #hud { opacity: 0; }
 #game.to-front #hud > * { pointer-events: none; }
@@ -645,7 +654,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 #game.lite .tile { background-color: #0d0b0a; } #game.lite .t-P { background-color: #1c0c0e; }
 
 /* Warm-up: the room is drawn once behind a cover so the first camera move does not stutter */
-#cover { background: #050303; z-index: 20; }
+#cover { background: #050303; z-index: 10001; }
 .warm #roomBox { transition: none !important; }
 
 /* Questions: text and options written in the air, no boxes */
@@ -690,8 +699,9 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   justify-content: center;
   overflow: hidden;
   pointer-events: all;
-  animation: screamerStrobe 0.08s infinite;
 }
+/* One single white flash (never a strobe: at most 3 flashes per second are safe). */
+.screamer-overlay::after { content: ""; position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; animation: screamerFlash .25s ease-out; }
 .screamer-jumpscare {
   width: 100vw;
   height: 100vh;
@@ -699,27 +709,23 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   align-items: center;
   justify-content: center;
   position: relative;
-  animation: screamerShake 0.04s infinite, screamerLunge 1.25s cubic-bezier(0.1, 0.85, 0.2, 1) forwards;
+  will-change: transform;
+  animation: screamerShake .2s linear 6, screamerLunge 1.25s cubic-bezier(0.1, 0.85, 0.2, 1) forwards;
 }
-.screamer-face {
-  width: min(95vw, 95vh);
-  height: min(95vw, 95vh);
-  filter: contrast(220%) brightness(1.2);
-}
+.screamer-face { width: min(95vw, 95vh); height: min(95vw, 95vh); }
+.screamer-custom { position: absolute; inset: 0; background: var(--scream-img, none) center / cover no-repeat; }
+.screamer-overlay.custom .screamer-face { display: none; }
 .screamer-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: radial-gradient(ellipse at 50% 50%, transparent 20%, rgba(180, 0, 15, 0.7) 65%, #000 95%);
 }
-
+/* Shake uses translate/rotate so it does not fight with the lunge (transform). */
 @keyframes screamerShake {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  20% { transform: translate(-16px, 14px) rotate(-3.5deg); }
-  40% { transform: translate(18px, -12px) rotate(3.5deg); }
-  60% { transform: translate(-20px, -16px) rotate(-2.5deg); }
-  80% { transform: translate(14px, 18px) rotate(2.5deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  25% { translate: -14px 10px; rotate: -2.5deg; }
+  75% { translate: 14px -10px; rotate: 2.5deg; }
 }
 @keyframes screamerLunge {
   0% { transform: scale(0.6); opacity: 0; }
@@ -728,9 +734,9 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   70% { transform: scale(1.55); }
   100% { transform: scale(1.95); opacity: 1; }
 }
-@keyframes screamerStrobe {
-  0%, 100% { filter: invert(0) brightness(1.1); }
-  25% { filter: invert(1) contrast(250%) saturate(150%); }
-  50% { filter: sepia(1) hue-rotate(-55deg) saturate(900%) contrast(200%); }
-  75% { filter: invert(0.8) brightness(1.4) contrast(300%); }
+@keyframes screamerFlash { from { opacity: .9; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .screamer-jumpscare, .screamer-overlay::after { animation: none; }
 }
+
+.note.warn { color: #c98b8b; }
