@@ -210,12 +210,12 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   95% { opacity: .85; }
 }
 
-/* Board: 7x7 grid, tiles live on the outer ring (24 cells) */
+/* Board: 9x9 grid, tiles live on the outer ring (32 cells) */
 #game { padding: 0; overflow: hidden; }
 #board {
-  position: absolute; left: -340px; top: -340px; width: 680px; height: 680px;
-  display: grid; grid-template: repeat(7, 1fr) / repeat(7, 1fr); gap: 4px;
-  transform: translate3d(0, 758px, 240px) rotateX(90deg) scale(1.2); /* lies flat on the table top */
+  position: absolute; left: -370px; top: -370px; width: 740px; height: 740px;
+  display: grid; grid-template: repeat(9, 1fr) / repeat(9, 1fr); gap: 4px;
+  transform: translate3d(0, 758px, 240px) rotateX(90deg) scale(1.15); /* lies flat on the table top */
   transform-style: preserve-3d;
   border-radius: 4px;
   /* black lacquer, like a spirit board */
@@ -223,7 +223,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   box-shadow: 0 0 0 10px #060505, 0 0 0 11px rgba(205, 195, 170, .3), 0 0 0 14px #0b0908, 0 0 50px rgba(0, 0, 0, .85);
 }
 /* engraved ring in the middle: GUESS / OR DIE, a moon and a sun */
-#boardArt { grid-area: 2 / 2 / 7 / 7; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cdefs%3E%3Cpath id='t' d='M 82,250 A 168,168 0 0 1 418,250'/%3E%3Cpath id='b' d='M 58,250 A 192,192 0 0 0 442,250'/%3E%3C/defs%3E%3Cg fill='none' stroke='%23d9cfba' stroke-opacity='.5'%3E%3Ccircle cx='250' cy='250' r='243' stroke-width='2'/%3E%3Ccircle cx='250' cy='250' r='232' stroke-width='1' stroke-dasharray='2 7'/%3E%3Ccircle cx='250' cy='250' r='150' stroke-width='1'/%3E%3Ccircle cx='250' cy='250' r='142' stroke-width='.6' stroke-opacity='.3'/%3E%3Ccircle cx='250' cy='250' r='52' stroke-width='.8' stroke-opacity='.3'/%3E%3Cpath d='M250 198 L250 302 M198 250 L302 250' stroke-width='.6' stroke-opacity='.25'/%3E%3Cpath d='M112 232 a20 20 0 1 0 0 36 a15 15 0 1 1 0 -36 z' stroke-width='1.4' stroke-opacity='.7'/%3E%3Ccircle cx='388' cy='250' r='9' stroke-width='1.4' stroke-opacity='.7'/%3E%3Cpath d='M388 232 v-8 M388 268 v8 M370 250 h-8 M406 250 h8 M375 237 l-6 -6 M401 263 l6 6 M401 237 l6 -6 M375 263 l-6 6' stroke-width='1.4' stroke-opacity='.7'/%3E%3C/g%3E%3Cg fill='%23d9cfba' fill-opacity='.62' font-family='Palatino Linotype, Book Antiqua, Georgia, serif' font-size='30' text-anchor='middle'%3E%3Ctext letter-spacing='16'%3E%3CtextPath href='%23t' startOffset='50%25'%3EGUESS%3C/textPath%3E%3C/text%3E%3Ctext letter-spacing='16'%3E%3CtextPath href='%23b' startOffset='50%25'%3EOR DIE%3C/textPath%3E%3C/text%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat; }
+#boardArt { grid-area: 2 / 2 / 9 / 9; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cdefs%3E%3Cpath id='t' d='M 82,250 A 168,168 0 0 1 418,250'/%3E%3Cpath id='b' d='M 58,250 A 192,192 0 0 0 442,250'/%3E%3C/defs%3E%3Cg fill='none' stroke='%23d9cfba' stroke-opacity='.5'%3E%3Ccircle cx='250' cy='250' r='243' stroke-width='2'/%3E%3Ccircle cx='250' cy='250' r='232' stroke-width='1' stroke-dasharray='2 7'/%3E%3Ccircle cx='250' cy='250' r='150' stroke-width='1'/%3E%3Ccircle cx='250' cy='250' r='142' stroke-width='.6' stroke-opacity='.3'/%3E%3Ccircle cx='250' cy='250' r='52' stroke-width='.8' stroke-opacity='.3'/%3E%3Cpath d='M250 198 L250 302 M198 250 L302 250' stroke-width='.6' stroke-opacity='.25'/%3E%3Cpath d='M112 232 a20 20 0 1 0 0 36 a15 15 0 1 1 0 -36 z' stroke-width='1.4' stroke-opacity='.7'/%3E%3Ccircle cx='388' cy='250' r='9' stroke-width='1.4' stroke-opacity='.7'/%3E%3Cpath d='M388 232 v-8 M388 268 v8 M370 250 h-8 M406 250 h8 M375 237 l-6 -6 M401 263 l6 6 M401 237 l6 -6 M375 263 l-6 6' stroke-width='1.4' stroke-opacity='.7'/%3E%3C/g%3E%3Cg fill='%23d9cfba' fill-opacity='.62' font-family='Palatino Linotype, Book Antiqua, Georgia, serif' font-size='30' text-anchor='middle'%3E%3Ctext letter-spacing='16'%3E%3CtextPath href='%23t' startOffset='50%25'%3EGUESS%3C/textPath%3E%3C/text%3E%3Ctext letter-spacing='16'%3E%3CtextPath href='%23b' startOffset='50%25'%3EOR DIE%3C/textPath%3E%3C/text%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat; }
 
 /* Tiles: black stone slabs with engraved edges; each kind has its own emblem */
 .tile {
@@ -710,7 +710,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   justify-content: center;
   position: relative;
   will-change: transform;
-  animation: screamerShake .2s linear 6, screamerLunge 1.25s cubic-bezier(0.1, 0.85, 0.2, 1) forwards;
+  animation: screamerLunge 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards, screamerJitter 0.06s linear infinite;
 }
 .screamer-face { width: min(95vw, 95vh); height: min(95vw, 95vh); }
 .screamer-custom { position: absolute; inset: 0; background: var(--scream-img, none) center / cover no-repeat; }
@@ -721,18 +721,18 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   pointer-events: none;
   background: radial-gradient(ellipse at 50% 50%, transparent 20%, rgba(180, 0, 15, 0.7) 65%, #000 95%);
 }
-/* Shake uses translate/rotate so it does not fight with the lunge (transform). */
-@keyframes screamerShake {
-  0%, 100% { translate: 0 0; rotate: 0deg; }
-  25% { translate: -14px 10px; rotate: -2.5deg; }
-  75% { translate: 14px -10px; rotate: 2.5deg; }
+/* Rapid high-frequency terror jitter instead of slow stepping sway */
+@keyframes screamerJitter {
+  0%, 100% { translate: 0 0; }
+  25% { translate: -6px 4px; }
+  50% { translate: 5px -5px; }
+  75% { translate: -4px -3px; }
 }
+/* Smooth, continuous, rapid approach directly into the screen */
 @keyframes screamerLunge {
-  0% { transform: scale(0.6); opacity: 0; }
-  8% { transform: scale(1.15); opacity: 1; }
-  35% { transform: scale(1.1); }
-  70% { transform: scale(1.55); }
-  100% { transform: scale(1.95); opacity: 1; }
+  0% { transform: scale(0.35); opacity: 0.15; }
+  10% { opacity: 1; }
+  100% { transform: scale(2.4); opacity: 1; }
 }
 @keyframes screamerFlash { from { opacity: .9; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {

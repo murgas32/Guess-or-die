@@ -1,8 +1,8 @@
 // Guess or Die - Atmospheric 3D Turn-based Horror Trivia Game
 
-const BOARD_SIZE = 24;
-// S = start, Q = question (12), B = benefit (6), P = punishment (5)
-let LAYOUT = "SQQBQPQBQQPQBQPQBQQPQBPB"; // replaced by makeLayout() at the start of every game
+const BOARD_SIZE = 32;
+// S = start, Q = question (16), B = benefit (8), P = punishment (7)
+let LAYOUT = "SQQBQPQBQQPQBQPQBQQPQBPBQQPQBPBQ"; // replaced by makeLayout() at the start of every game
 const COLORS = ["#d9b25a", "#8fb3c4", "#c0708a", "#8aa05c"];
 
 const $ = (id) => document.getElementById(id);
@@ -22,8 +22,8 @@ function shuffle(arr) {
   return arr;
 }
 
-// A new random board for every game: tile 0 is the start pedestal; the other 23 tiles are
-// 12 questions, 6 benefits and 5 punishments in random order, with a few fairness rules.
+// A new random board for every game: tile 0 is the start pedestal; the other 31 tiles are
+// 16 questions, 8 benefits and 7 punishments in random order, with a few fairness rules.
 function validLayout(L) {
   if (L[1] === "P" || L[BOARD_SIZE - 1] === "P") return false; // no punishment right next to the start
   let run = 1;
@@ -36,12 +36,12 @@ function validLayout(L) {
   return true;
 }
 function makeLayout() {
-  const kinds = [..."Q".repeat(12), ..."B".repeat(6), ..."P".repeat(5)];
+  const kinds = [..."Q".repeat(16), ..."B".repeat(8), ..."P".repeat(7)];
   for (let attempt = 0; attempt < 1000; attempt++) {
     const L = "S" + shuffle(kinds).join("");
     if (validLayout(L)) return L;
   }
-  return "SQQBQPQBQQPQBQPQBQQPQBPB";
+  return "SQQBQPQBQQPQBQPQBQQPQBPBQQPQBPBQ";
 }
 
 // ---- Sound ----
@@ -247,12 +247,12 @@ let players = [];
 let order = [];
 let tiles = [];
 
-// Position of tile i on the 7x7 ring, clockwise from the top-left corner.
+// Position of tile i on the 9x9 ring, clockwise from the top-left corner (32 tiles).
 function ringPos(i) {
-  if (i <= 6) return [0, i];
-  if (i <= 12) return [i - 6, 6];
-  if (i <= 18) return [6, 18 - i];
-  return [24 - i, 0];
+  if (i <= 8) return [0, i];
+  if (i <= 16) return [i - 8, 8];
+  if (i <= 24) return [8, 24 - i];
+  return [32 - i, 0];
 }
 
 // Emblem drawn on each kind of tile. The start tile gets a 3D pedestal instead.
@@ -266,7 +266,7 @@ const GLYPHS = {
 function buildPedestal() {
   const ped = document.createElement("div");
   ped.className = "ped";
-  [["base", 76, 76, 8, 0], ["col", 50, 50, 30, 8], ["cap", 64, 64, 6, 38]].forEach(([cls, w, d, h, z]) => {
+  [["base", 68, 68, 8, 0], ["col", 46, 46, 30, 8], ["cap", 58, 58, 6, 38]].forEach(([cls, w, d, h, z]) => {
     const box = document.createElement("div");
     box.className = "box " + cls;
     box.style.cssText = `--w:${w}px;--d:${d}px;--h:${h}px;--z:${z}px`;
@@ -532,7 +532,7 @@ async function triggerScreamer() {
   if (custom) overlay.style.setProperty("--scream-img", `url("${pick(SCREAMER_IMAGES)}")`);
   overlay.hidden = false;
   playScream();
-  await sleep(1350);
+  await sleep(950);
   overlay.hidden = true;
 }
 
