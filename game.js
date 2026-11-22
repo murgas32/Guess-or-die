@@ -83,6 +83,26 @@ const I18N = {
   es: {
     tag: "Una sola respuesta incorrecta te devolverá al inicio.",
     note: "Todos juegan en esta computadora, por turnos. El primero en volver al inicio gana.",
+    menuPlay: "Jugar",
+    menuPlayers: "Jugadores",
+    menuTimer: "Tiempo",
+    menuLang: "Idioma",
+    menuRules: "Reglas",
+    menuCredits: "Créditos",
+    playModalTitle: "Entrar a la Oscuridad",
+    playersModalTitle: "Configurar Jugadores",
+    timerModalTitle: "Temporizador de Vela",
+    timerSubtitle: "Si la vela se apaga antes de responder, la oscuridad te consume.",
+    langModalTitle: "Idioma de Preguntas",
+    langSubtitle: "Configura el idioma principal de las preguntas y la interfaz.",
+    rulesModalTitle: "Reglas y Supervivencia",
+    creditsModalTitle: "Créditos del Proyecto",
+    btnSave: "Listo",
+    btnClose: "Cerrar",
+    btnUnderstood: "Entendido",
+    statusPlayers: (n) => `${n} Jugador${n > 1 ? "es" : ""}`,
+    statusTimer: (s) => (s > 0 ? `Vela: ${s}s` : "Sin límite"),
+    statusLang: "Español",
     langLabel: "Idioma de las preguntas / Language:",
     timerLabel: "Tiempo por pregunta / Question timer:",
     timerOff: "Sin límite",
@@ -152,6 +172,26 @@ const I18N = {
   en: {
     tag: "One wrong answer sends you back to the start.",
     note: "Everyone plays on this computer, taking turns. First back to the start wins.",
+    menuPlay: "Play",
+    menuPlayers: "Players",
+    menuTimer: "Timer",
+    menuLang: "Language",
+    menuRules: "Rules",
+    menuCredits: "Credits",
+    playModalTitle: "Enter the Dark",
+    playersModalTitle: "Configure Players",
+    timerModalTitle: "Candle Timer",
+    timerSubtitle: "If the candle burns out before answering, darkness consumes you.",
+    langModalTitle: "Questions Language",
+    langSubtitle: "Select the main language for questions and the interface.",
+    rulesModalTitle: "Rules & Survival",
+    creditsModalTitle: "Project Credits",
+    btnSave: "Done",
+    btnClose: "Close",
+    btnUnderstood: "Understood",
+    statusPlayers: (n) => `${n} Player${n > 1 ? "s" : ""}`,
+    statusTimer: (s) => (s > 0 ? `Candle: ${s}s` : "No limit"),
+    statusLang: "English",
     langLabel: "Questions Language / Idioma:",
     timerLabel: "Question timer / Tiempo por pregunta:",
     timerOff: "No limit",
@@ -918,6 +958,7 @@ async function warmUp() {
 }
 
 function start(playerNames) {
+  closeMenuModal();
   players = playerNames.map((name, i) => ({
     id: i,
     name: name,
@@ -945,8 +986,105 @@ function start(playerNames) {
   warmUp().then(play);
 }
 
-// ---------------- SETUP SCREEN LOGIC ----------------
+// ---------------- SPIRAL MENU & MODAL LOGIC ----------------
 let selectedPlayerCount = 2;
+
+function getRulesHTML(lang) {
+  if (lang === "en") {
+    return `
+      <h3>Objective</h3>
+      <p>Travel through the 32 cursed tiles of the board and be the first survivor to complete the lap and return to the start.</p>
+      <h3>Survival & 3 Lives</h3>
+      <p>Each player begins with <strong>3 lives</strong>. Answering incorrectly or letting the candle burn out costs 1 life and sends you back to the start (unless protected by a shield or anchor). Losing all 3 lives eliminates you and activates <strong>Spectator Mode</strong> to watch the remaining players.</p>
+      <h3>Cursed Tiles</h3>
+      <ul>
+        <li><strong>Question (?)</strong>: Bilingual trivia across 4 categories with progressive difficulty.</li>
+        <li><strong>Benefits (+)</strong>: Spectral Shield, Swift Step (+2), Protective Whisper (skips next question), Spectral Roll (extra die toss), 50/50 Wisdom and Safety Anchor (checkpoint).</li>
+        <li><strong>Punishments (+)</strong>: Spectral Drag (-2), Fear Paralysis (skips turn), Time Pressure (halved time) and The Cursed Whisper.</li>
+        <li><strong>LIMBO (†)</strong>: A rare, extreme life-or-death confrontation tile.</li>
+      </ul>
+      <h3>Category Nemeses</h3>
+      <p>Each discipline is guarded by a horror entity with its own jumpscare: The Referee (Sports), The Chronicler (History), The Reckoner (Mathematics), and The Cartographer (Geography).</p>
+    `;
+  }
+  return `
+    <h3>Objetivo</h3>
+    <p>Recorre las 32 casillas malditas del tablero y sé el primer superviviente en completar la vuelta y regresar al inicio.</p>
+    <h3>Supervivencia y 3 Vidas</h3>
+    <p>Cada jugador cuenta con <strong>3 vidas</strong>. Responder incorrectamente o que se consuma la vela cuesta 1 vida y regresa al peón a la casilla de salida (salvo protección de escudos o anclas). Perder las 3 vidas elimina al jugador y activa el <strong>Modo Espectador</strong> para seguir presenciando la partida.</p>
+    <h3>Casillas del Tablero</h3>
+    <ul>
+      <li><strong>Pregunta (?)</strong>: Preguntas bilingües en 4 categorías con dificultad progresiva según tu avance.</li>
+      <li><strong>Beneficios (+)</strong>: Escudo Espectral, Paso Veloz (+2), Susurro Protector, Tirada Espectral (dado extra), Susurro 50/50 y Ancla Espectral (checkpoint de caída).</li>
+      <li><strong>Castigos (+)</strong>: Retroceso (-2), Parálisis (pierde turno), Presión Temporal (tiempo a la mitad) y Maldición del Susurro.</li>
+      <li><strong>LIMBO (†)</strong>: Casilla oculta de juicio mortal extremo.</li>
+    </ul>
+    <h3>Entidades por Categoría</h3>
+    <p>Cada área está custodiada por un enemigo temático con su propio screamer: El Árbitro (Deportes), El Cronista (Historia), El Contador (Matemáticas) y El Cartógrafo (Geografía).</p>
+  `;
+}
+
+function getCreditsHTML(lang) {
+  return `
+    <h3>Guess or Die</h3>
+    <p><strong>Programa:</strong> Análisis y Desarrollo de Software (ADSO)<br><strong>Ficha:</strong> 3408345 | <strong>Centro:</strong> SENA</p>
+    <h3>Equipo de Desarrollo</h3>
+    <ul>
+      <li><strong>Miguel Andrés Murgas García</strong> — Líder de Proyecto / Frontend</li>
+      <li><strong>Joiman Enoc Rico Bueno</strong> — Lógica y Mecánicas de Juego</li>
+      <li><strong>Jesús Samuel Suarez Padilla</strong> — Diseño UI/UX y CSS 3D</li>
+      <li><strong>Yoimer Jimenez Peinado</strong> — Contenido Bilingüe y Preguntas</li>
+      <li><strong>Jesús José Castro Genez</strong> — Audio, Screamers y Enemigos</li>
+      <li><strong>Jose Angel Soto Mejia</strong> — Documentación Técnica y QA</li>
+    </ul>
+    <h3>Tecnología</h3>
+    <p>Desarrollado en HTML5 semántico, CSS 3D nativo y JavaScript moderno (ES6+ Vanilla). Sin librerías externas.</p>
+  `;
+}
+
+function updateRosterSummary() {
+  const container = $("playRosterSummary");
+  if (!container) return;
+  const inputs = document.querySelectorAll(".player-name-input");
+  container.innerHTML = "";
+  inputs.forEach((inp, i) => {
+    const val = inp.value.trim() || I18N[gameLang].defaultPlayer(i + 1);
+    const chip = document.createElement("div");
+    chip.className = "roster-chip";
+    chip.innerHTML = `<span class="roster-chip-dot" style="background:${COLORS[i]};color:${COLORS[i]}"></span><span>${val}</span>`;
+    container.appendChild(chip);
+  });
+}
+
+function updateStatusBar() {
+  const t = I18N[gameLang];
+  if ($("statusPlayers")) $("statusPlayers").textContent = t.statusPlayers(selectedPlayerCount);
+  if ($("statusTimer")) $("statusTimer").textContent = t.statusTimer(timerSeconds);
+  if ($("statusLang")) $("statusLang").textContent = t.statusLang;
+}
+
+function openMenuModal(panelId) {
+  const modal = $("menuModal");
+  if (!modal) return;
+  modal.querySelectorAll(".modal-panel").forEach((p) => (p.hidden = true));
+  const target = $(panelId);
+  if (target) {
+    target.hidden = false;
+    modal.hidden = false;
+    if (panelId === "panelPlay") updateRosterSummary();
+    if (panelId === "panelRules") $("rulesContent").innerHTML = getRulesHTML(gameLang);
+    if (panelId === "panelCredits") $("creditsContent").innerHTML = getCreditsHTML(gameLang);
+  }
+}
+
+function closeMenuModal() {
+  const modal = $("menuModal");
+  if (!modal) return;
+  modal.hidden = true;
+  modal.querySelectorAll(".modal-panel").forEach((p) => (p.hidden = true));
+  updateStatusBar();
+  updateRosterSummary();
+}
 
 function renderPlayerInputs(n) {
   const container = $("playerInputs");
@@ -975,19 +1113,48 @@ function renderPlayerInputs(n) {
     row.appendChild(input);
     container.appendChild(row);
   }
+  updateRosterSummary();
 }
 
 function updateSetupTexts() {
   const t = I18N[gameLang];
-  $("setupTag").textContent = t.tag;
-  $("setupNote").textContent = t.note;
-  $("langLabel").textContent = t.langLabel;
-  $("timerLabel").textContent = t.timerLabel;
-  $("timerOffBtn").textContent = t.timerOff;
-  $("playersLabel").textContent = t.playersLabel;
-  $("namesLabel").textContent = t.namesLabel;
-  $("startBtn").textContent = t.startBtn;
-  $("setupWarn").textContent = t.warning;
+  if ($("setupTag")) $("setupTag").textContent = t.tag;
+  if ($("setupNote")) $("setupNote").textContent = t.note;
+  if ($("langLabel")) $("langLabel").textContent = t.langLabel;
+  if ($("timerLabel")) $("timerLabel").textContent = t.timerLabel;
+  if ($("timerOffBtn")) $("timerOffBtn").textContent = t.timerOff;
+  if ($("playersLabel")) $("playersLabel").textContent = t.playersLabel;
+  if ($("namesLabel")) $("namesLabel").textContent = t.namesLabel;
+  if ($("startBtn")) $("startBtn").textContent = t.startBtn;
+  if ($("setupWarn")) $("setupWarn").textContent = t.warning;
+
+  // Spiral menu buttons
+  if ($("lblMenuPlay")) $("lblMenuPlay").textContent = t.menuPlay;
+  if ($("lblMenuPlayers")) $("lblMenuPlayers").textContent = t.menuPlayers;
+  if ($("lblMenuTimer")) $("lblMenuTimer").textContent = t.menuTimer;
+  if ($("lblMenuLang")) $("lblMenuLang").textContent = t.menuLang;
+  if ($("lblMenuRules")) $("lblMenuRules").textContent = t.menuRules;
+  if ($("lblMenuCredits")) $("lblMenuCredits").textContent = t.menuCredits;
+
+  // Modal titles & subtitles
+  if ($("playTitle")) $("playTitle").textContent = t.playModalTitle;
+  if ($("playersTitle")) $("playersTitle").textContent = t.playersModalTitle;
+  if ($("timerTitle")) $("timerTitle").textContent = t.timerModalTitle;
+  if ($("timerSubtitle")) $("timerSubtitle").textContent = t.timerSubtitle;
+  if ($("langTitle")) $("langTitle").textContent = t.langModalTitle;
+  if ($("langSubtitle")) $("langSubtitle").textContent = t.langSubtitle;
+  if ($("rulesTitle")) $("rulesTitle").textContent = t.rulesModalTitle;
+  if ($("creditsTitle")) $("creditsTitle").textContent = t.creditsModalTitle;
+
+  // Modal action buttons
+  if ($("savePlayersBtn")) $("savePlayersBtn").textContent = t.btnSave;
+  if ($("saveTimerBtn")) $("saveTimerBtn").textContent = t.btnSave;
+  if ($("saveLangBtn")) $("saveLangBtn").textContent = t.btnSave;
+  if ($("closeRulesBtn")) $("closeRulesBtn").textContent = t.btnUnderstood;
+  if ($("closeCreditsBtn")) $("closeCreditsBtn").textContent = t.btnClose;
+
+  updateStatusBar();
+  updateRosterSummary();
 
   // Update existing inputs if they still hold default names
   const inputs = document.querySelectorAll(".player-name-input");
@@ -1016,6 +1183,7 @@ document.querySelectorAll("#timerGroup .pill").forEach((btn) => {
     document.querySelectorAll("#timerGroup .pill").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     timerSeconds = Number(btn.dataset.timer);
+    updateStatusBar();
   });
 });
 
@@ -1025,7 +1193,43 @@ document.querySelectorAll(".count-btn").forEach((btn) => {
     btn.classList.add("active");
     selectedPlayerCount = Number(btn.dataset.n);
     renderPlayerInputs(selectedPlayerCount);
+    updateStatusBar();
   });
+});
+
+// God of War menu navigation
+$("menuTilePlay").addEventListener("click", () => openMenuModal("panelPlay"));
+$("menuTilePlayers").addEventListener("click", () => openMenuModal("panelPlayers"));
+$("menuTileTimer").addEventListener("click", () => openMenuModal("panelTimer"));
+$("menuTileLang").addEventListener("click", () => openMenuModal("panelLang"));
+$("menuTileRules").addEventListener("click", () => openMenuModal("panelRules"));
+$("menuTileCredits").addEventListener("click", () => openMenuModal("panelCredits"));
+
+// Eye reactivity when hovering menu
+const gowEyeStage = $("gowEyeStage");
+const gowNav = document.querySelector(".gow-nav");
+if (gowEyeStage && gowNav) {
+  gowNav.addEventListener("mouseenter", () => {
+    gowEyeStage.classList.add("eye-focus-left");
+  });
+  gowNav.addEventListener("mouseleave", () => {
+    gowEyeStage.classList.remove("eye-focus-left");
+  });
+}
+
+// Modal close buttons
+$("modalCloseBtn").addEventListener("click", closeMenuModal);
+$("modalBackdrop").addEventListener("click", closeMenuModal);
+$("savePlayersBtn").addEventListener("click", closeMenuModal);
+$("saveTimerBtn").addEventListener("click", closeMenuModal);
+$("saveLangBtn").addEventListener("click", closeMenuModal);
+$("closeRulesBtn").addEventListener("click", closeMenuModal);
+$("closeCreditsBtn").addEventListener("click", closeMenuModal);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && $("menuModal") && !$("menuModal").hidden) {
+    closeMenuModal();
+  }
 });
 
 $("startBtn").addEventListener("click", () => {
