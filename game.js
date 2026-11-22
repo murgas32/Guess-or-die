@@ -1,6 +1,6 @@
 // Guess or Die - Atmospheric 3D Turn-based Horror Trivia Game
 
-const BOARD_SIZE = 24;
+const BOARD_SIZE = 50;
 
 // Fisher-Yates shuffle (Array.sort with random comparator is biased)
 function shuffle(a) {
@@ -12,14 +12,30 @@ function shuffle(a) {
 }
 
 // Generate randomized board layout for each match:
-// 1 Start ('S' at index 0), 12 Questions ('Q'), 6 Benefits ('B'), 5 Punishments ('P')
+// Casilla 0 (Tile 1): 'S' (Start / Salida in center)
+// Casilla 49 (Tile 50): 'M' (Meta at outer rim)
+// Casilla 24 (Tile 25): 'L' (Limbo midpoint landmark)
+// Casilla 40 (Tile 41): 'L' (Limbo endgame peril)
+// Remaining 46 tiles: 25 Questions ('Q'), 12 Benefits ('B'), 9 Punishments ('P')
 function generateRandomLayout() {
   const pool = [
-    ...Array(12).fill("Q"),
-    ...Array(6).fill("B"),
-    ...Array(5).fill("P")
+    ...Array(25).fill("Q"),
+    ...Array(12).fill("B"),
+    ...Array(9).fill("P")
   ];
-  return ["S", ...shuffle(pool)];
+  const shuffled = shuffle(pool);
+  const layout = new Array(BOARD_SIZE);
+  layout[0] = "S";
+  layout[BOARD_SIZE - 1] = "M";
+  layout[24] = "L";
+  layout[40] = "L";
+  let poolIdx = 0;
+  for (let i = 1; i < BOARD_SIZE - 1; i++) {
+    if (i !== 24 && i !== 40) {
+      layout[i] = shuffled[poolIdx++];
+    }
+  }
+  return layout;
 }
 
 let currentLayout = generateRandomLayout();
@@ -31,9 +47,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // Multi-language dictionary
 const I18N = {
   es: {
-    tag: "Una sola respuesta errónea te devuelve al inicio. A las 3 fallas, mueres.",
-    note: "Todos juegan en esta computadora, por turnos. El último sobreviviente o el primero en completar la vuelta gana.",
-    noteSolo: "Juegas solo: completa la vuelta al tablero antes de acumular 3 fallas.",
+    tag: "Una sola respuesta errónea te devuelve al inicio. A las 3 fallas o al caer en el Limbo, mueres.",
+    note: "Todos juegan en esta computadora, por turnos. El primero en llegar a la META (casilla 50) o el último sobreviviente gana.",
+    noteSolo: "Juegas solo: llega a la META (casilla 50) antes de acumular 3 fallas o sucumbir en el Limbo.",
     langLabel: "Idioma / Language:",
     timerLabel: "Tiempo por pregunta:",
     timerOff: "Sin límite",
@@ -73,10 +89,10 @@ const I18N = {
     spectatorBadge: "ESPECTADOR",
     btnContinue: "Continuar",
     btnBackToStart: "Volver al inicio",
-    soloWinTitle: "Has logrado regresar",
-    soloWinText: "Completaste la vuelta al tablero.",
-    multiWinTitle: (name) => `${name} ha logrado regresar`,
-    multiWinText: "Ha completado la vuelta al tablero.",
+    soloWinTitle: "Has logrado escapar",
+    soloWinText: "Alcanzaste la META en la casilla 50 y sobreviviste a la oscuridad.",
+    multiWinTitle: (name) => `${name} ha alcanzado la META`,
+    multiWinText: "Llegó a la casilla 50 y escapó de la oscuridad.",
     lastSurvivorTitle: (name) => `${name} es el único sobreviviente`,
     lastSurvivorText: "Todos los demás han perecido en la oscuridad. Eres el único que queda con vida.",
     soloGameOverTitle: "Has muerto",
@@ -104,9 +120,9 @@ const I18N = {
     }
   },
   en: {
-    tag: "One wrong answer sends you to the start. At 3 strikes, you die.",
-    note: "Everyone plays on this computer, taking turns. The last survivor or first to finish wins.",
-    noteSolo: "Playing solo: complete the lap around the board before getting 3 strikes.",
+    tag: "One wrong answer sends you to the start. At 3 strikes or falling in Limbo, you die.",
+    note: "Everyone plays on this computer, taking turns. First to reach the GOAL (tile 50) or last survivor wins.",
+    noteSolo: "Playing solo: reach the GOAL (tile 50) before getting 3 strikes or perishing in Limbo.",
     langLabel: "Language / Idioma:",
     timerLabel: "Time per question:",
     timerOff: "No limit",
@@ -146,10 +162,10 @@ const I18N = {
     spectatorBadge: "SPECTATOR",
     btnContinue: "Continue",
     btnBackToStart: "Back to start",
-    soloWinTitle: "You made it back",
-    soloWinText: "You completed the lap.",
-    multiWinTitle: (name) => `${name} made it back`,
-    multiWinText: "Completed the lap around the board.",
+    soloWinTitle: "You escaped the dark",
+    soloWinText: "You reached the GOAL at tile 50 and survived.",
+    multiWinTitle: (name) => `${name} reached the GOAL`,
+    multiWinText: "Reached tile 50 and escaped the darkness.",
     lastSurvivorTitle: (name) => `${name} is the last survivor`,
     lastSurvivorText: "Everyone else has perished in the dark. You won the game.",
     soloGameOverTitle: "You died",
@@ -205,26 +221,92 @@ let players = [];
 let order = [];
 let tiles = [];
 
-// Position of tile i on the 7x7 ring, clockwise from the top-left corner.
-function ringPos(i) {
-  if (i <= 6) return [0, i];
-  if (i <= 12) return [i - 6, 6];
-  if (i <= 18) return [6, 18 - i];
-  return [24 - i, 0];
+// Spiral geometry constants for the 50-tile Archimedean spiral board
+const SPIRAL_CX = 340;
+const SPIRAL_CY = 340;
+const SPIRAL_R0 = 40;
+const SPIRAL_W = 68;
+const SPIRAL_B = SPIRAL_W / (2 * Math.PI);
+const SPIRAL_A0 = (215 * Math.PI) / 180; // 215 deg so Tile 50 finishes at top-left ~10:30 o'clock
+
+function getSpiralTileCoord(i) {
+  if (i === 0) {
+    return { x: SPIRAL_CX, y: SPIRAL_CY, rMid: 0, aMid: SPIRAL_A0, th1: 0, th2: 2 * Math.PI };
+  }
+  let turn = 0, n = 12, j = 0;
+  if (i <= 12) {
+    turn = 0; n = 12; j = i - 1;
+  } else if (i <= 29) {
+    turn = 1; n = 17; j = i - 13;
+  } else {
+    turn = 2; n = 20; j = i - 30;
+  }
+  const tBase = turn * 2 * Math.PI;
+  const th1 = tBase + (j / n) * 2 * Math.PI;
+  const th2 = tBase + ((j + 1) / n) * 2 * Math.PI;
+  const thMid = (th1 + th2) / 2;
+  const aMid = SPIRAL_A0 + thMid;
+  const rIn = SPIRAL_R0 + SPIRAL_B * thMid;
+  const rOut = SPIRAL_R0 + SPIRAL_B * (thMid + 2 * Math.PI);
+  const rMid = (rIn + rOut) / 2;
+  const x = Math.round(SPIRAL_CX + rMid * Math.cos(aMid));
+  const y = Math.round(SPIRAL_CY + rMid * Math.sin(aMid));
+  return { x, y, rMid, aMid, th1, th2 };
 }
 
-// Emblem drawn on each kind of tile. The start tile gets a 3D pedestal instead.
+function getSpiralTilePath(th1, th2) {
+  const steps = 8;
+  const pts = [];
+  for (let s = 0; s <= steps; s++) {
+    const t = s / steps;
+    const th = th1 + t * (th2 - th1);
+    const r = SPIRAL_R0 + SPIRAL_B * th;
+    const a = SPIRAL_A0 + th;
+    const x = (SPIRAL_CX + r * Math.cos(a)).toFixed(1);
+    const y = (SPIRAL_CY + r * Math.sin(a)).toFixed(1);
+    pts.push(`${x} ${y}`);
+  }
+  for (let s = steps; s >= 0; s--) {
+    const t = s / steps;
+    const th = th1 + t * (th2 - th1);
+    const r = SPIRAL_R0 + SPIRAL_B * (th + 2 * Math.PI);
+    const a = SPIRAL_A0 + th;
+    const x = (SPIRAL_CX + r * Math.cos(a)).toFixed(1);
+    const y = (SPIRAL_CY + r * Math.sin(a)).toFixed(1);
+    pts.push(`${x} ${y}`);
+  }
+  return "M " + pts.join(" L ") + " Z";
+}
+
+function getCasilla1Path() {
+  const steps = 16;
+  const pts = [];
+  for (let s = 0; s <= steps; s++) {
+    const t = s / steps;
+    const th = t * 2 * Math.PI;
+    const r = SPIRAL_R0 + SPIRAL_B * th;
+    const a = SPIRAL_A0 + th;
+    const x = (SPIRAL_CX + r * Math.cos(a)).toFixed(1);
+    const y = (SPIRAL_CY + r * Math.sin(a)).toFixed(1);
+    pts.push(`${x} ${y}`);
+  }
+  return "M " + pts.join(" L ") + " Z";
+}
+
+// Emblem drawn on each kind of tile.
 const GLYPHS = {
   Q: '<span class="g-q"><b>?</b></span>',
   B: '<span class="g-b"><i class="salt"></i><i class="flame"></i><i class="wax"></i></span>',
   P: '<span class="g-p"><i class="tri"></i><i class="eye"></i></span>',
+  L: '<span class="g-l"><b class="limbo-mark">&#x2620;</b></span>',
+  M: '<span class="g-m"><b class="meta-mark">&#x2605;</b></span>',
   S: "",
 };
 
 function buildPedestal() {
   const ped = document.createElement("div");
   ped.className = "ped";
-  [["base", 76, 76, 8, 0], ["col", 50, 50, 30, 8], ["cap", 64, 64, 6, 38]].forEach(([cls, w, d, h, z]) => {
+  [["base", 64, 64, 8, 0], ["col", 44, 44, 30, 8], ["cap", 56, 56, 6, 38]].forEach(([cls, w, d, h, z]) => {
     const box = document.createElement("div");
     box.className = "box " + cls;
     box.style.cssText = `--w:${w}px;--d:${d}px;--h:${h}px;--z:${z}px`;
@@ -238,20 +320,148 @@ function buildBoard() {
   const board = $("board");
   board.innerHTML = "";
   tiles = [];
-  const art = document.createElement("div");
-  art.id = "boardArt";
-  board.appendChild(art);
+
+  // 1. Create SVG spiral board
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.id = "boardSvg";
+  svg.setAttribute("viewBox", "0 0 680 680");
+  svg.setAttribute("width", "680");
+  svg.setAttribute("height", "680");
+
+  let svgInner = `
+    <defs>
+      <radialGradient id="boardBaseGrad" cx="45%" cy="40%" r="55%">
+        <stop offset="0%" stop-color="#181312" />
+        <stop offset="65%" stop-color="#0c0909" />
+        <stop offset="100%" stop-color="#040303" />
+      </radialGradient>
+      <linearGradient id="qGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#241a2e" />
+        <stop offset="100%" stop-color="#0c0712" />
+      </linearGradient>
+      <linearGradient id="bGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#2d2114" />
+        <stop offset="100%" stop-color="#0d0905" />
+      </linearGradient>
+      <linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#2c0f13" />
+        <stop offset="100%" stop-color="#0d0305" />
+      </linearGradient>
+      <linearGradient id="sGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#38131a" />
+        <stop offset="100%" stop-color="#120407" />
+      </linearGradient>
+      <linearGradient id="mGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#142c1b" />
+        <stop offset="100%" stop-color="#050e08" />
+      </linearGradient>
+      <linearGradient id="lGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#363336" />
+        <stop offset="50%" stop-color="#222123" />
+        <stop offset="100%" stop-color="#111013" />
+      </linearGradient>
+      <path id="arcTop" d="M 90,340 A 250,250 0 0 1 590,340" />
+      <path id="arcBottom" d="M 590,340 A 250,250 0 0 1 90,340" />
+    </defs>
+    <circle cx="340" cy="340" r="338" fill="url(#boardBaseGrad)" stroke="#c5b89a" stroke-width="2.6" stroke-opacity="0.4" />
+    <circle cx="340" cy="340" r="332" fill="none" stroke="#c5b89a" stroke-width="1" stroke-dasharray="3,5" stroke-opacity="0.25" />
+    <circle cx="340" cy="340" r="326" fill="none" stroke="#c5b89a" stroke-width="0.7" stroke-opacity="0.15" />
+    <g fill="#c5b89a" fill-opacity="0.32" font-family="'Cinzel', Georgia, serif" font-size="11.5" text-anchor="middle" letter-spacing="14">
+      <text><textPath href="#arcTop" startOffset="50%">GUESS</textPath></text>
+      <text><textPath href="#arcBottom" startOffset="50%">OR DIE</textPath></text>
+    </g>
+  `;
+
   for (let i = 0; i < BOARD_SIZE; i++) {
-    const [row, col] = ringPos(i);
+    const type = currentLayout[i];
+    const coord = getSpiralTileCoord(i);
+    const num = i + 1;
+    let path = "";
+    let innerContent = "";
+
+    if (type === "S") {
+      path = getCasilla1Path();
+      innerContent = `
+        <circle cx="340" cy="340" r="26" fill="none" stroke="#c5b89a" stroke-width="0.9" stroke-dasharray="2,3" stroke-opacity="0.4" />
+        <text class="casilla-label salida" x="340" y="347">SALIDA</text>
+        <text class="casilla-sublabel" fill="#c2323e" x="340" y="358">▲ INICIO</text>
+      `;
+    } else if (type === "M") {
+      path = getSpiralTilePath(coord.th1, coord.th2);
+      innerContent = `
+        <text class="casilla-label meta" x="${coord.x}" y="${coord.y - 19}">META</text>
+      `;
+    } else if (type === "L") {
+      path = getSpiralTilePath(coord.th1, coord.th2);
+      innerContent = `
+        <text class="casilla-label limbo" x="${coord.x}" y="${coord.y - 19}">LIMBO</text>
+      `;
+    } else {
+      path = getSpiralTilePath(coord.th1, coord.th2);
+      innerContent = ``;
+    }
+
+    let grad = `url(#${type.toLowerCase()}Grad)`;
+    let strokeCol = "#c5b89a";
+    let strokeOpacity = "0.4";
+    if (type === "Q") strokeCol = "#b7a4e0";
+    else if (type === "B") strokeCol = "#e7b552";
+    else if (type === "P") strokeCol = "#c2323e";
+    else if (type === "L") { strokeCol = "#dedad2"; strokeOpacity = "0.75"; }
+    else if (type === "M") { strokeCol = "#52c48a"; strokeOpacity = "0.7"; }
+    else if (type === "S") { strokeCol = "#c2323e"; strokeOpacity = "0.6"; }
+
+    svgInner += `
+      <g id="casilla-${num}" class="casilla-g type-${type}">
+        <path class="casilla-path" d="${path}" fill="${grad}" stroke="${strokeCol}" stroke-width="1.4" stroke-opacity="${strokeOpacity}" />
+        ${innerContent}
+      </g>
+    `;
+  }
+
+  svg.innerHTML = svgInner;
+  board.appendChild(svg);
+
+  // 2. Create HTML 3D tile anchors for pawns
+  const boardTiles = document.createElement("div");
+  boardTiles.id = "boardTiles";
+  board.appendChild(boardTiles);
+
+  for (let i = 0; i < BOARD_SIZE; i++) {
+    const type = currentLayout[i];
+    const coord = getSpiralTileCoord(i);
+    const num = i + 1;
     const t = document.createElement("div");
-    t.className = "tile t-" + currentLayout[i];
-    t.style.gridArea = `${row + 1} / ${col + 1}`;
-    t.innerHTML = GLYPHS[currentLayout[i]];
-    if (currentLayout[i] === "S") t.appendChild(buildPedestal());
+    t.className = `tile-node t-${type}`;
+    t.style.left = `${coord.x}px`;
+    t.style.top = `${coord.y}px`;
+    t.dataset.num = num;
+    t.dataset.type = type;
+
+    t.addEventListener("mouseenter", () => {
+      t.classList.add("hovered");
+      const g = $("casilla-" + num);
+      if (g) g.classList.add("hovered");
+    });
+    t.addEventListener("mouseleave", () => {
+      t.classList.remove("hovered");
+      const g = $("casilla-" + num);
+      if (g) g.classList.remove("hovered");
+    });
+
+    if (type === "S") {
+      t.appendChild(buildPedestal());
+    } else if (GLYPHS[type]) {
+      const gw = document.createElement("div");
+      gw.className = "glyph-wrap";
+      gw.innerHTML = GLYPHS[type];
+      t.appendChild(gw);
+    }
+
     const tk = document.createElement("div");
     tk.className = "tokens";
     t.appendChild(tk);
-    board.appendChild(t);
+    boardTiles.appendChild(t);
     tiles.push(tk);
   }
 }
@@ -291,7 +501,8 @@ function renderTokens(hopId) {
     el.title = `${p.name} (${Math.max(0, 3 - p.failures)} vidas)`;
     if (p.id === hopId) el.classList.add("hop");
     el.innerHTML = `<i class="pawn-shadow"></i><i class="pawn">${p.id + 1}</i>`;
-    tiles[p.progress % BOARD_SIZE].appendChild(el);
+    const targetIdx = Math.min(p.progress, BOARD_SIZE - 1);
+    tiles[targetIdx].appendChild(el);
   });
 }
 
@@ -379,7 +590,7 @@ async function move(p, steps) {
     p.progress++;
     renderTokens(p.id);
     await sleep(260);
-    if (p.progress >= BOARD_SIZE) break; // back at start: lap complete
+    if (p.progress >= BOARD_SIZE - 1) break; // reached META
   }
 }
 
@@ -388,7 +599,35 @@ function setLite(on) {
   $("qualityBtn").textContent = on ? I18N[gameLang].qualityLow : I18N[gameLang].qualityHigh;
 }
 
+// Calculates difficulty/complexity score for a question (for Limbo selection)
+function getQuestionComplexity(q) {
+  let score = 0;
+  const text = ((q.question_es || "") + " " + (q.question_en || "")).toLowerCase();
+  const ans = ((q.answer_es || "") + " " + (q.answer || "")).toLowerCase();
+  score += Math.min(30, Math.round(text.length / 4));
+
+  const complexKeywords = [
+    'tratado', 'revolución', 'dinastía', 'siglo', 'imperio', 'batalla', 'independencia',
+    'raíz', 'potencia', 'elevado', 'primo', 'porcentaje', 'fracción', 'ecuación',
+    'estrecho', 'fosa', 'cordillera', 'archipiélago', 'desierto', 'altiplano', 'meridiano',
+    'teorema', 'filósofo', 'monarquía', 'constitución', 'olímpico', 'récord', 'ecosistema',
+    'pandemia', 'civilización', 'conquista', 'astronomía', 'hemisferio', 'continente'
+  ];
+  for (const kw of complexKeywords) {
+    if (text.includes(kw) || ans.includes(kw)) score += 20;
+  }
+  if (q.category === 'Mathematics' && /raíz|elevado|primo|divis|²|³|⁵/i.test(text)) {
+    score += 25;
+  }
+  if (q.category === 'History' && /\b(1[0-9]{3}|[0-9]{3}\s*(a\.c|d\.c)|siglo)\b/i.test(text)) {
+    score += 25;
+  }
+  return score;
+}
+
 let questionDeck = [];
+let limboQuestionDeck = [];
+
 function getNextQuestion() {
   if (!questionDeck.length) {
     questionDeck = (typeof QUESTIONS !== "undefined" && QUESTIONS.length)
@@ -396,6 +635,22 @@ function getNextQuestion() {
       : [];
   }
   return questionDeck.pop();
+}
+
+// Draws the most complex/difficult questions specifically for LIMBO
+function getLimboQuestion() {
+  if (!limboQuestionDeck.length) {
+    if (typeof QUESTIONS !== "undefined" && QUESTIONS.length) {
+      const scored = QUESTIONS.map((q) => ({ q, score: getQuestionComplexity(q) }));
+      scored.sort((a, b) => b.score - a.score);
+      const topCount = Math.max(15, Math.floor(scored.length * 0.45));
+      const pool = scored.slice(0, topCount).map((item) => item.q);
+      limboQuestionDeck = shuffle([...pool]);
+    } else {
+      limboQuestionDeck = [];
+    }
+  }
+  return limboQuestionDeck.pop();
 }
 
 // Benefits and punishments.
@@ -500,11 +755,11 @@ async function askQuestion(p, isLimbo = false) {
   body.innerHTML = "";
   btn.hidden = true;
 
-  const q = getNextQuestion();
+  const q = isLimbo ? getLimboQuestion() : getNextQuestion();
   if (!q) return;
 
   setFx(isLimbo ? "limbo" : "Q");
-  card.className = `front-card ${isLimbo ? "t-P fx-limbo" : "t-Q fx-Q"}`;
+  card.className = `front-card ${isLimbo ? "t-L fx-limbo" : "t-Q fx-Q"}`;
 
   let timerInterval = null;
   const stopTimer = () => {
@@ -760,8 +1015,16 @@ async function askQuestion(p, isLimbo = false) {
 
 // Landing scene: camera tilts up, encounter resolves, camera tilts back down.
 async function land(p, index) {
+  if (index >= BOARD_SIZE - 1) return finish(p);
   const type = currentLayout[index];
-  if (type === "S") return;
+  if (type === "S" || type === "M") return;
+
+  if (type === "L") {
+    // Dedicated LIMBO tile!
+    log(`${p.name}: ¡Ha caído en la casilla del LIMBO!`);
+    await askQuestion(p, true);
+    return;
+  }
 
   if (type === "Q") {
     if (p.skipQ) {
@@ -774,14 +1037,6 @@ async function land(p, index) {
   }
 
   if (type === "P") {
-    // 20% low probability chance for LIMBO (life-or-death trivia punishment)
-    const isLimbo = Math.random() < 0.20;
-    if (isLimbo) {
-      log(`${p.name}: ¡LIMBO!`);
-      await askQuestion(p, true);
-      return;
-    }
-
     // Regular punishments (filtered for solo mode if needed)
     const pool = EFFECTS.P.filter((e) => !(e.multiOnly && players.length === 1));
     const effect = pick(pool);
@@ -836,10 +1091,10 @@ async function play() {
     const v = await askRoll(p, I18N[gameLang].rollPrompt);
     log(I18N[gameLang].rolled(p.name, v));
     await move(p, v);
-    if (p.alive && p.progress >= BOARD_SIZE) return finish(p);
+    if (p.alive && p.progress >= BOARD_SIZE - 1) return finish(p);
 
-    await land(p, p.progress % BOARD_SIZE);
-    if (p.alive && p.progress >= BOARD_SIZE) return finish(p);
+    await land(p, p.progress);
+    if (p.alive && p.progress >= BOARD_SIZE - 1) return finish(p);
 
     // Re-check alive counts after encounter
     const aliveAfter = players.filter((pl) => pl.alive);
