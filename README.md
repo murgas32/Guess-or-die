@@ -10,11 +10,12 @@ Los jugadores se encuentran en una misteriosa sala oscura iluminada unicamente p
 - Sistema de 3 Vidas y Modo Espectador: Cada jugador cuenta con 3 vidas (representadas con velas en el HUD). Al acumular 3 fallas, el jugador muere definitivamente, su peon desaparece del tablero y permanece en la partida unicamente como espectador. Si todos mueren, la oscuridad gana; en multijugador, el ultimo superviviente se alza con la victoria.
 - Castigo Letal "LIMBO": Al caer en una casilla de castigo, existe una baja probabilidad de entrar al temible "LIMBO", una prueba de vida o muerte con ambientacion abisal roja. Un acierto te salva; un fallo o tiempo agotado (sin proteccion del circulo de sal) provoca tu muerte instantanea y eliminacion inmediata como espectador.
 - Entorno 3D sin librerias externas: Habitacion completa en CSS 3D con perspectiva, efectos de iluminacion, chimenea, ventana con luz de luna y camara en primera persona que levanta la mirada en cada encuentro.
+- Tablero Ampliado de 32 Casillas: Tablero con rejilla 9x9 de mayor escala, con 32 casillas perimetrales (1 casilla de salida, 16 preguntas, 8 beneficios y 7 castigos) y 3 niveles de dificultad progresiva.
 - Screamer instantaneo al fallar: Si un jugador responde incorrectamente sin la proteccion del circulo de sal, un screamer visual azota la pantalla e inmediatamente el peon es devuelto a la casilla de inicio.
 - Flujo agil sin boton de continuar: Al acertar una pregunta, el sistema valida la respuesta y transfiere el turno directamente al siguiente jugador sin pantallas intermedias.
 - Temporizador de Vela: Cuenta regresiva visual (15s, 20s, 30s o desactivado). Si la vela se extingue antes de responder, la oscuridad te consume y vuelves al inicio.
 - Personalizacion de Jugadores (1 a 4 jugadores): Permite ingresar los nombres de cada participante con su peon de color correspondiente.
-- Selector de Idioma (Espanol / English): Configura el idioma de las preguntas, de sus opciones de respuesta y de toda la interfaz (incluida la pantalla de configuracion), con boton para ver la pregunta y las opciones en el otro idioma en cualquier momento.
+- Selector de Idioma (Espanol / English): Configura el idioma principal de las preguntas y de la interfaz, con boton dinamico para alternar la traduccion en cualquier momento.
 - Banco Ampliado de Preguntas: Mas de 110 preguntas bilingues clasificadas en 4 categorias (Deportes, Historia, Matematicas y Geografia).
 - Casillas Especiales:
   - Pregunta (?): Pregunta aleatoria del mazo sin repeticion.

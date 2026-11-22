@@ -44,6 +44,76 @@ const COLORS = ["#d9b25a", "#8fb3c4", "#c0708a", "#8aa05c"];
 const $ = (id) => document.getElementById(id);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Your own screamer files go here, e.g. "assets/screamers/1.jpg" and "assets/screamers/1.mp3".
+// While these lists are empty, the built-in face and a synthesized scream are used.
+const SCREAMER_IMAGES = [];
+const SCREAMER_SOUNDS = [];
+
+// Fisher-Yates: an unbiased shuffle.
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// A new random board for every game: tile 0 is the start pedestal; the other 31 tiles are
+// 16 questions, 8 benefits and 7 punishments in random order, with a few fairness rules.
+function validLayout(L) {
+  if (L[1] === "P" || L[BOARD_SIZE - 1] === "P") return false; // no punishment right next to the start
+  let run = 1;
+  for (let i = 2; i < BOARD_SIZE; i++) {
+    run = L[i] === L[i - 1] ? run + 1 : 1;
+    if (L[i] === "P" && L[i - 1] === "P") return false;        // never two punishments in a row
+    if (L[i] !== "Q" && run >= 3) return false;                // no trio of benefits or punishments
+    if (L[i] === "Q" && run >= 5) return false;                // no wall of five questions
+  }
+  return true;
+}
+function makeLayout() {
+  const kinds = [..."Q".repeat(16), ..."B".repeat(8), ..."P".repeat(7)];
+  for (let attempt = 0; attempt < 1000; attempt++) {
+    const L = "S" + shuffle(kinds).join("");
+    if (validLayout(L)) return L;
+  }
+  return "SQQBQPQBQQPQBQPQBQQPQBPBQQPQBPBQ";
+}
+
+// ---- Sound ----
+let audioCtx = null, soundOn = true;
+function audio() {
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { /* no audio */ } }
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+function playScream() {
+  if (!soundOn) return;
+  if (SCREAMER_SOUNDS.length) {
+    new Audio(SCREAMER_SOUNDS[Math.floor(Math.random() * SCREAMER_SOUNDS.length)]).play().catch(() => {});
+    return;
+  }
+  const c = audio();
+  if (!c) return;
+  const t = c.currentTime, out = c.createGain();
+  out.gain.setValueAtTime(0.0001, t);
+  out.gain.exponentialRampToValueAtTime(0.6, t + 0.02);
+  out.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+  out.connect(c.destination);
+  const buf = c.createBuffer(1, Math.floor(c.sampleRate * 1.3), c.sampleRate), data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const noise = c.createBufferSource(), band = c.createBiquadFilter();
+  noise.buffer = buf; band.type = "bandpass"; band.Q.value = 0.8;
+  band.frequency.setValueAtTime(2500, t); band.frequency.exponentialRampToValueAtTime(400, t + 1.2);
+  noise.connect(band); band.connect(out); noise.start(t);
+  const screech = c.createOscillator(); screech.type = "sawtooth";
+  screech.frequency.setValueAtTime(1400, t); screech.frequency.exponentialRampToValueAtTime(180, t + 1.1);
+  screech.connect(out); screech.start(t); screech.stop(t + 1.3);
+  const boom = c.createOscillator(); boom.type = "sine";
+  boom.frequency.setValueAtTime(90, t); boom.frequency.exponentialRampToValueAtTime(35, t + 0.6);
+  boom.connect(out); boom.start(t); boom.stop(t + 0.8);
+}
+
 // Multi-language dictionary
 const I18N = {
   es: {
@@ -53,7 +123,7 @@ const I18N = {
     langLabel: "Idioma / Language:",
     timerLabel: "Tiempo por pregunta:",
     timerOff: "Sin límite",
-    playersLabel: "¿Cuántos jugadores?",
+    playersLabel: "¿Cuántos jugadores? / How many players?",
     namesLabel: "Nombres de los jugadores:",
     defaultPlayer: (i) => `Jugador ${i}`,
     startBtn: "Entrar a la oscuridad",
@@ -61,9 +131,20 @@ const I18N = {
     qualityHigh: "Calidad: alta",
     qualityLow: "Calidad: baja",
     mainMenu: "Menú principal",
+    soundOn: "Sonido: sí",
+    soundOff: "Sonido: no",
+    warning: "Aviso: este juego contiene sustos repentinos y sonidos fuertes.",
+    levels: ["Fácil", "Media", "Difícil"],
     confirmLeave: "¿Abandonar la partida y regresar al menú principal?",
     rollOrderPrompt: "lanza para decidir el orden de turnos",
     rollPrompt: "lanza el dado",
+    extraRollPrompt: "lanza tu tirada adicional",
+    extraRollLog: (name) => `${name} activa una tirada adicional.`,
+    fiftyFiftyLog: (name) => `Un susurro disipó dos opciones falsas para ${name}.`,
+    timePressureLog: (name) => `La presión temporal acecha a ${name}.`,
+    anchorSaved: (tile) => `El ancla espectral resistió: caes a la casilla ${tile + 1}.`,
+    cursedLog: (name) => `Una maldición envuelve a ${name}.`,
+    cursedVictimLog: (name) => `La maldición del susurro le costó el siguiente turno a ${name}.`,
     rolled: (name, v) => `${name} sacó un ${v}.`,
     tie: (v) => `Empate en ${v}. Vuelvan a lanzar.`,
     firstGoes: (name) => `${name} va primero.`,
@@ -112,11 +193,16 @@ const I18N = {
     limboTimeoutDied: (ans) => `Tiempo agotado. ${ans}. El Limbo te consume por completo. Has muerto al instante.`,
     limboDiedLog: (name) => `${name} cayó en el Limbo y ha muerto. Ahora es un espectador.`,
     effects: {
-      B1: { title: "La vela arde con más fuerza", text: "La oscuridad te deja pasar. Avanzas 2 casillas." },
-      B2: { title: "Un círculo de sal", text: "Estás protegido. Tu próxima respuesta incorrecta será perdonada." },
-      B3: { title: "Los susurros se apagan", text: "La siguiente casilla de pregunta guardará silencio." },
-      P1: { title: "El suelo cede", text: "Algo te arrastra 2 casillas hacia atrás." },
-      P2: { title: "Algo te retiene", text: "Pierdes tu siguiente turno." },
+      B1: { title: "Escudo Espectral", text: "Un aura espectral te protege. Tu siguiente error o tiempo agotado será perdonado sin enviarte al inicio." },
+      B2: { title: "Paso Veloz", text: "Una ráfaga de viento frío te impulsa 2 casillas hacia adelante de inmediato." },
+      B3: { title: "Susurro Protector", text: "El espíritu responde por ti. La siguiente casilla de pregunta que pises guardará silencio." },
+      B4: { title: "Tirada Espectral", text: "Los dados resuenan con ecos espectrales. Lanzas el dado una vez más en este mismo turno." },
+      B5: { title: "Susurro de Sabiduría", text: "Voces del más allá disiparán dos opciones incorrectas en tu próxima pregunta." },
+      B6: { title: "Ancla Espectral", text: "Un ancla fantasmal fija tu posición. Si caes en tu próxima pregunta, solo retrocederás hasta esta casilla." },
+      P1: { title: "Retroceso Espectral", text: "Fuerzas oscuras te arrastran 2 casillas hacia atrás entre lamentos lejanos." },
+      P2: { title: "Parálisis del Miedo", text: "El terror congela tu cuerpo. Pierdes tu siguiente turno completo." },
+      P3: { title: "Presión Temporal", text: "El tiempo se acelera furiosamente. Tu próxima pregunta tendrá solo la mitad del tiempo." },
+      P5: { title: "Maldición del Susurro", text: "La oscuridad distorsiona la realidad: tus escudos quedan anulados, y fallar o acertar te costará tu siguiente turno." },
     }
   },
   en: {
@@ -126,7 +212,7 @@ const I18N = {
     langLabel: "Language / Idioma:",
     timerLabel: "Time per question:",
     timerOff: "No limit",
-    playersLabel: "How many players?",
+    playersLabel: "How many players? / ¿Cuántos jugadores?",
     namesLabel: "Player names:",
     defaultPlayer: (i) => `Player ${i}`,
     startBtn: "Enter the Dark",
@@ -134,9 +220,20 @@ const I18N = {
     qualityHigh: "Quality: high",
     qualityLow: "Quality: low",
     mainMenu: "Main menu",
+    soundOn: "Sound: on",
+    soundOff: "Sound: off",
+    warning: "Warning: this game contains sudden scares and loud sounds.",
+    levels: ["Easy", "Medium", "Hard"],
     confirmLeave: "Leave the game and return to the main menu?",
     rollOrderPrompt: "roll to decide the turn order",
     rollPrompt: "roll the die",
+    extraRollPrompt: "roll your extra roll",
+    extraRollLog: (name) => `${name} gains an extra roll.`,
+    fiftyFiftyLog: (name) => `A whisper banished two false options for ${name}.`,
+    timePressureLog: (name) => `Time pressure looms over ${name}.`,
+    anchorSaved: (tile) => `The safety anchor held: you only fell to tile ${tile + 1}.`,
+    cursedLog: (name) => `A dark curse grips ${name}.`,
+    cursedVictimLog: (name) => `The cursed whisper cost ${name} their next turn.`,
     rolled: (name, v) => `${name} rolled ${v}.`,
     tie: (v) => `Tie on ${v}. Roll again.`,
     firstGoes: (name) => `${name} goes first.`,
@@ -185,11 +282,16 @@ const I18N = {
     limboTimeoutDied: (ans) => `Time expired. ${ans}. Limbo claims your soul completely. You died instantly.`,
     limboDiedLog: (name) => `${name} fell into Limbo and died. They are now a spectator.`,
     effects: {
-      B1: { title: "The candle burns brighter", text: "The dark lets you pass. Move forward 2 tiles." },
-      B2: { title: "A circle of salt", text: "You are protected. Your next wrong answer will be forgiven." },
-      B3: { title: "The whispers fade", text: "The next question tile will stay silent." },
-      P1: { title: "The floor gives way", text: "Something drags you back 2 tiles." },
-      P2: { title: "Something holds you", text: "You lose your next turn." },
+      B1: { title: "Spectral Shield", text: "A spectral aura protects you. Your next failed question or timeout will be forgiven." },
+      B2: { title: "Swift Step", text: "A gust of cold wind propels you forward 2 tiles immediately." },
+      B3: { title: "Protective Whisper", text: "The spirit answers for you. The next question tile you land on will stay silent." },
+      B4: { title: "Spectral Roll", text: "The dice echo from the beyond. Roll the die one more time right now." },
+      B5: { title: "Wisdom Whisper", text: "Voices from beyond will banish two incorrect options on your next question." },
+      B6: { title: "Safety Anchor", text: "A phantom anchor marks your position. If you fall on your next question, you only retreat here." },
+      P1: { title: "Spectral Drag", text: "Dark forces drag you back 2 tiles among distant wails." },
+      P2: { title: "Fear Paralysis", text: "Terror freezes you in place. You lose your next turn completely." },
+      P3: { title: "Time Pressure", text: "Time accelerates furiously. Your next question will only have half the normal time." },
+      P5: { title: "The Cursed Whisper", text: "Darkness distorts reality: shields are voided, and answering will cost your next turn." },
     }
   }
 };
@@ -656,11 +758,29 @@ function getLimboQuestion() {
 // Benefits and punishments.
 const EFFECTS = {
   B: [
-    { id: "B1", run: (p) => move(p, 2) },
-    { id: "B2", run: async (p) => { p.shield = true; } },
+    // BEN-01: Shield of Grammar / Escudo Espectral
+    { id: "B1", run: async (p) => { p.shield = true; } },
+    // BEN-02: Swift Step / Paso Veloz (+2 casillas)
+    { id: "B2", run: async (p) => { await move(p, 2); } },
+    // BEN-03: Skip Quest / Susurro Protector (salta la proxima pregunta)
     { id: "B3", run: async (p) => { p.skipQ = true; } },
+    // BEN-04: Double Dice Roll / Tirada Espectral (lanzamiento extra inmediato)
+    { id: "B4", run: async (p) => {
+        log(I18N[gameLang].extraRollLog(p.name));
+        await sleep(400);
+        const v = await askRoll(p, I18N[gameLang].extraRollPrompt);
+        log(I18N[gameLang].rolled(p.name, v));
+        await move(p, v);
+        if (p.progress < BOARD_SIZE) await land(p, p.progress % BOARD_SIZE);
+      }
+    },
+    // BEN-05: Wisdom Whisper / Susurro de Sabiduria (50/50 en la siguiente pregunta)
+    { id: "B5", run: async (p) => { p.fiftyFifty = true; } },
+    // BEN-06: Safety Anchor / Ancla Espectral (punto de anclaje de seguridad)
+    { id: "B6", run: async (p) => { p.anchor = p.progress; } },
   ],
   P: [
+    // CAS-01: Retroceso Espectral (-2 casillas)
     { id: "P1", run: async (p) => {
         for (let i = 0; i < 2 && p.progress > 0; i++) {
           p.progress--;
@@ -669,7 +789,12 @@ const EFFECTS = {
         }
       }
     },
-    { id: "P2", multiOnly: true, run: async (p) => { p.skipTurn = true; } },
+    // CAS-02: Paralisis del Miedo (pierde el siguiente turno)
+    { id: "P2", run: async (p) => { p.skipTurn = true; } },
+    // CAS-03: Time Pressure / Presion Temporal (mitad de tiempo en la siguiente pregunta)
+    { id: "P3", run: async (p) => { p.timePressure = true; } },
+    // CAS-05: The Cursed Whisper / Maldicion del Susurro (anula escudos y cuesta el turno)
+    { id: "P5", run: async (p) => { p.cursedWhisper = true; } },
   ],
 };
 
@@ -701,11 +826,15 @@ function setFx(type) {
   }
 }
 
-// Instant screamer jumpscare execution
+// Instant screamer: one flash, a lunge and a scream (see .screamer-* in style.css).
 async function triggerScreamer() {
   const overlay = $("screamerOverlay");
+  const custom = SCREAMER_IMAGES.length > 0;
+  overlay.classList.toggle("custom", custom);
+  if (custom) overlay.style.setProperty("--scream-img", `url("${pick(SCREAMER_IMAGES)}")`);
   overlay.hidden = false;
-  await sleep(1350);
+  playScream();
+  await sleep(950);
   overlay.hidden = true;
 }
 
@@ -801,9 +930,11 @@ async function askQuestion(p, isLimbo = false) {
   const primaryText = isEs ? q.question_es : q.question_en;
   const secondaryText = isEs ? q.question_en : q.question_es;
   const n = primaryText.split(" ").length;
-  const optsPrimary = (isEs && q.options_es) ? q.options_es : q.options;
-  const optsSecondary = (isEs ? q.options : q.options_es) || q.options;
-  const answerPrimary = (isEs && q.answer_es) ? q.answer_es : q.answer;
+
+  const choices = buildChoices(q);
+  const correctChoice = choices.find((c) => c.correct);
+  const correctLetter = correctChoice.letter;
+  const answerText = correctChoice.text;
 
   const introWarning = isLimbo ? `<div class="limbo-warning">${I18N[gameLang].limboWarning}</div>` : "";
 
@@ -817,7 +948,7 @@ async function askQuestion(p, isLimbo = false) {
   tBtn.addEventListener("click", () => {
     const show = esBox.hidden;
     esBox.hidden = !show;
-    esBox.textContent = show ? `${secondaryText}\n${optsSecondary.join("\n")}` : "";
+    esBox.textContent = show ? secondaryText : "";
     tBtn.textContent = show ? I18N[gameLang].translateBtnHide : I18N[gameLang].translateBtnShow;
   });
 
@@ -840,7 +971,7 @@ async function askQuestion(p, isLimbo = false) {
       stopTimer();
 
       opts.querySelectorAll(".q-opt-btn").forEach((x) => (x.disabled = true));
-      const correctBtn = opts.querySelector(`[data-letter="${q.correct_letter}"]`);
+      const correctBtn = opts.querySelector(`[data-letter="${correctLetter}"]`);
 
       if (b && b.dataset.letter === q.correct_letter) {
         // CORRECT ANSWER
@@ -857,7 +988,8 @@ async function askQuestion(p, isLimbo = false) {
         if (b) b.classList.add("wrong");
         if (correctBtn) correctBtn.classList.add("correct");
 
-        if (p.shield) {
+        if (p.shield && !isCursed) {
+          // Protected by Spectral Shield
           p.shield = false;
           feedback.textContent = isLimbo
             ? I18N[gameLang].limboShieldSaved(answerPrimary)
@@ -916,10 +1048,10 @@ async function askQuestion(p, isLimbo = false) {
       stopTimer();
 
       opts.querySelectorAll(".q-opt-btn").forEach((x) => (x.disabled = true));
-      const correctBtn = opts.querySelector(`[data-letter="${q.correct_letter}"]`);
+      const correctBtn = opts.querySelector(`[data-letter="${correctLetter}"]`);
       if (correctBtn) correctBtn.classList.add("correct");
 
-      if (p.shield) {
+      if (p.shield && !isCursed) {
         p.shield = false;
         feedback.textContent = isLimbo
           ? I18N[gameLang].limboShieldSaved(answerPrimary)
@@ -969,47 +1101,69 @@ async function askQuestion(p, isLimbo = false) {
       }
     };
 
-    // Start countdown timer if enabled
-    if (timerSeconds > 0) {
-      timerWrap.hidden = false;
-      timerWrap.classList.remove("urgent");
-      timerBar.style.width = "100%";
-      timerText.textContent = `${timerSeconds}s`;
+    // Calculate effective timer (Check CAS-03: Time Pressure)
+    let effectiveSeconds = timerSeconds;
+    let isPressured = false;
+    if (p.timePressure) {
+      p.timePressure = false;
+      isPressured = true;
+      effectiveSeconds = Math.max(5, Math.floor(timerSeconds > 0 ? timerSeconds / 2 : 10));
+      log(I18N[gameLang].timePressureLog(p.name));
+    }
 
-      const totalMs = timerSeconds * 1000;
+    // Countdown: it starts once the options are visible, so reading time is not lost.
+    let timerStarted = false;
+    const beginCountdown = () => {
+      if (timerStarted || resolved || effectiveSeconds <= 0) return;
+      timerStarted = true;
+      const totalMs = effectiveSeconds * 1000;
       const startAt = performance.now();
-
       timerInterval = setInterval(() => {
-        const elapsed = performance.now() - startAt;
-        const remainingMs = Math.max(0, totalMs - elapsed);
-        const pct = Math.max(0, (remainingMs / totalMs) * 100);
-        const secs = Math.ceil(remainingMs / 1000);
-
-        timerBar.style.width = `${pct}%`;
-        timerText.textContent = `${secs}s`;
-
-        if (remainingMs <= 5000) {
-          timerWrap.classList.add("urgent");
-        }
-
-        if (remainingMs <= 0) {
-          handleTimeout();
-        }
+        const remainingMs = Math.max(0, totalMs - (performance.now() - startAt));
+        timerBar.style.width = `${(remainingMs / totalMs) * 100}%`;
+        timerText.textContent = `${Math.ceil(remainingMs / 1000)}s`;
+        if (remainingMs <= 5000 || isPressured) timerWrap.classList.add("urgent");
+        if (remainingMs <= 0) handleTimeout();
       }, 100);
+    };
+    if (effectiveSeconds > 0) {
+      timerWrap.hidden = false;
+      timerWrap.classList.toggle("urgent", isPressured || effectiveSeconds <= 5);
+      timerBar.style.width = "100%";
+      timerText.textContent = `${effectiveSeconds}s`;
     }
 
     // Build answer buttons
-    optsPrimary.forEach((optText, idx) => {
+    choices.forEach((choice, idx) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "q-opt-btn notranslate";
       b.setAttribute("translate", "no");
-      b.textContent = optText;
-      b.dataset.letter = optText.trim()[0];
+      b.textContent = choice.text;
+      b.dataset.letter = choice.letter;
       b.style.animationDelay = `${(0.35 + n * 0.05 + idx * 0.12).toFixed(2)}s`;
       b.addEventListener("click", () => handleSelect(b));
       opts.appendChild(b);
     });
+
+    if (effectiveSeconds > 0) {
+      opts.lastElementChild.addEventListener("animationend", beginCountdown, { once: true });
+      setTimeout(beginCountdown, Math.round((0.35 + n * 0.05 + 3 * 0.12 + 0.6) * 1000) + 700); // fallback
+    }
+
+    // Check BEN-05: Wisdom Whisper (50/50 effect banishing 2 incorrect options)
+    if (p.fiftyFifty) {
+      p.fiftyFifty = false;
+      const wrongButtons = Array.from(opts.querySelectorAll(".q-opt-btn")).filter(
+        (b) => b.dataset.letter !== correctLetter
+      );
+      wrongButtons.sort(() => Math.random() - 0.5);
+      wrongButtons.slice(0, 2).forEach((b) => {
+        b.disabled = true;
+        b.classList.add("banished-option");
+      });
+      log(I18N[gameLang].fiftyFiftyLog(p.name));
+    }
   });
 }
 
@@ -1139,11 +1293,13 @@ function finishLastSurvivor(winner) {
 }
 
 async function warmUp() {
-  const game = $("game"), cover = $("cover");
+  const game = $("game"), cover = $("cover"), scare = $("screamerOverlay");
   $("coverText").textContent = I18N[gameLang].preparing;
   cover.hidden = false;
   game.classList.add("warm");
+  scare.hidden = false; // drawn once behind the cover so the first scare does not stutter
   await sleep(500);
+  scare.hidden = true;
   game.classList.add("to-front");
   await sleep(700);
   game.classList.remove("to-front");
@@ -1165,8 +1321,11 @@ function start(playerNames) {
     skipQ: false,
     skipTurn: false,
   }));
+  audio(); // created inside a click, so the browser allows the scream later
+  LAYOUT = makeLayout(); // a different board every game
   $("menuBtn").textContent = I18N[gameLang].mainMenu;
-  setLite($("game").classList.contains("lite"));
+  $("qualityBtn").textContent = I18N[gameLang].qualityHigh;
+  $("soundBtn").textContent = I18N[gameLang].soundOn;
   $("rollBtn").textContent = I18N[gameLang].rollBtn;
   $("setup").hidden = true;
   $("game").hidden = false;
@@ -1210,15 +1369,15 @@ function renderPlayerInputs(n) {
 
 function updateSetupTexts() {
   const t = I18N[gameLang];
-  document.documentElement.lang = gameLang;
   $("setupTag").textContent = t.tag;
-  $("setupNote").textContent = selectedPlayerCount === 1 ? t.noteSolo : t.note;
+  $("setupNote").textContent = t.note;
   $("langLabel").textContent = t.langLabel;
   $("timerLabel").textContent = t.timerLabel;
   $("timerOffBtn").textContent = t.timerOff;
   $("playersLabel").textContent = t.playersLabel;
   $("namesLabel").textContent = t.namesLabel;
   $("startBtn").textContent = t.startBtn;
+  $("setupWarn").textContent = t.warning;
 
   // Update existing inputs if they still hold default names
   const inputs = document.querySelectorAll(".player-name-input");
@@ -1256,7 +1415,6 @@ document.querySelectorAll(".count-btn").forEach((btn) => {
     btn.classList.add("active");
     selectedPlayerCount = Number(btn.dataset.n);
     renderPlayerInputs(selectedPlayerCount);
-    updateSetupTexts();
   });
 });
 
@@ -1273,6 +1431,10 @@ $("startBtn").addEventListener("click", () => {
 $("again").addEventListener("click", () => location.reload());
 $("menuBtn").addEventListener("click", () => {
   if (confirm(I18N[gameLang].confirmLeave)) location.reload();
+});
+$("soundBtn").addEventListener("click", () => {
+  soundOn = !soundOn;
+  $("soundBtn").textContent = soundOn ? I18N[gameLang].soundOn : I18N[gameLang].soundOff;
 });
 $("qualityBtn").addEventListener("click", () => setLite(!$("game").classList.contains("lite")));
 

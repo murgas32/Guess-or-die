@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google" content="notranslate">
 <title>Guess or Die</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Crimson+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="notranslate" translate="no">
@@ -67,14 +64,14 @@
       <div class="p side" style="--w:4600px;--h:2220px;--x:-2400px;--y:160px;--z:-300px;--r:rotateY(90deg)"><i class="books"></i></div>
       <div class="p side" style="--w:4600px;--h:2220px;--x:2400px;--y:160px;--z:-300px;--r:rotateY(-90deg)"><i class="hearth"></i></div>
       <div class="p floor" style="--w:4800px;--h:4600px;--y:1270px;--z:-300px;--r:rotateX(90deg)"></div>
-      <div class="p rug" style="--w:1700px;--h:1250px;--y:1268px;--z:240px;--r:rotateX(90deg)"></div>
-      <div class="p tabletop" style="--w:960px;--h:800px;--y:760px;--z:240px;--r:rotateX(90deg)"></div>
+      <div class="p rug" style="--w:1800px;--h:1350px;--y:1268px;--z:240px;--r:rotateX(90deg)"></div>
+      <div class="p tabletop" style="--w:1260px;--h:1020px;--y:760px;--z:240px;--r:rotateX(90deg)"></div>
       <div id="board" aria-label="Game board"></div>
       <div class="p dicetray" style="--w:136px;--h:136px;--x:330px;--y:757px;--z:240px;--r:rotateX(90deg)"></div>
       <div id="dieShadow"></div>
       <div id="dice" aria-label="Die"><div class="cube" id="cube"></div></div>
-      <div class="p tablelight" style="--w:1000px;--h:840px;--y:753px;--z:240px;--r:rotateX(90deg)"></div>
-      <div class="p cone" style="--w:1500px;--h:965px;--y:278px;--z:240px"></div>
+      <div class="p tablelight" style="--w:1360px;--h:1120px;--y:753px;--z:240px;--r:rotateX(90deg)"></div>
+      <div class="p cone" style="--w:1600px;--h:1020px;--y:278px;--z:240px"></div>
       <div class="p cord" style="--w:5px;--h:645px;--y:-628px;--z:240px"></div>
       <div class="p shade" style="--w:300px;--h:100px;--y:-255px;--z:240px"></div>
       <div class="p bloom" style="--w:900px;--h:900px;--y:-225px;--z:244px"></div>
@@ -90,6 +87,7 @@
     <ol id="order"></ol>
     <ul id="log" aria-label="Game log"></ul>
     <button id="rollBtn" disabled>Lanzar el dado</button>
+    <button id="soundBtn">Sonido: sí</button>
     <button id="qualityBtn">Calidad: alta</button>
   </div>
   <section id="front" class="front notranslate" translate="no" hidden>
@@ -125,6 +123,7 @@
 <!-- Screamer jumpscare overlay -->
 <div id="screamerOverlay" class="screamer-overlay" hidden aria-hidden="true">
   <div class="screamer-jumpscare">
+    <div class="screamer-custom"></div>
     <svg viewBox="0 0 800 800" class="screamer-face" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <radialGradient id="scGlow" cx="50%" cy="50%" r="50%">

@@ -1,3 +1,11 @@
+/* Fonts are bundled in assets/fonts, so the game looks the same without internet. */
+@font-face { font-family: "Cinzel"; font-weight: 600; font-style: normal; font-display: swap; src: url("assets/fonts/cinzel-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Cinzel"; font-weight: 700; font-style: normal; font-display: swap; src: url("assets/fonts/cinzel-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Cinzel"; font-weight: 800; font-style: normal; font-display: swap; src: url("assets/fonts/cinzel-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Crimson Pro"; font-weight: 400; font-style: normal; font-display: swap; src: url("assets/fonts/crimson-pro-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Crimson Pro"; font-weight: 600; font-style: normal; font-display: swap; src: url("assets/fonts/crimson-pro-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Crimson Pro"; font-weight: 700; font-style: normal; font-display: swap; src: url("assets/fonts/crimson-pro-latin-700-normal.woff2") format("woff2"); }
+
 :root {
   --head-turn-dur: 0.65s;
   --head-turn-ease: cubic-bezier(0.25, 1, 0.4, 1);
@@ -486,7 +494,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   transform: translate3d(330px, calc(758px - var(--d) / 2), 240px); transform-style: preserve-3d;
 }
 #dieShadow {
-  position: absolute; left: -62px; top: -62px; width: 124px; height: 124px; border-radius: 50%;
+  position: absolute; left: -74px; top: -74px; width: 148px; height: 148px; border-radius: 50%;
   background: radial-gradient(rgba(0, 0, 0, .8), transparent 68%);
   transform: translate3d(330px, 759px, 240px) rotateX(90deg);
 }
@@ -624,7 +632,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   box-shadow: 0 0 12px rgba(231, 76, 60, .9);
 }
 .timer-wrap.urgent .timer-flame {
-  animation: flicker .3s infinite;
+  animation: flicker .8s infinite;
   box-shadow: 0 0 16px 5px rgba(255, 60, 60, .85);
 }
 .timer-text {
@@ -639,7 +647,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 .timer-wrap.urgent .timer-text {
   color: #ff6b78;
   text-shadow: 0 0 10px rgba(255, 80, 80, .9);
-  animation: pulse .5s infinite;
+  animation: pulse .8s infinite;
 }
 .front-icon { font-family: var(--display); font-size: clamp(2.4rem, 8vw, 3.8rem); line-height: 1; font-style: normal; font-weight: 700; margin-bottom: .3rem; }
 .front-card h2 { font-family: var(--display); font-weight: 700; font-style: normal; font-size: clamp(1.4rem, 4.6vw, 2.2rem); letter-spacing: .05em; text-transform: uppercase; margin: .2rem 0 .8rem; }
@@ -839,6 +847,7 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   filter: grayscale(1) opacity(0.4);
 }
 #log { position: absolute; left: .9rem; bottom: 1.6rem; max-height: none; text-align: left; font-size: .8rem; text-shadow: 0 1px 4px #000; }
+#soundBtn { position: absolute; right: .9rem; bottom: 3.6rem; font-size: .8rem; padding: .35rem .8rem; background: rgba(10, 5, 6, .65); }
 #qualityBtn { position: absolute; right: .9rem; bottom: 1.6rem; font-size: .8rem; padding: .35rem .8rem; background: rgba(10, 5, 6, .65); }
 #game.to-front #hud { opacity: 0; }
 #game.to-front #hud > * { pointer-events: none; }
@@ -858,12 +867,12 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 #game.lite .tile { background-color: #0d0b0a; } #game.lite .t-P { background-color: #1c0c0e; }
 
 /* Warm-up: the room is drawn once behind a cover so the first camera move does not stutter */
-#cover { background: #050303; z-index: 20; }
+#cover { background: #050303; z-index: 10001; }
 .warm #roomBox { transition: none !important; }
 
 /* Questions: text and options written in the air, no boxes */
 .q-en { display: block; font-style: normal; font-weight: 600; font-size: clamp(1.25rem, 3.6vw, 1.95rem); line-height: 1.35; color: var(--bone); margin: .2rem 0 .6rem; }
-.q-es-box { display: block; white-space: pre-line; margin: .3rem auto .8rem; max-width: 36rem; font-style: normal; font-size: 1.05rem; color: #d8c5a2; }
+.q-es-box { display: block; margin: .3rem auto .8rem; max-width: 36rem; font-style: normal; font-size: 1.05rem; color: #d8c5a2; }
 .translate-btn, .translate-btn:hover:not(:disabled) { background: none; border: 0; box-shadow: none; }
 .translate-btn { padding: .2rem .4rem; font: inherit; font-size: .85rem; color: var(--dim); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; text-shadow: 0 1px 6px #000; }
 .translate-btn:hover:not(:disabled) { color: var(--bone); }
@@ -881,6 +890,13 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 .q-opt-btn.correct { color: #b8f08c; text-shadow: 0 0 16px rgba(120, 220, 80, .9), 0 2px 8px #000; }
 .q-opt-btn.wrong { color: #ff6b78; text-shadow: 0 0 16px rgba(240, 40, 60, .95), 0 2px 8px #000; animation: ghost .6s ease-out forwards, shake .5s ease-out; }
 .q-opt-btn.correct::before, .q-opt-btn.wrong::before { opacity: 1; }
+.q-opt-btn.banished-option {
+  opacity: 0.18 !important;
+  text-decoration: line-through !important;
+  pointer-events: none !important;
+  cursor: default !important;
+  filter: grayscale(1);
+}
 .q-feedback { margin: .6rem 0 .6rem; font-size: 1.25rem; font-style: normal; font-weight: 600; min-height: 1.5em; }
 .q-feedback.correct { color: #b8f08c; text-shadow: 0 0 14px rgba(120, 220, 80, .8), 0 2px 8px #000; }
 .q-feedback.wrong { color: #ff8a92; text-shadow: 0 0 14px rgba(240, 40, 60, .9), 0 2px 8px #000; }
@@ -896,8 +912,9 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   justify-content: center;
   overflow: hidden;
   pointer-events: all;
-  animation: screamerStrobe 0.08s infinite;
 }
+/* One single white flash (never a strobe: at most 3 flashes per second are safe). */
+.screamer-overlay::after { content: ""; position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; animation: screamerFlash .25s ease-out; }
 .screamer-jumpscare {
   width: 100vw;
   height: 100vh;
@@ -905,40 +922,34 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   align-items: center;
   justify-content: center;
   position: relative;
-  animation: screamerShake 0.04s infinite, screamerLunge 1.25s cubic-bezier(0.1, 0.85, 0.2, 1) forwards;
+  will-change: transform;
+  animation: screamerLunge 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards, screamerJitter 0.06s linear infinite;
 }
-.screamer-face {
-  width: min(95vw, 95vh);
-  height: min(95vw, 95vh);
-  filter: contrast(220%) brightness(1.2);
-}
+.screamer-face { width: min(95vw, 95vh); height: min(95vw, 95vh); }
+.screamer-custom { position: absolute; inset: 0; background: var(--scream-img, none) center / cover no-repeat; }
+.screamer-overlay.custom .screamer-face { display: none; }
 .screamer-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: radial-gradient(ellipse at 50% 50%, transparent 20%, rgba(180, 0, 15, 0.7) 65%, #000 95%);
 }
-
-@keyframes screamerShake {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  20% { transform: translate(-16px, 14px) rotate(-3.5deg); }
-  40% { transform: translate(18px, -12px) rotate(3.5deg); }
-  60% { transform: translate(-20px, -16px) rotate(-2.5deg); }
-  80% { transform: translate(14px, 18px) rotate(2.5deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
+/* Rapid high-frequency terror jitter instead of slow stepping sway */
+@keyframes screamerJitter {
+  0%, 100% { translate: 0 0; }
+  25% { translate: -6px 4px; }
+  50% { translate: 5px -5px; }
+  75% { translate: -4px -3px; }
 }
+/* Smooth, continuous, rapid approach directly into the screen */
 @keyframes screamerLunge {
-  0% { transform: scale(0.6); opacity: 0; }
-  8% { transform: scale(1.15); opacity: 1; }
-  35% { transform: scale(1.1); }
-  70% { transform: scale(1.55); }
-  100% { transform: scale(1.95); opacity: 1; }
+  0% { transform: scale(0.35); opacity: 0.15; }
+  10% { opacity: 1; }
+  100% { transform: scale(2.4); opacity: 1; }
 }
-@keyframes screamerStrobe {
-  0%, 100% { filter: invert(0) brightness(1.1); }
-  25% { filter: invert(1) contrast(250%) saturate(150%); }
-  50% { filter: sepia(1) hue-rotate(-55deg) saturate(900%) contrast(200%); }
-  75% { filter: invert(0.8) brightness(1.4) contrast(300%); }
+@keyframes screamerFlash { from { opacity: .9; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .screamer-jumpscare, .screamer-overlay::after { animation: none; }
 }
 
 /* Limbo encounter atmosphere & typography - Neutral ghostly white */
