@@ -60,26 +60,6 @@ function shuffle(arr) {
 
 // A new random board for every game: tile 0 is the start pedestal; the other 31 tiles are
 // 16 questions, 8 benefits and 7 punishments in random order, with a few fairness rules.
-function validLayout(L) {
-  if (L[1] === "P" || L[BOARD_SIZE - 1] === "P") return false; // no punishment right next to the start
-  let run = 1;
-  for (let i = 2; i < BOARD_SIZE; i++) {
-    run = L[i] === L[i - 1] ? run + 1 : 1;
-    if (L[i] === "P" && L[i - 1] === "P") return false;        // never two punishments in a row
-    if (L[i] !== "Q" && run >= 3) return false;                // no trio of benefits or punishments
-    if (L[i] === "Q" && run >= 5) return false;                // no wall of five questions
-  }
-  return true;
-}
-function makeLayout() {
-  const kinds = [..."Q".repeat(16), ..."B".repeat(8), ..."P".repeat(7)];
-  for (let attempt = 0; attempt < 1000; attempt++) {
-    const L = "S" + shuffle(kinds).join("");
-    if (validLayout(L)) return L;
-  }
-  return "SQQBQPQBQQPQBQPQBQQPQBPBQQPQBPBQ";
-}
-
 // ---- Sound ----
 let audioCtx = null, soundOn = true;
 function audio() {
@@ -126,6 +106,26 @@ const I18N = {
     playersLabel: "¿Cuántos jugadores? / How many players?",
     namesLabel: "Nombres de los jugadores:",
     defaultPlayer: (i) => `Jugador ${i}`,
+    menuPlay: "Jugar",
+    menuPlayers: "Jugadores",
+    menuTimer: "Tiempo",
+    menuLang: "Idioma",
+    menuRules: "Reglas",
+    menuCredits: "Créditos",
+    playModalTitle: "Entrar a la oscuridad",
+    playersModalTitle: "Configurar Jugadores",
+    timerModalTitle: "Temporizador de Vela",
+    langModalTitle: "Idioma de Preguntas",
+    rulesModalTitle: "Reglas y Supervivencia",
+    creditsModalTitle: "Créditos del Proyecto",
+    timerSubtitle: "Si la vela se apaga antes de responder, la oscuridad te consume.",
+    langSubtitle: "Configura el idioma principal de las preguntas y la interfaz.",
+    btnSave: "Listo",
+    btnUnderstood: "Entendido",
+    btnClose: "Cerrar",
+    statusPlayers: (count) => `${count} ${count === 1 ? "Jugador" : "Jugadores"}`,
+    statusTimer: (seconds) => seconds === 0 ? "Vela: sin límite" : `Vela: ${seconds}s`,
+    statusLang: "Español",
     startBtn: "Entrar a la oscuridad",
     rollBtn: "Lanzar el dado",
     qualityHigh: "Calidad: alta",
@@ -215,6 +215,26 @@ const I18N = {
     playersLabel: "How many players? / ¿Cuántos jugadores?",
     namesLabel: "Player names:",
     defaultPlayer: (i) => `Player ${i}`,
+    menuPlay: "Play",
+    menuPlayers: "Players",
+    menuTimer: "Time",
+    menuLang: "Language",
+    menuRules: "Rules",
+    menuCredits: "Credits",
+    playModalTitle: "Enter the darkness",
+    playersModalTitle: "Configure Players",
+    timerModalTitle: "Candle Timer",
+    langModalTitle: "Question Language",
+    rulesModalTitle: "Rules and Survival",
+    creditsModalTitle: "Project Credits",
+    timerSubtitle: "If the candle goes out before you answer, the darkness consumes you.",
+    langSubtitle: "Set the primary language for questions and the interface.",
+    btnSave: "Done",
+    btnUnderstood: "Got it",
+    btnClose: "Close",
+    statusPlayers: (count) => `${count} ${count === 1 ? "Player" : "Players"}`,
+    statusTimer: (seconds) => seconds === 0 ? "No limit" : `Candle: ${seconds}s`,
+    statusLang: "English",
     startBtn: "Enter the Dark",
     rollBtn: "Roll the die",
     qualityHigh: "Quality: high",
@@ -1323,7 +1343,6 @@ function start(playerNames) {
     skipTurn: false,
   }));
   audio(); // created inside a click, so the browser allows the scream later
-  LAYOUT = makeLayout(); // a different board every game
   $("menuBtn").textContent = I18N[gameLang].mainMenu;
   $("qualityBtn").textContent = I18N[gameLang].qualityHigh;
   $("soundBtn").textContent = I18N[gameLang].soundOn;
@@ -1469,7 +1488,8 @@ function renderPlayerInputs(n) {
 function updateSetupTexts() {
   const t = I18N[gameLang];
   if ($("setupTag")) $("setupTag").textContent = t.tag;
-  if ($("setupNote")) $("setupNote").textContent = t.note;
+  if ($("playSetupTag")) $("playSetupTag").textContent = t.tag;
+  if ($("setupNote")) $("setupNote").textContent = selectedPlayerCount === 1 ? t.noteSolo : t.note;
   if ($("langLabel")) $("langLabel").textContent = t.langLabel;
   if ($("timerLabel")) $("timerLabel").textContent = t.timerLabel;
   if ($("timerOffBtn")) $("timerOffBtn").textContent = t.timerOff;
@@ -1544,6 +1564,11 @@ document.querySelectorAll(".count-btn").forEach((btn) => {
     selectedPlayerCount = Number(btn.dataset.n);
     renderPlayerInputs(selectedPlayerCount);
     updateStatusBar();
+    if ($("setupNote")) {
+      $("setupNote").textContent = selectedPlayerCount === 1
+        ? I18N[gameLang].noteSolo
+        : I18N[gameLang].note;
+    }
   });
 });
 
@@ -1554,18 +1579,6 @@ $("menuTileTimer").addEventListener("click", () => openMenuModal("panelTimer"));
 $("menuTileLang").addEventListener("click", () => openMenuModal("panelLang"));
 $("menuTileRules").addEventListener("click", () => openMenuModal("panelRules"));
 $("menuTileCredits").addEventListener("click", () => openMenuModal("panelCredits"));
-
-// Eye reactivity when hovering menu
-const gowEyeStage = $("gowEyeStage");
-const gowNav = document.querySelector(".gow-nav");
-if (gowEyeStage && gowNav) {
-  gowNav.addEventListener("mouseenter", () => {
-    gowEyeStage.classList.add("eye-focus-left");
-  });
-  gowNav.addEventListener("mouseleave", () => {
-    gowEyeStage.classList.remove("eye-focus-left");
-  });
-}
 
 // Modal close buttons
 $("modalCloseBtn").addEventListener("click", closeMenuModal);
