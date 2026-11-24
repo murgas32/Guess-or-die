@@ -3,9 +3,12 @@
 Juego de mesa por turnos de terror psicologico y supervivencia con trivia bilingue, desarrollado en HTML5, CSS 3D puro y Vanilla JavaScript.
 
 ## Sinopsis
-Los jugadores se encuentran en una misteriosa sala oscura iluminada unicamente por una lampara sobre la mesa. Para escapar deben recorrer un tablero maldito de 32 casillas. Una sola respuesta incorrecta sin proteccion sobrenatural te devolvera al punto de partida.
+Los jugadores se encuentran en una misteriosa sala oscura iluminada unicamente por una lampara sobre la mesa. Para escapar deben recorrer un tablero maldito de 50 casillas. Una sola respuesta incorrecta sin proteccion sobrenatural te devolvera al punto de partida.
 
 ## Caracteristicas
+- Tablero Procedural Aleatorio: Las 50 casillas se posicionan y barajan de forma completamente aleatoria en cada partida, garantizando una experiencia diferente y rejugable en cada juego.
+- Sistema de 3 Vidas y Modo Espectador: Cada jugador cuenta con 3 vidas (representadas con velas en el HUD). Al acumular 3 fallas, el jugador muere definitivamente, su peon desaparece del tablero y permanece en la partida unicamente como espectador. Si todos mueren, la oscuridad gana; en multijugador, el ultimo superviviente se alza con la victoria.
+- Castigo Letal "LIMBO": Al caer en una casilla de castigo, existe una baja probabilidad de entrar al temible "LIMBO", una prueba de vida o muerte con ambientacion abisal roja. Un acierto te salva; un fallo o tiempo agotado (sin proteccion del circulo de sal) provoca tu muerte instantanea y eliminacion inmediata como espectador.
 - Entorno 3D sin librerias externas: Habitacion completa en CSS 3D con perspectiva, efectos de iluminacion, chimenea, ventana con luz de luna y camara en primera persona que levanta la mirada en cada encuentro.
 - Tablero Ampliado de 32 Casillas: Tablero con rejilla 9x9 de mayor escala, con 32 casillas perimetrales (1 casilla de salida, 16 preguntas, 8 beneficios y 7 castigos) y 3 niveles de dificultad progresiva.
 - Screamer instantaneo al fallar: Si un jugador responde incorrectamente sin la proteccion del circulo de sal, un screamer visual azota la pantalla e inmediatamente el peon es devuelto a la casilla de inicio.
@@ -16,8 +19,8 @@ Los jugadores se encuentran en una misteriosa sala oscura iluminada unicamente p
 - Banco Ampliado de Preguntas: Mas de 110 preguntas bilingues clasificadas en 4 categorias (Deportes, Historia, Matematicas y Geografia).
 - Casillas Especiales:
   - Pregunta (?): Pregunta aleatoria del mazo sin repeticion.
-  - Beneficio (+): Escudo Espectral (perdona 1 error/tiempo), Paso Veloz (+2 casillas), Susurro Protector (salta la proxima pregunta), Tirada Espectral (lanzamiento extra de dado), Susurro de Sabiduria (elimina 2 opciones 50/50) o Ancla Espectral (fija un checkpoint seguro ante caidas).
-  - Castigo (+): Retroceso Espectral (-2 casillas), Paralisis del Miedo (pierde el turno), Presion Temporal (mitad de tiempo en la siguiente pregunta) o Maldicion del Susurro (anula escudos y el turno queda congelado).
+  - Beneficio (+): Vela mas brillante (+2 casillas), Circulo de sal (escudo ante un fallo) o Susurros apagados (salta la proxima pregunta).
+  - Castigo (+): El suelo cede (-2 casillas), Retencion (pierde el turno) o el letal "LIMBO" (pregunta de vida o muerte).
 - Modo de Calidad (Baja / Alta): Optimizado para correr fluido en cualquier equipo mediante texture baking y modo simplificado.
 
 ## Como jugar

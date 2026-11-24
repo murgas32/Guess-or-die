@@ -1,8 +1,44 @@
 // Guess or Die - Atmospheric 3D Turn-based Horror Trivia Game
 
-const BOARD_SIZE = 32;
-// S = start, Q = question (16), B = benefit (8), P = punishment (7)
-let LAYOUT = "SQQBQPQBQQPQBQPQBQQPQBPBQQPQBPBQ"; // replaced by makeLayout() at the start of every game
+const BOARD_SIZE = 50;
+
+// Fisher-Yates shuffle (Array.sort with random comparator is biased)
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Generate randomized board layout for each match:
+// Casilla 0 (Tile 1): 'S' (Start / Salida in center)
+// Casilla 49 (Tile 50): 'M' (Meta at outer rim)
+// Casilla 24 (Tile 25): 'L' (Limbo midpoint landmark)
+// Casilla 40 (Tile 41): 'L' (Limbo endgame peril)
+// Remaining 46 tiles: 25 Questions ('Q'), 12 Benefits ('B'), 9 Punishments ('P')
+function generateRandomLayout() {
+  const pool = [
+    ...Array(25).fill("Q"),
+    ...Array(12).fill("B"),
+    ...Array(9).fill("P")
+  ];
+  const shuffled = shuffle(pool);
+  const layout = new Array(BOARD_SIZE);
+  layout[0] = "S";
+  layout[BOARD_SIZE - 1] = "M";
+  layout[24] = "L";
+  layout[40] = "L";
+  let poolIdx = 0;
+  for (let i = 1; i < BOARD_SIZE - 1; i++) {
+    if (i !== 24 && i !== 40) {
+      layout[i] = shuffled[poolIdx++];
+    }
+  }
+  return layout;
+}
+
+let currentLayout = generateRandomLayout();
 const COLORS = ["#d9b25a", "#8fb3c4", "#c0708a", "#8aa05c"];
 
 const $ = (id) => document.getElementById(id);
@@ -81,30 +117,11 @@ function playScream() {
 // Multi-language dictionary
 const I18N = {
   es: {
-    tag: "Una sola respuesta incorrecta te devolverá al inicio.",
-    note: "Todos juegan en esta computadora, por turnos. El primero en volver al inicio gana.",
-    menuPlay: "Jugar",
-    menuPlayers: "Jugadores",
-    menuTimer: "Tiempo",
-    menuLang: "Idioma",
-    menuRules: "Reglas",
-    menuCredits: "Créditos",
-    playModalTitle: "Entrar a la Oscuridad",
-    playersModalTitle: "Configurar Jugadores",
-    timerModalTitle: "Temporizador de Vela",
-    timerSubtitle: "Si la vela se apaga antes de responder, la oscuridad te consume.",
-    langModalTitle: "Idioma de Preguntas",
-    langSubtitle: "Configura el idioma principal de las preguntas y la interfaz.",
-    rulesModalTitle: "Reglas y Supervivencia",
-    creditsModalTitle: "Créditos del Proyecto",
-    btnSave: "Listo",
-    btnClose: "Cerrar",
-    btnUnderstood: "Entendido",
-    statusPlayers: (n) => `${n} Jugador${n > 1 ? "es" : ""}`,
-    statusTimer: (s) => (s > 0 ? `Vela: ${s}s` : "Sin límite"),
-    statusLang: "Español",
-    langLabel: "Idioma de las preguntas / Language:",
-    timerLabel: "Tiempo por pregunta / Question timer:",
+    tag: "Una sola respuesta errónea te devuelve al inicio. A las 3 fallas o al caer en el Limbo, mueres.",
+    note: "Todos juegan en esta computadora, por turnos. El primero en llegar a la META (casilla 50) o el último sobreviviente gana.",
+    noteSolo: "Juegas solo: llega a la META (casilla 50) antes de acumular 3 fallas o sucumbir en el Limbo.",
+    langLabel: "Idioma / Language:",
+    timerLabel: "Tiempo por pregunta:",
     timerOff: "Sin límite",
     playersLabel: "¿Cuántos jugadores? / How many players?",
     namesLabel: "Nombres de los jugadores:",
@@ -140,22 +157,41 @@ const I18N = {
     translateBtnShow: "Ver en inglés",
     translateBtnHide: "Ocultar inglés",
     correctFeedback: "Correcto. Sobrevives a esta casilla.",
-    wrongFeedbackShield: (ans) => `Incorrecto. ${ans}. Pero el aura espectral te protege del abismo.`,
-    wrongFeedbackDeath: (ans) => `Incorrecto. ${ans}. Vuelves al inicio.`,
+    wrongFeedbackShield: (ans) => `Incorrecto. ${ans}. Pero el círculo de sal te protege del abismo.`,
+    wrongFeedbackLives: (ans, livesLeft) => `Incorrecto. ${ans}. Vuelves al inicio. Te quedan ${livesLeft} ${livesLeft === 1 ? "vida" : "vidas"}.`,
+    thirdFailureDeath: (ans) => `Incorrecto. ${ans}. Has acumulado 3 fallas. Has muerto y ahora eres un espectador.`,
+    timeExpiredFeedbackShield: (ans) => `Tiempo agotado. ${ans}. Pero el círculo de sal te protege.`,
+    timeExpiredFeedbackLives: (ans, livesLeft) => `Tiempo agotado. ${ans}. Vuelves al inicio. Te quedan ${livesLeft} ${livesLeft === 1 ? "vida" : "vidas"}.`,
+    timeExpiredDeath: (ans) => `Tiempo agotado. ${ans}. Has acumulado 3 fallas. Has muerto y ahora eres un espectador.`,
     answeredCorrectLog: (name) => `${name} respondió correctamente.`,
-    failedSaltLog: (name) => `${name} falló, pero el aura espectral le protegió.`,
-    failedLog: (name) => `${name} falló la pregunta y volvió al inicio.`,
-    timeExpiredFeedbackShield: (ans) => `Tiempo agotado. ${ans}. Pero el aura espectral te protege.`,
-    timeExpiredFeedbackDeath: (ans) => `Tiempo agotado. ${ans}. La oscuridad te arrastra al inicio.`,
-    timeExpiredLog: (name) => `${name} agotó el tiempo y volvió al inicio.`,
+    failedSaltLog: (name) => `${name} falló, pero el círculo de sal le protegió.`,
+    failedLogLives: (name, fails) => `${name} falló la pregunta (${fails}/3 fallas) y volvió al inicio.`,
+    playerDiedLog: (name) => `${name} acumuló 3 fallas y ha muerto. Ahora es un espectador.`,
+    spectatorBadge: "ESPECTADOR",
     btnContinue: "Continuar",
     btnBackToStart: "Volver al inicio",
-    soloWinTitle: "Has logrado regresar",
-    soloWinText: "Completaste la vuelta al tablero.",
-    multiWinTitle: (name) => `${name} ha logrado regresar`,
-    multiWinText: "Todos los demás han quedado atrapados en la oscuridad.",
+    soloWinTitle: "Has logrado escapar",
+    soloWinText: "Alcanzaste la META en la casilla 50 y sobreviviste a la oscuridad.",
+    multiWinTitle: (name) => `${name} ha alcanzado la META`,
+    multiWinText: "Llegó a la casilla 50 y escapó de la oscuridad.",
+    lastSurvivorTitle: (name) => `${name} es el único sobreviviente`,
+    lastSurvivorText: "Todos los demás han perecido en la oscuridad. Eres el único que queda con vida.",
+    soloGameOverTitle: "Has muerto",
+    soloGameOverText: "Acumulaste 3 fallas. Tu alma quedó atrapada en la oscuridad para siempre.",
+    gameOverAllDeadTitle: "Nadie ha sobrevivido",
+    gameOverAllDeadText: "Todos los jugadores han muerto. La oscuridad los consumió a todos.",
     playAgain: "Jugar de nuevo",
     preparing: "Preparando la sala...",
+    limboTitle: "LIMBO",
+    limboSubtitle: "Pregunta de vida o muerte",
+    limboWarning: "Has caído en el abismo del Limbo. Una sola respuesta incorrecta o que se extinga la vela significará tu MUERTE INMEDIATA.",
+    limboEscaped: "¡Correcto! Has escapado del Limbo y tu alma sobrevive.",
+    limboEscapedLog: (name) => `${name} superó la prueba del Limbo y salvó su vida.`,
+    limboShieldSaved: (ans) => `Incorrecto. ${ans}. ¡El círculo de sal se destruye salvándote de la muerte en el Limbo!`,
+    limboShieldLog: (name) => `${name} se salvó del Limbo gracias a su círculo de sal.`,
+    limboDied: (ans) => `Incorrecto. ${ans}. El Limbo te consume por completo. Has muerto al instante.`,
+    limboTimeoutDied: (ans) => `Tiempo agotado. ${ans}. El Limbo te consume por completo. Has muerto al instante.`,
+    limboDiedLog: (name) => `${name} cayó en el Limbo y ha muerto. Ahora es un espectador.`,
     effects: {
       B1: { title: "Escudo Espectral", text: "Un aura espectral te protege. Tu siguiente error o tiempo agotado será perdonado sin enviarte al inicio." },
       B2: { title: "Paso Veloz", text: "Una ráfaga de viento frío te impulsa 2 casillas hacia adelante de inmediato." },
@@ -170,30 +206,11 @@ const I18N = {
     }
   },
   en: {
-    tag: "One wrong answer sends you back to the start.",
-    note: "Everyone plays on this computer, taking turns. First back to the start wins.",
-    menuPlay: "Play",
-    menuPlayers: "Players",
-    menuTimer: "Timer",
-    menuLang: "Language",
-    menuRules: "Rules",
-    menuCredits: "Credits",
-    playModalTitle: "Enter the Dark",
-    playersModalTitle: "Configure Players",
-    timerModalTitle: "Candle Timer",
-    timerSubtitle: "If the candle burns out before answering, darkness consumes you.",
-    langModalTitle: "Questions Language",
-    langSubtitle: "Select the main language for questions and the interface.",
-    rulesModalTitle: "Rules & Survival",
-    creditsModalTitle: "Project Credits",
-    btnSave: "Done",
-    btnClose: "Close",
-    btnUnderstood: "Understood",
-    statusPlayers: (n) => `${n} Player${n > 1 ? "s" : ""}`,
-    statusTimer: (s) => (s > 0 ? `Candle: ${s}s` : "No limit"),
-    statusLang: "English",
-    langLabel: "Questions Language / Idioma:",
-    timerLabel: "Question timer / Tiempo por pregunta:",
+    tag: "One wrong answer sends you to the start. At 3 strikes or falling in Limbo, you die.",
+    note: "Everyone plays on this computer, taking turns. First to reach the GOAL (tile 50) or last survivor wins.",
+    noteSolo: "Playing solo: reach the GOAL (tile 50) before getting 3 strikes or perishing in Limbo.",
+    langLabel: "Language / Idioma:",
+    timerLabel: "Time per question:",
     timerOff: "No limit",
     playersLabel: "How many players? / ¿Cuántos jugadores?",
     namesLabel: "Player names:",
@@ -229,22 +246,41 @@ const I18N = {
     translateBtnShow: "Translate to Spanish",
     translateBtnHide: "Hide translation",
     correctFeedback: "Correct. You survive this tile.",
-    wrongFeedbackShield: (ans) => `Wrong. ${ans}. But the spectral shield holds: you are spared.`,
-    wrongFeedbackDeath: (ans) => `Wrong. ${ans}. Back to the start.`,
+    wrongFeedbackShield: (ans) => `Wrong. ${ans}. But the circle of salt holds: you are spared.`,
+    wrongFeedbackLives: (ans, livesLeft) => `Wrong. ${ans}. Back to start. You have ${livesLeft} ${livesLeft === 1 ? "life" : "lives"} left.`,
+    thirdFailureDeath: (ans) => `Wrong. ${ans}. You reached 3 strikes. You died and are now a spectator.`,
+    timeExpiredFeedbackShield: (ans) => `Time expired. ${ans}. But the circle of salt holds: you are spared.`,
+    timeExpiredFeedbackLives: (ans, livesLeft) => `Time expired. ${ans}. Back to start. You have ${livesLeft} ${livesLeft === 1 ? "life" : "lives"} left.`,
+    timeExpiredDeath: (ans) => `Time expired. ${ans}. You reached 3 strikes. You died and are now a spectator.`,
     answeredCorrectLog: (name) => `${name} answered correctly.`,
-    failedSaltLog: (name) => `${name} failed, but the spectral aura protected them.`,
-    failedLog: (name) => `${name} failed the question and was sent back to start.`,
-    timeExpiredFeedbackShield: (ans) => `Time expired. ${ans}. But the spectral shield holds: you are spared.`,
-    timeExpiredFeedbackDeath: (ans) => `Time expired. ${ans}. The dark drags you back to the start.`,
-    timeExpiredLog: (name) => `${name} ran out of time and was sent back to start.`,
+    failedSaltLog: (name) => `${name} failed, but the salt circle protected them.`,
+    failedLogLives: (name, fails) => `${name} failed the question (${fails}/3 strikes) and returned to start.`,
+    playerDiedLog: (name) => `${name} reached 3 strikes and died. They are now a spectator.`,
+    spectatorBadge: "SPECTATOR",
     btnContinue: "Continue",
     btnBackToStart: "Back to start",
-    soloWinTitle: "You made it back",
-    soloWinText: "You completed the lap.",
-    multiWinTitle: (name) => `${name} made it back`,
-    multiWinText: "Everyone else is lost in the dark.",
+    soloWinTitle: "You escaped the dark",
+    soloWinText: "You reached the GOAL at tile 50 and survived.",
+    multiWinTitle: (name) => `${name} reached the GOAL`,
+    multiWinText: "Reached tile 50 and escaped the darkness.",
+    lastSurvivorTitle: (name) => `${name} is the last survivor`,
+    lastSurvivorText: "Everyone else has perished in the dark. You won the game.",
+    soloGameOverTitle: "You died",
+    soloGameOverText: "You accumulated 3 strikes. Your soul is trapped in the dark forever.",
+    gameOverAllDeadTitle: "Everyone died",
+    gameOverAllDeadText: "All players have died. The darkness consumed everyone.",
     playAgain: "Play again",
     preparing: "Preparing the room...",
+    limboTitle: "LIMBO",
+    limboSubtitle: "Life or death question",
+    limboWarning: "You have fallen into the abyss of Limbo. A single wrong answer or running out of time means INSTANT DEATH.",
+    limboEscaped: "Correct! You escaped Limbo and your soul survives.",
+    limboEscapedLog: (name) => `${name} overcame Limbo and saved their life.`,
+    limboShieldSaved: (ans) => `Wrong. ${ans}. The circle of salt shatters, saving your life from Limbo!`,
+    limboShieldLog: (name) => `${name} was saved from Limbo by the salt circle.`,
+    limboDied: (ans) => `Wrong. ${ans}. Limbo claims your soul completely. You died instantly.`,
+    limboTimeoutDied: (ans) => `Time expired. ${ans}. Limbo claims your soul completely. You died instantly.`,
+    limboDiedLog: (name) => `${name} fell into Limbo and died. They are now a spectator.`,
     effects: {
       B1: { title: "Spectral Shield", text: "A spectral aura protects you. Your next failed question or timeout will be forgiven." },
       B2: { title: "Swift Step", text: "A gust of cold wind propels you forward 2 tiles immediately." },
@@ -287,26 +323,92 @@ let players = [];
 let order = [];
 let tiles = [];
 
-// Position of tile i on the 9x9 ring, clockwise from the top-left corner (32 tiles).
-function ringPos(i) {
-  if (i <= 8) return [0, i];
-  if (i <= 16) return [i - 8, 8];
-  if (i <= 24) return [8, 24 - i];
-  return [32 - i, 0];
+// Spiral geometry constants for the 50-tile Archimedean spiral board
+const SPIRAL_CX = 340;
+const SPIRAL_CY = 340;
+const SPIRAL_R0 = 40;
+const SPIRAL_W = 68;
+const SPIRAL_B = SPIRAL_W / (2 * Math.PI);
+const SPIRAL_A0 = (215 * Math.PI) / 180; // 215 deg so Tile 50 finishes at top-left ~10:30 o'clock
+
+function getSpiralTileCoord(i) {
+  if (i === 0) {
+    return { x: SPIRAL_CX, y: SPIRAL_CY, rMid: 0, aMid: SPIRAL_A0, th1: 0, th2: 2 * Math.PI };
+  }
+  let turn = 0, n = 12, j = 0;
+  if (i <= 12) {
+    turn = 0; n = 12; j = i - 1;
+  } else if (i <= 29) {
+    turn = 1; n = 17; j = i - 13;
+  } else {
+    turn = 2; n = 20; j = i - 30;
+  }
+  const tBase = turn * 2 * Math.PI;
+  const th1 = tBase + (j / n) * 2 * Math.PI;
+  const th2 = tBase + ((j + 1) / n) * 2 * Math.PI;
+  const thMid = (th1 + th2) / 2;
+  const aMid = SPIRAL_A0 + thMid;
+  const rIn = SPIRAL_R0 + SPIRAL_B * thMid;
+  const rOut = SPIRAL_R0 + SPIRAL_B * (thMid + 2 * Math.PI);
+  const rMid = (rIn + rOut) / 2;
+  const x = Math.round(SPIRAL_CX + rMid * Math.cos(aMid));
+  const y = Math.round(SPIRAL_CY + rMid * Math.sin(aMid));
+  return { x, y, rMid, aMid, th1, th2 };
 }
 
-// Emblem drawn on each kind of tile. The start tile gets a 3D pedestal instead.
+function getSpiralTilePath(th1, th2) {
+  const steps = 8;
+  const pts = [];
+  for (let s = 0; s <= steps; s++) {
+    const t = s / steps;
+    const th = th1 + t * (th2 - th1);
+    const r = SPIRAL_R0 + SPIRAL_B * th;
+    const a = SPIRAL_A0 + th;
+    const x = (SPIRAL_CX + r * Math.cos(a)).toFixed(1);
+    const y = (SPIRAL_CY + r * Math.sin(a)).toFixed(1);
+    pts.push(`${x} ${y}`);
+  }
+  for (let s = steps; s >= 0; s--) {
+    const t = s / steps;
+    const th = th1 + t * (th2 - th1);
+    const r = SPIRAL_R0 + SPIRAL_B * (th + 2 * Math.PI);
+    const a = SPIRAL_A0 + th;
+    const x = (SPIRAL_CX + r * Math.cos(a)).toFixed(1);
+    const y = (SPIRAL_CY + r * Math.sin(a)).toFixed(1);
+    pts.push(`${x} ${y}`);
+  }
+  return "M " + pts.join(" L ") + " Z";
+}
+
+function getCasilla1Path() {
+  const steps = 16;
+  const pts = [];
+  for (let s = 0; s <= steps; s++) {
+    const t = s / steps;
+    const th = t * 2 * Math.PI;
+    const r = SPIRAL_R0 + SPIRAL_B * th;
+    const a = SPIRAL_A0 + th;
+    const x = (SPIRAL_CX + r * Math.cos(a)).toFixed(1);
+    const y = (SPIRAL_CY + r * Math.sin(a)).toFixed(1);
+    pts.push(`${x} ${y}`);
+  }
+  return "M " + pts.join(" L ") + " Z";
+}
+
+// Emblem drawn on each kind of tile.
 const GLYPHS = {
   Q: '<span class="g-q"><b>?</b></span>',
   B: '<span class="g-b"><i class="salt"></i><i class="flame"></i><i class="wax"></i></span>',
   P: '<span class="g-p"><i class="tri"></i><i class="eye"></i></span>',
+  L: '<span class="g-l"><b class="limbo-mark">&#x2620;</b></span>',
+  M: '<span class="g-m"><b class="meta-mark">&#x2605;</b></span>',
   S: "",
 };
 
 function buildPedestal() {
   const ped = document.createElement("div");
   ped.className = "ped";
-  [["base", 68, 68, 8, 0], ["col", 46, 46, 30, 8], ["cap", 58, 58, 6, 38]].forEach(([cls, w, d, h, z]) => {
+  [["base", 64, 64, 8, 0], ["col", 44, 44, 30, 8], ["cap", 56, 56, 6, 38]].forEach(([cls, w, d, h, z]) => {
     const box = document.createElement("div");
     box.className = "box " + cls;
     box.style.cssText = `--w:${w}px;--d:${d}px;--h:${h}px;--z:${z}px`;
@@ -320,20 +422,148 @@ function buildBoard() {
   const board = $("board");
   board.innerHTML = "";
   tiles = [];
-  const art = document.createElement("div");
-  art.id = "boardArt";
-  board.appendChild(art);
+
+  // 1. Create SVG spiral board
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.id = "boardSvg";
+  svg.setAttribute("viewBox", "0 0 680 680");
+  svg.setAttribute("width", "680");
+  svg.setAttribute("height", "680");
+
+  let svgInner = `
+    <defs>
+      <radialGradient id="boardBaseGrad" cx="45%" cy="40%" r="55%">
+        <stop offset="0%" stop-color="#181312" />
+        <stop offset="65%" stop-color="#0c0909" />
+        <stop offset="100%" stop-color="#040303" />
+      </radialGradient>
+      <linearGradient id="qGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#241a2e" />
+        <stop offset="100%" stop-color="#0c0712" />
+      </linearGradient>
+      <linearGradient id="bGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#2d2114" />
+        <stop offset="100%" stop-color="#0d0905" />
+      </linearGradient>
+      <linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#2c0f13" />
+        <stop offset="100%" stop-color="#0d0305" />
+      </linearGradient>
+      <linearGradient id="sGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#38131a" />
+        <stop offset="100%" stop-color="#120407" />
+      </linearGradient>
+      <linearGradient id="mGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#142c1b" />
+        <stop offset="100%" stop-color="#050e08" />
+      </linearGradient>
+      <linearGradient id="lGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#363336" />
+        <stop offset="50%" stop-color="#222123" />
+        <stop offset="100%" stop-color="#111013" />
+      </linearGradient>
+      <path id="arcTop" d="M 90,340 A 250,250 0 0 1 590,340" />
+      <path id="arcBottom" d="M 590,340 A 250,250 0 0 1 90,340" />
+    </defs>
+    <circle cx="340" cy="340" r="338" fill="url(#boardBaseGrad)" stroke="#c5b89a" stroke-width="2.6" stroke-opacity="0.4" />
+    <circle cx="340" cy="340" r="332" fill="none" stroke="#c5b89a" stroke-width="1" stroke-dasharray="3,5" stroke-opacity="0.25" />
+    <circle cx="340" cy="340" r="326" fill="none" stroke="#c5b89a" stroke-width="0.7" stroke-opacity="0.15" />
+    <g fill="#c5b89a" fill-opacity="0.32" font-family="'Cinzel', Georgia, serif" font-size="11.5" text-anchor="middle" letter-spacing="14">
+      <text><textPath href="#arcTop" startOffset="50%">GUESS</textPath></text>
+      <text><textPath href="#arcBottom" startOffset="50%">OR DIE</textPath></text>
+    </g>
+  `;
+
   for (let i = 0; i < BOARD_SIZE; i++) {
-    const [row, col] = ringPos(i);
+    const type = currentLayout[i];
+    const coord = getSpiralTileCoord(i);
+    const num = i + 1;
+    let path = "";
+    let innerContent = "";
+
+    if (type === "S") {
+      path = getCasilla1Path();
+      innerContent = `
+        <circle cx="340" cy="340" r="26" fill="none" stroke="#c5b89a" stroke-width="0.9" stroke-dasharray="2,3" stroke-opacity="0.4" />
+        <text class="casilla-label salida" x="340" y="347">SALIDA</text>
+        <text class="casilla-sublabel" fill="#c2323e" x="340" y="358">▲ INICIO</text>
+      `;
+    } else if (type === "M") {
+      path = getSpiralTilePath(coord.th1, coord.th2);
+      innerContent = `
+        <text class="casilla-label meta" x="${coord.x}" y="${coord.y - 19}">META</text>
+      `;
+    } else if (type === "L") {
+      path = getSpiralTilePath(coord.th1, coord.th2);
+      innerContent = `
+        <text class="casilla-label limbo" x="${coord.x}" y="${coord.y - 19}">LIMBO</text>
+      `;
+    } else {
+      path = getSpiralTilePath(coord.th1, coord.th2);
+      innerContent = ``;
+    }
+
+    let grad = `url(#${type.toLowerCase()}Grad)`;
+    let strokeCol = "#c5b89a";
+    let strokeOpacity = "0.4";
+    if (type === "Q") strokeCol = "#b7a4e0";
+    else if (type === "B") strokeCol = "#e7b552";
+    else if (type === "P") strokeCol = "#c2323e";
+    else if (type === "L") { strokeCol = "#dedad2"; strokeOpacity = "0.75"; }
+    else if (type === "M") { strokeCol = "#52c48a"; strokeOpacity = "0.7"; }
+    else if (type === "S") { strokeCol = "#c2323e"; strokeOpacity = "0.6"; }
+
+    svgInner += `
+      <g id="casilla-${num}" class="casilla-g type-${type}">
+        <path class="casilla-path" d="${path}" fill="${grad}" stroke="${strokeCol}" stroke-width="1.4" stroke-opacity="${strokeOpacity}" />
+        ${innerContent}
+      </g>
+    `;
+  }
+
+  svg.innerHTML = svgInner;
+  board.appendChild(svg);
+
+  // 2. Create HTML 3D tile anchors for pawns
+  const boardTiles = document.createElement("div");
+  boardTiles.id = "boardTiles";
+  board.appendChild(boardTiles);
+
+  for (let i = 0; i < BOARD_SIZE; i++) {
+    const type = currentLayout[i];
+    const coord = getSpiralTileCoord(i);
+    const num = i + 1;
     const t = document.createElement("div");
-    t.className = "tile t-" + LAYOUT[i];
-    t.style.gridArea = `${row + 1} / ${col + 1}`;
-    t.innerHTML = GLYPHS[LAYOUT[i]];
-    if (LAYOUT[i] === "S") t.appendChild(buildPedestal());
+    t.className = `tile-node t-${type}`;
+    t.style.left = `${coord.x}px`;
+    t.style.top = `${coord.y}px`;
+    t.dataset.num = num;
+    t.dataset.type = type;
+
+    t.addEventListener("mouseenter", () => {
+      t.classList.add("hovered");
+      const g = $("casilla-" + num);
+      if (g) g.classList.add("hovered");
+    });
+    t.addEventListener("mouseleave", () => {
+      t.classList.remove("hovered");
+      const g = $("casilla-" + num);
+      if (g) g.classList.remove("hovered");
+    });
+
+    if (type === "S") {
+      t.appendChild(buildPedestal());
+    } else if (GLYPHS[type]) {
+      const gw = document.createElement("div");
+      gw.className = "glyph-wrap";
+      gw.innerHTML = GLYPHS[type];
+      t.appendChild(gw);
+    }
+
     const tk = document.createElement("div");
     tk.className = "tokens";
     t.appendChild(tk);
-    board.appendChild(t);
+    boardTiles.appendChild(t);
     tiles.push(tk);
   }
 }
@@ -366,13 +596,15 @@ function showFace(v, tumble) {
 function renderTokens(hopId) {
   tiles.forEach((tk) => (tk.innerHTML = ""));
   players.forEach((p) => {
+    if (!p.alive) return; // Dead players are eliminated spectators; don't render on board
     const el = document.createElement("div");
     el.className = "token";
     el.style.setProperty("--c", p.color);
-    el.title = p.name;
+    el.title = `${p.name} (${Math.max(0, 3 - p.failures)} vidas)`;
     if (p.id === hopId) el.classList.add("hop");
     el.innerHTML = `<i class="pawn-shadow"></i><i class="pawn">${p.id + 1}</i>`;
-    tiles[p.progress % BOARD_SIZE].appendChild(el);
+    const targetIdx = Math.min(p.progress, BOARD_SIZE - 1);
+    tiles[targetIdx].appendChild(el);
   });
 }
 
@@ -390,11 +622,26 @@ function renderOrder(activeId) {
   ol.innerHTML = "";
   order.forEach((p) => {
     const li = document.createElement("li");
-    if (p.id === activeId) li.className = "active";
-    const dot = document.createElement("i");
-    dot.style.background = p.color;
-    li.appendChild(dot);
-    li.appendChild(document.createTextNode(p.name));
+    const classes = [];
+    if (p.id === activeId) classes.push("active");
+    if (!p.alive) classes.push("dead-player");
+    if (classes.length) li.className = classes.join(" ");
+
+    let statusHtml = "";
+    if (!p.alive) {
+      statusHtml = `<span class="life-status dead">💀 ${I18N[gameLang].spectatorBadge}</span>`;
+    } else {
+      const remaining = Math.max(0, 3 - p.failures);
+      let pips = "";
+      for (let i = 0; i < 3; i++) {
+        pips += i < remaining
+          ? '<span class="life-dot on" title="Vida">🕯️</span>'
+          : '<span class="life-dot off" title="Falla">💀</span>';
+      }
+      statusHtml = `<span class="life-status">${pips}</span>`;
+    }
+
+    li.innerHTML = `<span class="p-info"><i style="background:${p.color}"></i>${p.name}</span> ${statusHtml}`;
     ol.appendChild(li);
   });
 }
@@ -445,7 +692,7 @@ async function move(p, steps) {
     p.progress++;
     renderTokens(p.id);
     await sleep(260);
-    if (p.progress >= BOARD_SIZE) break; // back at start: lap complete
+    if (p.progress >= BOARD_SIZE - 1) break; // reached META
   }
 }
 
@@ -454,55 +701,61 @@ function setLite(on) {
   $("qualityBtn").textContent = on ? I18N[gameLang].qualityLow : I18N[gameLang].qualityHigh;
 }
 
-// Questions already asked are remembered between games (localStorage), so every question
-// in the bank appears before any of them repeats. Clear the browser's site data to reset it.
-const SEEN_KEY = "guessOrDie.seen.v1";
-const questionId = (q) => q.question_en;
-function loadSeen() {
-  try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]")); } catch (e) { return new Set(); }
-}
-function saveSeen(set) {
-  try { localStorage.setItem(SEEN_KEY, JSON.stringify([...set])); } catch (e) { /* private mode: keep in memory */ }
-}
-let seenQuestions = loadSeen();
+// Calculates difficulty/complexity score for a question (for Limbo selection)
+function getQuestionComplexity(q) {
+  let score = 0;
+  const text = ((q.question_es || "") + " " + (q.question_en || "")).toLowerCase();
+  const ans = ((q.answer_es || "") + " " + (q.answer || "")).toLowerCase();
+  score += Math.min(30, Math.round(text.length / 4));
 
-// Difficulty by position on the board: first third easy, middle third medium, last third hard.
-const levelFor = (progress) => (progress < BOARD_SIZE / 3 ? 1 : progress < (2 * BOARD_SIZE) / 3 ? 2 : 3);
+  const complexKeywords = [
+    'tratado', 'revolución', 'dinastía', 'siglo', 'imperio', 'batalla', 'independencia',
+    'raíz', 'potencia', 'elevado', 'primo', 'porcentaje', 'fracción', 'ecuación',
+    'estrecho', 'fosa', 'cordillera', 'archipiélago', 'desierto', 'altiplano', 'meridiano',
+    'teorema', 'filósofo', 'monarquía', 'constitución', 'olímpico', 'récord', 'ecosistema',
+    'pandemia', 'civilización', 'conquista', 'astronomía', 'hemisferio', 'continente'
+  ];
+  for (const kw of complexKeywords) {
+    if (text.includes(kw) || ans.includes(kw)) score += 20;
+  }
+  if (q.category === 'Mathematics' && /raíz|elevado|primo|divis|²|³|⁵/i.test(text)) {
+    score += 25;
+  }
+  if (q.category === 'History' && /\b(1[0-9]{3}|[0-9]{3}\s*(a\.c|d\.c)|siglo)\b/i.test(text)) {
+    score += 25;
+  }
+  return score;
+}
 
-function getNextQuestion(progress, afterReset = false) {
-  if (typeof QUESTIONS === "undefined" || !QUESTIONS.length) return undefined;
-  const level = levelFor(progress);
-  const fallback = level === 1 ? [1, 2, 3] : level === 2 ? [2, 1, 3] : [3, 2, 1];
-  for (const lv of fallback) {
-    const pool = QUESTIONS.filter((q) => (q.difficulty || 2) === lv && !seenQuestions.has(questionId(q)));
-    if (pool.length) {
-      const q = pool[Math.floor(Math.random() * pool.length)];
-      seenQuestions.add(questionId(q));
-      saveSeen(seenQuestions);
-      return q;
+let questionDeck = [];
+let limboQuestionDeck = [];
+
+function getNextQuestion() {
+  if (!questionDeck.length) {
+    questionDeck = (typeof QUESTIONS !== "undefined" && QUESTIONS.length)
+      ? shuffle([...QUESTIONS])
+      : [];
+  }
+  return questionDeck.pop();
+}
+
+// Draws the most complex/difficult questions specifically for LIMBO
+function getLimboQuestion() {
+  if (!limboQuestionDeck.length) {
+    if (typeof QUESTIONS !== "undefined" && QUESTIONS.length) {
+      const scored = QUESTIONS.map((q) => ({ q, score: getQuestionComplexity(q) }));
+      scored.sort((a, b) => b.score - a.score);
+      const topCount = Math.max(15, Math.floor(scored.length * 0.45));
+      const pool = scored.slice(0, topCount).map((item) => item.q);
+      limboQuestionDeck = shuffle([...pool]);
+    } else {
+      limboQuestionDeck = [];
     }
   }
-  if (afterReset) return pick(QUESTIONS);
-  seenQuestions = new Set(); // the whole bank has been asked: start a new cycle
-  saveSeen(seenQuestions);
-  return getNextQuestion(progress, true);
+  return limboQuestionDeck.pop();
 }
 
-// Options in random order (so the right answer is not always B or C), relabelled A-D,
-// in the chosen language (options_es holds the Spanish text).
-const LABELS = ["A", "B", "C", "D"];
-const stripLabel = (t) => t.replace(/^[A-D]\)\s*/, "").trim();
-function buildChoices(q) {
-  const es = gameLang === "es" && Array.isArray(q.options_es);
-  const items = q.options.map((o, i) => ({
-    text: stripLabel(es ? q.options_es[i] : o),
-    correct: o.trim()[0] === q.correct_letter,
-  }));
-  shuffle(items);
-  return items.map((it, i) => ({ letter: LABELS[i], text: `${LABELS[i]}) ${it.text}`, correct: it.correct }));
-}
-
-// 6 Benefits and 5 Punishments fully adapted to game mechanics.
+// Benefits and punishments.
 const EFFECTS = {
   B: [
     // BEN-01: Shield of Grammar / Escudo Espectral
@@ -552,9 +805,18 @@ const words = (text) => esc(text).split(" ").map((w, i) => `<span class="w" styl
 // Atmosphere effects (particles and lighting)
 function setFx(type) {
   const front = $("front"), layer = $("fxLayer");
-  front.classList.remove("fx-Q", "fx-B", "fx-P", "win", "fail");
+  front.classList.remove("fx-Q", "fx-B", "fx-P", "fx-limbo", "win", "fail");
   front.classList.add("fx-" + type);
   layer.innerHTML = "";
+  if (type === "limbo") {
+    for (let i = 0; i < 18; i++) {
+      const e = document.createElement("i");
+      e.className = "ember limbo-ember";
+      e.style.cssText = `left:${5 + Math.random() * 90}%;--d:${(Math.random() * 2).toFixed(2)}s;--t:${(3 + Math.random() * 2.5).toFixed(2)}s;--s:${(3 + Math.random() * 5).toFixed(1)}px`;
+      layer.appendChild(e);
+    }
+    return;
+  }
   if (type !== "B") return;
   for (let i = 0; i < 14; i++) {
     const e = document.createElement("i");
@@ -576,17 +838,57 @@ async function triggerScreamer() {
   overlay.hidden = true;
 }
 
-// Landing scene: camera tilts up, encounter resolves, camera tilts back down.
-async function land(p, index) {
-  const type = LAYOUT[index];
+// Simple modal scene for benefits, whispers, or regular punishments
+async function showBannerScene(icon, title, text, fxType = "B") {
+  const front = $("front"), card = $("frontCard"), body = $("frontBody"), btn = $("frontBtn");
+  const timerWrap = $("frontTimerWrap");
+
+  timerWrap.hidden = true;
+  body.innerHTML = "";
+  btn.hidden = false;
+  btn.textContent = I18N[gameLang].btnContinue;
+  setFx(fxType);
+  card.className = `front-card t-${fxType} fx-${fxType}`;
+
+  $("frontIcon").textContent = icon;
+  $("frontTitle").textContent = title;
+  $("frontText").innerHTML = words(text);
+
+  const waitContinue = () => new Promise((res) => btn.addEventListener("click", res, { once: true }));
+  const open = () => {
+    front.hidden = false;
+    void front.offsetWidth;
+    $("game").classList.add("to-front");
+    front.classList.add("show");
+  };
+  const close = async () => {
+    front.classList.remove("show", "win", "fail");
+    card.classList.remove("hit");
+    $("game").classList.remove("to-front");
+    await sleep(600);
+    front.hidden = true;
+    body.innerHTML = "";
+  };
+
+  open();
+  btn.focus({ preventScroll: true });
+  await waitContinue();
+  await close();
+}
+
+// Handles trivia encounters: standard questions or life-or-death LIMBO
+async function askQuestion(p, isLimbo = false) {
   const front = $("front"), card = $("frontCard"), body = $("frontBody"), btn = $("frontBtn");
   const timerWrap = $("frontTimerWrap"), timerBar = $("timerBar"), timerText = $("timerText");
 
-  if (type === "S") return;
-  card.className = `front-card t-${type} fx-${type}`;
   body.innerHTML = "";
-  btn.hidden = true; // Hidden by default (no continue button on questions!)
-  setFx(type);
+  btn.hidden = true;
+
+  const q = isLimbo ? getLimboQuestion() : getNextQuestion();
+  if (!q) return;
+
+  setFx(isLimbo ? "limbo" : "Q");
+  card.className = `front-card ${isLimbo ? "t-L fx-limbo" : "t-Q fx-Q"}`;
 
   let timerInterval = null;
   const stopTimer = () => {
@@ -598,13 +900,13 @@ async function land(p, index) {
     timerWrap.classList.remove("urgent");
   };
 
-  const waitContinue = () => new Promise((res) => btn.addEventListener("click", res, { once: true }));
   const open = () => {
     front.hidden = false;
     void front.offsetWidth;
     $("game").classList.add("to-front");
     front.classList.add("show");
   };
+
   const close = async () => {
     stopTimer();
     front.classList.remove("show", "win", "fail");
@@ -615,63 +917,14 @@ async function land(p, index) {
     body.innerHTML = "";
   };
 
-  let q = null, effect = null, scene = null;
-  if (type === "Q") {
-    if (p.skipQ) {
-      p.skipQ = false;
-      scene = {
-        icon: "\u2026",
-        title: I18N[gameLang].whispersFadeTitle,
-        text: I18N[gameLang].whispersFadeText
-      };
-    } else {
-      q = getNextQuestion(p.progress);
-      if (!q) {
-        scene = {
-          icon: "?",
-          title: I18N[gameLang].noQuestionsTitle,
-          text: I18N[gameLang].noQuestionsText
-        };
-      }
-    }
+  if (isLimbo) {
+    $("frontIcon").innerHTML = '<span class="limbo-icon">&#x2620;</span>';
+    $("frontTitle").innerHTML = `<span class="limbo-title">${I18N[gameLang].limboTitle}</span><span class="limbo-subtitle">${p.name} &mdash; ${I18N[gameLang].limboSubtitle}</span>`;
   } else {
-    effect = pick(EFFECTS[type]);
-    const info = I18N[gameLang].effects[effect.id];
-    scene = { icon: type === "B" ? "+" : "\u2020", title: info.title, text: info.text };
-    log(`${p.name}: ${info.title}.`);
+    const catName = (CATEGORY_NAMES[gameLang] && CATEGORY_NAMES[gameLang][q.category]) || q.category;
+    $("frontIcon").textContent = "?";
+    $("frontTitle").textContent = `${p.name} \u2014 ${catName.toUpperCase()}`;
   }
-
-  // Non-question scene (benefit, punishment, or whispers faded)
-  if (scene) {
-    stopTimer();
-    btn.hidden = false;
-    btn.textContent = I18N[gameLang].btnContinue;
-    $("frontIcon").textContent = scene.icon;
-    $("frontTitle").textContent = scene.title;
-    $("frontText").innerHTML = words(scene.text);
-    open();
-    btn.focus({ preventScroll: true });
-    await waitContinue();
-    await close();
-    if (effect) await effect.run(p);
-    return;
-  }
-
-  // --- QUESTION ENCOUNTER (NO CONTINUE BUTTON) ---
-  btn.hidden = true;
-  const catName = (CATEGORY_NAMES[gameLang] && CATEGORY_NAMES[gameLang][q.category]) || q.category;
-  
-  // Check CAS-05: The Cursed Whisper
-  let isCursed = false;
-  if (p.cursedWhisper) {
-    p.cursedWhisper = false;
-    isCursed = true;
-    p.shield = false; // The curse pierces all shields
-    log(I18N[gameLang].cursedLog(p.name));
-  }
-
-  $("frontIcon").textContent = "?";
-  $("frontTitle").textContent = `${p.name} \u2014 ${catName.toUpperCase()} \u00b7 ${I18N[gameLang].levels[(q.difficulty || 2) - 1].toUpperCase()}`;
 
   const isEs = (gameLang === "es");
   const primaryText = isEs ? q.question_es : q.question_en;
@@ -683,7 +936,10 @@ async function land(p, index) {
   const correctLetter = correctChoice.letter;
   const answerText = correctChoice.text;
 
+  const introWarning = isLimbo ? `<div class="limbo-warning">${I18N[gameLang].limboWarning}</div>` : "";
+
   $("frontText").innerHTML =
+    introWarning +
     `<span class="q-en notranslate" translate="no">${words(primaryText)}</span>` +
     `<button type="button" class="translate-btn" id="translateBtn">${I18N[gameLang].translateBtnShow}</button>` +
     `<span class="q-es-box" id="qEsBox" hidden></span>`;
@@ -717,22 +973,14 @@ async function land(p, index) {
       opts.querySelectorAll(".q-opt-btn").forEach((x) => (x.disabled = true));
       const correctBtn = opts.querySelector(`[data-letter="${correctLetter}"]`);
 
-      if (b && b.dataset.letter === correctLetter) {
+      if (b && b.dataset.letter === q.correct_letter) {
         // CORRECT ANSWER
         b.classList.add("correct");
-        if (isCursed) {
-          p.skipTurn = true;
-          feedback.textContent = isEs
-            ? "Correcto, pero la maldición del susurro congela tu siguiente turno."
-            : "Correct, but the cursed whisper freezes your next turn.";
-          log(I18N[gameLang].cursedVictimLog(p.name));
-        } else {
-          feedback.textContent = I18N[gameLang].correctFeedback;
-        }
+        feedback.textContent = isLimbo ? I18N[gameLang].limboEscaped : I18N[gameLang].correctFeedback;
         feedback.className = "q-feedback correct";
         front.classList.add("win");
-        log(I18N[gameLang].answeredCorrectLog(p.name));
-        await sleep(900);
+        log(isLimbo ? I18N[gameLang].limboEscapedLog(p.name) : I18N[gameLang].answeredCorrectLog(p.name));
+        await sleep(isLimbo ? 1100 : 850);
         await close();
         resolveQuestion();
       } else {
@@ -743,43 +991,49 @@ async function land(p, index) {
         if (p.shield && !isCursed) {
           // Protected by Spectral Shield
           p.shield = false;
-          feedback.textContent = I18N[gameLang].wrongFeedbackShield(answerText);
+          feedback.textContent = isLimbo
+            ? I18N[gameLang].limboShieldSaved(answerPrimary)
+            : I18N[gameLang].wrongFeedbackShield(answerPrimary);
           feedback.className = "q-feedback correct";
-          log(I18N[gameLang].failedSaltLog(p.name));
-          await sleep(1600);
+          log(isLimbo ? I18N[gameLang].limboShieldLog(p.name) : I18N[gameLang].failedSaltLog(p.name));
+          await sleep(1800);
           await close();
           resolveQuestion();
-        } else if (p.anchor && p.anchor > 0) {
-          // Saved by Safety Anchor checkpoint
-          const savedAnchor = p.anchor;
-          p.anchor = 0;
-          p.progress = savedAnchor;
-          renderTokens(p.id);
-          feedback.textContent = I18N[gameLang].anchorSaved(savedAnchor);
+        } else if (isLimbo) {
+          // LIMBO LIFE OR DEATH: INSTANT DEATH
+          p.failures = 3;
+          p.alive = false;
+          feedback.textContent = I18N[gameLang].limboDied(answerPrimary);
           feedback.className = "q-feedback wrong";
           front.classList.add("fail");
           card.classList.add("hit");
-          log(I18N[gameLang].anchorSaved(savedAnchor));
-          if (isCursed) {
-            p.skipTurn = true;
-            log(I18N[gameLang].cursedVictimLog(p.name));
-          }
+          log(I18N[gameLang].limboDiedLog(p.name));
+          renderTokens(p.id);
+          renderOrder(p.id);
+
           await triggerScreamer();
           await close();
           resolveQuestion();
         } else {
-          // Standard full demise: reset to start + screamer
-          feedback.textContent = I18N[gameLang].wrongFeedbackDeath(answerText);
+          // Standard question failure: add strike, reset to start
+          p.failures++;
+          p.progress = 0;
+          renderTokens(p.id);
+
+          if (p.failures >= 3) {
+            p.alive = false;
+            feedback.textContent = I18N[gameLang].thirdFailureDeath(answerPrimary);
+            log(I18N[gameLang].playerDiedLog(p.name));
+          } else {
+            const livesLeft = 3 - p.failures;
+            feedback.textContent = I18N[gameLang].wrongFeedbackLives(answerPrimary, livesLeft);
+            log(I18N[gameLang].failedLogLives(p.name, p.failures));
+          }
           feedback.className = "q-feedback wrong";
           front.classList.add("fail");
           card.classList.add("hit");
-          log(I18N[gameLang].failedLog(p.name));
-          p.progress = 0;
-          renderTokens(p.id);
-          if (isCursed) {
-            p.skipTurn = true;
-            log(I18N[gameLang].cursedVictimLog(p.name));
-          }
+          renderOrder(p.id);
+
           await triggerScreamer();
           await close();
           resolveQuestion();
@@ -799,41 +1053,48 @@ async function land(p, index) {
 
       if (p.shield && !isCursed) {
         p.shield = false;
-        feedback.textContent = I18N[gameLang].timeExpiredFeedbackShield(answerText);
+        feedback.textContent = isLimbo
+          ? I18N[gameLang].limboShieldSaved(answerPrimary)
+          : I18N[gameLang].timeExpiredFeedbackShield(answerPrimary);
         feedback.className = "q-feedback correct";
-        log(I18N[gameLang].failedSaltLog(p.name));
-        await sleep(1600);
+        log(isLimbo ? I18N[gameLang].limboShieldLog(p.name) : I18N[gameLang].failedSaltLog(p.name));
+        await sleep(1800);
         await close();
         resolveQuestion();
-      } else if (p.anchor && p.anchor > 0) {
-        const savedAnchor = p.anchor;
-        p.anchor = 0;
-        p.progress = savedAnchor;
-        renderTokens(p.id);
-        feedback.textContent = I18N[gameLang].anchorSaved(savedAnchor);
+      } else if (isLimbo) {
+        // LIMBO TIMEOUT: INSTANT DEATH
+        p.failures = 3;
+        p.alive = false;
+        feedback.textContent = I18N[gameLang].limboTimeoutDied(answerPrimary);
         feedback.className = "q-feedback wrong";
         front.classList.add("fail");
         card.classList.add("hit");
-        log(I18N[gameLang].anchorSaved(savedAnchor));
-        if (isCursed) {
-          p.skipTurn = true;
-          log(I18N[gameLang].cursedVictimLog(p.name));
-        }
+        log(I18N[gameLang].limboDiedLog(p.name));
+        renderTokens(p.id);
+        renderOrder(p.id);
+
         await triggerScreamer();
         await close();
         resolveQuestion();
       } else {
-        feedback.textContent = I18N[gameLang].timeExpiredFeedbackDeath(answerText);
+        p.failures++;
+        p.progress = 0;
+        renderTokens(p.id);
+
+        if (p.failures >= 3) {
+          p.alive = false;
+          feedback.textContent = I18N[gameLang].timeExpiredDeath(answerPrimary);
+          log(I18N[gameLang].playerDiedLog(p.name));
+        } else {
+          const livesLeft = 3 - p.failures;
+          feedback.textContent = I18N[gameLang].timeExpiredFeedbackLives(answerPrimary, livesLeft);
+          log(I18N[gameLang].failedLogLives(p.name, p.failures));
+        }
         feedback.className = "q-feedback wrong";
         front.classList.add("fail");
         card.classList.add("hit");
-        log(I18N[gameLang].timeExpiredLog(p.name));
-        p.progress = 0;
-        renderTokens(p.id);
-        if (isCursed) {
-          p.skipTurn = true;
-          log(I18N[gameLang].cursedVictimLog(p.name));
-        }
+        renderOrder(p.id);
+
         await triggerScreamer();
         await close();
         resolveQuestion();
@@ -906,12 +1167,71 @@ async function land(p, index) {
   });
 }
 
+// Landing scene: camera tilts up, encounter resolves, camera tilts back down.
+async function land(p, index) {
+  if (index >= BOARD_SIZE - 1) return finish(p);
+  const type = currentLayout[index];
+  if (type === "S" || type === "M") return;
+
+  if (type === "L") {
+    // Dedicated LIMBO tile!
+    log(`${p.name}: ¡Ha caído en la casilla del LIMBO!`);
+    await askQuestion(p, true);
+    return;
+  }
+
+  if (type === "Q") {
+    if (p.skipQ) {
+      p.skipQ = false;
+      await showBannerScene("\u2026", I18N[gameLang].whispersFadeTitle, I18N[gameLang].whispersFadeText, "Q");
+      return;
+    }
+    await askQuestion(p, false);
+    return;
+  }
+
+  if (type === "P") {
+    // Regular punishments (filtered for solo mode if needed)
+    const pool = EFFECTS.P.filter((e) => !(e.multiOnly && players.length === 1));
+    const effect = pick(pool);
+    const info = I18N[gameLang].effects[effect.id];
+    log(`${p.name}: ${info.title}.`);
+    await showBannerScene("\u2020", info.title, info.text, "P");
+    if (effect) await effect.run(p);
+    return;
+  }
+
+  if (type === "B") {
+    const effect = pick(EFFECTS.B);
+    const info = I18N[gameLang].effects[effect.id];
+    log(`${p.name}: ${info.title}.`);
+    await showBannerScene("+", info.title, info.text, "B");
+    if (effect) await effect.run(p);
+    return;
+  }
+}
+
 async function play() {
   order = players.length > 1 ? await rollOff(players) : players.slice();
   if (players.length > 1) log(I18N[gameLang].firstGoes(order[0].name));
   let turn = 0;
   while (true) {
+    // Check if any players are alive
+    const alive = players.filter((pl) => pl.alive);
+    if (alive.length === 0) {
+      return finishAllDead();
+    }
+    if (players.length > 1 && alive.length === 1) {
+      return finishLastSurvivor(alive[0]);
+    }
+
     const p = order[turn % order.length];
+    if (!p.alive) {
+      // Dead spectator: skip their turn immediately
+      turn++;
+      continue;
+    }
+
     renderOrder(p.id);
     if (p.skipTurn) {
       p.skipTurn = false;
@@ -921,12 +1241,24 @@ async function play() {
       turn++;
       continue;
     }
+
     const v = await askRoll(p, I18N[gameLang].rollPrompt);
     log(I18N[gameLang].rolled(p.name, v));
     await move(p, v);
-    if (p.progress >= BOARD_SIZE) return finish(p);
-    await land(p, p.progress % BOARD_SIZE);
-    if (p.progress >= BOARD_SIZE) return finish(p);
+    if (p.alive && p.progress >= BOARD_SIZE - 1) return finish(p);
+
+    await land(p, p.progress);
+    if (p.alive && p.progress >= BOARD_SIZE - 1) return finish(p);
+
+    // Re-check alive counts after encounter
+    const aliveAfter = players.filter((pl) => pl.alive);
+    if (aliveAfter.length === 0) {
+      return finishAllDead();
+    }
+    if (players.length > 1 && aliveAfter.length === 1) {
+      return finishLastSurvivor(aliveAfter[0]);
+    }
+
     turn++;
   }
 }
@@ -936,6 +1268,25 @@ function finish(winner) {
   const t = I18N[gameLang];
   $("endTitle").textContent = solo ? t.soloWinTitle : t.multiWinTitle(winner.name);
   $("endText").textContent = solo ? t.soloWinText : t.multiWinText;
+  $("again").textContent = t.playAgain;
+  $("end").hidden = false;
+  $("again").focus();
+}
+
+function finishAllDead() {
+  const solo = players.length === 1;
+  const t = I18N[gameLang];
+  $("endTitle").textContent = solo ? t.soloGameOverTitle : t.gameOverAllDeadTitle;
+  $("endText").textContent = solo ? t.soloGameOverText : t.gameOverAllDeadText;
+  $("again").textContent = t.playAgain;
+  $("end").hidden = false;
+  $("again").focus();
+}
+
+function finishLastSurvivor(winner) {
+  const t = I18N[gameLang];
+  $("endTitle").textContent = t.lastSurvivorTitle(winner.name);
+  $("endText").textContent = t.lastSurvivorText;
   $("again").textContent = t.playAgain;
   $("end").hidden = false;
   $("again").focus();
@@ -959,18 +1310,17 @@ async function warmUp() {
 
 function start(playerNames) {
   closeMenuModal();
+  currentLayout = generateRandomLayout();
   players = playerNames.map((name, i) => ({
     id: i,
     name: name,
     color: COLORS[i],
     progress: 0,
+    failures: 0,
+    alive: true,
     shield: false,
     skipQ: false,
     skipTurn: false,
-    fiftyFifty: false,
-    timePressure: false,
-    cursedWhisper: false,
-    anchor: 0,
   }));
   audio(); // created inside a click, so the browser allows the scream later
   LAYOUT = makeLayout(); // a different board every game
