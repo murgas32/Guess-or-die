@@ -1,6 +1,7 @@
 const QUESTIONS = [
   {
     "category": "Sports",
+    "difficulty": 1,
     "question_en": "How many players are on the field for one team in a soccer match?",
     "question_es": "¿Cuántos jugadores por equipo hay en cancha durante un partido de fútbol?",
     "options": [
@@ -21,6 +22,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 3,
     "question_en": "How many points is a free throw worth in basketball?",
     "question_es": "¿Cuántos puntos vale un tiro libre en baloncesto?",
     "options": [
@@ -41,6 +43,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "Which country won the FIFA Men's World Cup in 2022?",
     "question_es": "¿Qué país ganó el Mundial de Fútbol Masculino en 2022?",
     "options": [
@@ -61,6 +64,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 1,
     "question_en": "What colored card does a referee show to remove a player from a soccer game?",
     "question_es": "¿Qué tarjeta muestra el árbitro para expulsar a un jugador en fútbol?",
     "options": [
@@ -81,6 +85,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 1,
     "question_en": "What sport is Usain Bolt famous for?",
     "question_es": "¿Por qué deporte es famoso Usain Bolt?",
     "options": [
@@ -101,6 +106,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 1,
     "question_en": "Which famous basketball player wore the number 23 for the Chicago Bulls?",
     "question_es": "¿Qué famoso baloncestista usó el número 23 en los Chicago Bulls?",
     "options": [
@@ -121,6 +127,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 1,
     "question_en": "How often are the Summer Olympic Games held?",
     "question_es": "¿Cada cuántos años se celebran los Juegos Olímpicos de Verano?",
     "options": [
@@ -141,6 +148,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "What shirt number does Lionel Messi wear for the Argentina national team?",
     "question_es": "¿Qué número de camiseta usa Lionel Messi en la selección de Argentina?",
     "options": [
@@ -161,6 +169,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "What shirt number is famous for Cristiano Ronaldo (CR7)?",
     "question_es": "¿Qué número de camiseta es famoso para Cristiano Ronaldo (CR7)?",
     "options": [
@@ -181,6 +190,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "Which country won the FIFA Men's World Cup in 2026?",
     "question_es": "¿Qué país ganó el Mundial de Fútbol Masculino en 2026?",
     "options": [
@@ -201,6 +211,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "How many players play in a volleyball team?",
     "question_es": "¿Cuántos jugadores juegan en un equipo de voleibol?",
     "options": [
@@ -221,6 +232,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 3,
     "question_en": "Which Colombian soccer team is nicknamed \"El Tiburón\" (The Shark)?",
     "question_es": "¿A qué equipo de fútbol colombiano le dicen \"El Tiburón\"?",
     "options": [
@@ -241,6 +253,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 1,
     "question_en": "What is the most popular sport in the world?",
     "question_es": "¿Cuál es el deporte más popular del mundo?",
     "options": [
@@ -261,6 +274,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 1,
     "question_en": "Who was the first President of the United States?",
     "question_es": "¿Quién fue el primer presidente de los Estados Unidos?",
     "options": [
@@ -281,6 +295,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 1,
     "question_en": "What ship sank in 1912 after hitting an iceberg?",
     "question_es": "¿Qué barco se hundió en 1912 tras chocar con un iceberg?",
     "options": [
@@ -290,7 +305,7 @@ const QUESTIONS = [
       "D) Mayflower"
     ],
     "options_es": [
-      "A) Santa Maria",
+      "A) Santa María",
       "B) Titanic",
       "C) Britannic",
       "D) Mayflower"
@@ -301,6 +316,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 1,
     "question_en": "Who painted the Mona Lisa?",
     "question_es": "¿Quién pintó la Mona Lisa?",
     "options": [
@@ -321,6 +337,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 1,
     "question_en": "Which ancient civilization built the Colosseum in Rome?",
     "question_es": "¿Qué antigua civilización construyó el Coliseo de Roma?",
     "options": [
@@ -341,6 +358,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "In which year did World War II end?",
     "question_es": "¿En qué año terminó la Segunda Guerra Mundial?",
     "options": [
@@ -361,6 +379,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 1,
     "question_en": "Who was known as the King of Pop?",
     "question_es": "¿Quién era conocido como el Rey del Pop?",
     "options": [
@@ -381,6 +400,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 1,
     "question_en": "Which explorer reached America in 1492?",
     "question_es": "¿Qué explorador llegó a América en 1492?",
     "options": [
@@ -401,6 +421,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 1,
     "question_en": "What structure was built in China to protect against invasions?",
     "question_es": "¿Qué estructura se construyó en China para protegerse de invasiones?",
     "options": [
@@ -421,6 +442,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 1,
     "question_en": "Which empire was ruled by Julius Caesar?",
     "question_es": "¿Qué imperio fue gobernado por Julio César?",
     "options": [
@@ -430,17 +452,18 @@ const QUESTIONS = [
       "D) British Empire"
     ],
     "options_es": [
-      "A) Imperio persa",
-      "B) Imperio romano",
-      "C) Imperio otomano",
-      "D) Imperio británico"
+      "A) Imperio Persa",
+      "B) Imperio Romano",
+      "C) Imperio Otomano",
+      "D) Imperio Británico"
     ],
     "answer": "B) Roman Empire",
-    "answer_es": "B) Imperio romano",
+    "answer_es": "B) Imperio Romano",
     "correct_letter": "B"
   },
   {
     "category": "History",
+    "difficulty": 1,
     "question_en": "What was the name of the first human to walk on the Moon?",
     "question_es": "¿Cómo se llamaba el primer humano en caminar sobre la Luna?",
     "options": [
@@ -461,6 +484,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 3,
     "question_en": "In which country did the Industrial Revolution begin?",
     "question_es": "¿En qué país comenzó la Revolución Industrial?",
     "options": [
@@ -481,6 +505,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "Which famous queen ruled ancient Egypt alongside Julius Caesar and Mark Antony?",
     "question_es": "¿Qué famosa reina gobernó el antiguo Egipto junto a Julio César y Marco Antonio?",
     "options": [
@@ -501,6 +526,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "What famous revolution started in 1789 with the storming of the Bastille?",
     "question_es": "¿Qué famosa revolución comenzó en 1789 con la toma de la Bastilla?",
     "options": [
@@ -510,17 +536,18 @@ const QUESTIONS = [
       "D) Industrial Revolution"
     ],
     "options_es": [
-      "A) Revolución estadounidense",
-      "B) Revolución francesa",
-      "C) Revolución rusa",
-      "D) Revolución industrial"
+      "A) Revolución Americana",
+      "B) Revolución Francesa",
+      "C) Revolución Rusa",
+      "D) Revolución Industrial"
     ],
     "answer": "B) French Revolution",
-    "answer_es": "B) Revolución francesa",
+    "answer_es": "B) Revolución Francesa",
     "correct_letter": "B"
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "What is 7 × 8?",
     "question_es": "¿Cuánto es 7 × 8?",
     "options": [
@@ -541,6 +568,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 1,
     "question_en": "How many sides does a hexagon have?",
     "question_es": "¿Cuántos lados tiene un hexágono?",
     "options": [
@@ -561,6 +589,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "What is the square root of 81?",
     "question_es": "¿Cuál es la raíz cuadrada de 81?",
     "options": [
@@ -581,6 +610,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 1,
     "question_en": "What is 15 + 27?",
     "question_es": "¿Cuánto es 15 + 27?",
     "options": [
@@ -601,6 +631,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 1,
     "question_en": "What is 50% of 120?",
     "question_es": "¿Cuánto es el 50% de 120?",
     "options": [
@@ -621,6 +652,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 1,
     "question_en": "What is 100 - 37?",
     "question_es": "¿Cuánto es 100 - 37?",
     "options": [
@@ -641,6 +673,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 1,
     "question_en": "What prime number comes after 5?",
     "question_es": "¿Qué número primo sigue después del 5?",
     "options": [
@@ -661,6 +694,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 3,
     "question_en": "What is 12 × 12?",
     "question_es": "¿Cuánto es 12 × 12?",
     "options": [
@@ -681,6 +715,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 3,
     "question_en": "What is 3³ (3 to the power of 3)?",
     "question_es": "¿Cuánto es 3³ (3 elevado a la 3)?",
     "options": [
@@ -701,6 +736,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 1,
     "question_en": "What number is represented by the Roman numeral 'X'?",
     "question_es": "¿Qué número representa el numeral romano 'X'?",
     "options": [
@@ -721,6 +757,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "What is 144 ÷ 12?",
     "question_es": "¿Cuánto es 144 ÷ 12?",
     "options": [
@@ -741,6 +778,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "What is the capital city of France?",
     "question_es": "¿Cuál es la capital de Francia?",
     "options": [
@@ -761,6 +799,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "Which is the largest ocean on Earth?",
     "question_es": "¿Cuál es el océano más grande de la Tierra?",
     "options": [
@@ -781,6 +820,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "In which continent is the Amazon Rainforest located?",
     "question_es": "¿En qué continente se encuentra la Selva Amazónica?",
     "options": [
@@ -791,16 +831,17 @@ const QUESTIONS = [
     ],
     "options_es": [
       "A) África",
-      "B) Sudamérica",
+      "B) América del Sur",
       "C) Asia",
-      "D) Norteamérica"
+      "D) América del Norte"
     ],
     "answer": "B) South America",
-    "answer_es": "B) Sudamérica",
+    "answer_es": "B) América del Sur",
     "correct_letter": "B"
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "What is the largest country in the world by land area?",
     "question_es": "¿Cuál es el país más grande del mundo por área terrestre?",
     "options": [
@@ -821,6 +862,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 2,
     "question_en": "Which river is considered the longest in the world?",
     "question_es": "¿Qué río se considera el más largo del mundo?",
     "options": [
@@ -841,6 +883,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "What is the capital city of Japan?",
     "question_es": "¿Cuál es la capital de Japón?",
     "options": [
@@ -861,6 +904,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 2,
     "question_en": "Which continent has the most countries?",
     "question_es": "¿Qué continente tiene más países?",
     "options": [
@@ -873,7 +917,7 @@ const QUESTIONS = [
       "A) Asia",
       "B) Europa",
       "C) África",
-      "D) Sudamérica"
+      "D) América del Sur"
     ],
     "answer": "C) Africa",
     "answer_es": "C) África",
@@ -881,6 +925,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 2,
     "question_en": "Mount Everest is located in which mountain range?",
     "question_es": "¿En qué cordillera se encuentra el Monte Everest?",
     "options": [
@@ -893,7 +938,7 @@ const QUESTIONS = [
       "A) Los Andes",
       "B) Los Alpes",
       "C) El Himalaya",
-      "D) Las Montañas Rocosas"
+      "D) Las Rocosas"
     ],
     "answer": "C) The Himalayas",
     "answer_es": "C) El Himalaya",
@@ -901,6 +946,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 3,
     "question_en": "What is the capital city of Australia?",
     "question_es": "¿Cuál es la capital de Australia?",
     "options": [
@@ -921,6 +967,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "Which country has a map shaped like a boot?",
     "question_es": "¿Qué país tiene un mapa con forma de bota?",
     "options": [
@@ -941,6 +988,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "What is the coldest continent on Earth?",
     "question_es": "¿Cuál es el continente más frío de la Tierra?",
     "options": [
@@ -951,7 +999,7 @@ const QUESTIONS = [
     ],
     "options_es": [
       "A) Europa",
-      "B) Norteamérica",
+      "B) América del Norte",
       "C) Antártida",
       "D) Asia"
     ],
@@ -961,6 +1009,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 2,
     "question_en": "Which desert is the largest hot desert in the world?",
     "question_es": "¿Qué desierto es el desierto cálido más grande del mundo?",
     "options": [
@@ -981,6 +1030,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 2,
     "question_en": "What is the capital city of Canada?",
     "question_es": "¿Cuál es la capital de Canadá?",
     "options": [
@@ -1001,7 +1051,8 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
-    "question_en": "Which country borders Colombia to the south?",
+    "difficulty": 2,
+    "question_en": "Which countries border Colombia to the south?",
     "question_es": "¿Qué países limitan con Colombia al sur?",
     "options": [
       "A) Panama",
@@ -1021,6 +1072,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "Which country is famous for its pyramids of Chichen Itza and tacos?",
     "question_es": "¿Qué país es famoso por sus pirámides de Chichén Itzá y tacos?",
     "options": [
@@ -1041,6 +1093,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 3,
     "question_en": "Which Grand Slam tennis tournament is played on clay courts?",
     "question_es": "¿Qué torneo de tenis de Grand Slam se juega en canchas de arcilla?",
     "options": [
@@ -1051,7 +1104,7 @@ const QUESTIONS = [
     ],
     "options_es": [
       "A) Wimbledon",
-      "B) US Open",
+      "B) Abierto de EE. UU.",
       "C) Roland Garros (Abierto de Francia)",
       "D) Abierto de Australia"
     ],
@@ -1061,6 +1114,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "Which swimming stroke is named after an insect?",
     "question_es": "¿Qué estilo de natación lleva el nombre de un insecto?",
     "options": [
@@ -1081,6 +1135,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 1,
     "question_en": "How many minutes does a standard regulation soccer match last (excluding extra time)?",
     "question_es": "¿Cuántos minutos dura un partido reglamentario de fútbol (sin contar tiempo extra)?",
     "options": [
@@ -1101,6 +1156,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 3,
     "question_en": "How many minutes is a standard round in professional men's boxing?",
     "question_es": "¿Cuántos minutos dura un asalto estándar en el boxeo profesional masculino?",
     "options": [
@@ -1121,6 +1177,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 3,
     "question_en": "What is the official distance of an Olympic marathon race?",
     "question_es": "¿Cuál es la distancia oficial de una carrera de maratón olímpica?",
     "options": [
@@ -1130,17 +1187,18 @@ const QUESTIONS = [
       "D) 50.000 km"
     ],
     "options_es": [
-      "A) 21,097 km",
-      "B) 35,000 km",
-      "C) 42,195 km",
-      "D) 50,000 km"
+      "A) 21.097 km",
+      "B) 35.000 km",
+      "C) 42.195 km",
+      "D) 50.000 km"
     ],
     "answer": "C) 42.195 km",
-    "answer_es": "C) 42,195 km",
+    "answer_es": "C) 42.195 km",
     "correct_letter": "C"
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "In baseball, how many strikes are required for a batter to strike out?",
     "question_es": "En el béisbol, ¿cuántos strikes se necesitan para que un bateador sea ponchado?",
     "options": [
@@ -1161,6 +1219,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 1,
     "question_en": "How many players per team are on the basketball court at the same time?",
     "question_es": "¿Cuántos jugadores por equipo están en la cancha al mismo tiempo en baloncesto?",
     "options": [
@@ -1181,6 +1240,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "In American football, how many points is a touchdown worth?",
     "question_es": "En el fútbol americano, ¿cuántos puntos vale un touchdown (anotación)?",
     "options": [
@@ -1201,6 +1261,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "What is the most prestigious multi-stage road cycling race in the world, held in France?",
     "question_es": "¿Cuál es la carrera ciclista por etapas más prestigiosa del mundo, celebrada en Francia?",
     "options": [
@@ -1210,17 +1271,18 @@ const QUESTIONS = [
       "D) Paris-Roubaix"
     ],
     "options_es": [
-      "A) Giro de Italia",
+      "A) Giro d'Italia",
       "B) Vuelta a España",
-      "C) Tour de Francia",
+      "C) Tour de France",
       "D) París-Roubaix"
     ],
     "answer": "C) Tour de France",
-    "answer_es": "C) Tour de Francia",
+    "answer_es": "C) Tour de France",
     "correct_letter": "C"
   },
   {
     "category": "Sports",
+    "difficulty": 3,
     "question_en": "What flag is waved in Formula 1 to indicate the winner has crossed the finish line?",
     "question_es": "¿Qué bandera se ondea en la Fórmula 1 para indicar el final de la carrera?",
     "options": [
@@ -1233,14 +1295,15 @@ const QUESTIONS = [
       "A) Bandera amarilla",
       "B) Bandera verde",
       "C) Bandera roja",
-      "D) Bandera de cuadros blanco y negro"
+      "D) Bandera a cuadros blanca y negra"
     ],
     "answer": "D) Checkered black and white flag",
-    "answer_es": "D) Bandera de cuadros blanco y negro",
+    "answer_es": "D) Bandera a cuadros blanca y negra",
     "correct_letter": "D"
   },
   {
     "category": "Sports",
+    "difficulty": 3,
     "question_en": "Which country hosted and won the very first FIFA World Cup in 1930?",
     "question_es": "¿Qué país organizó y ganó la primera Copa del Mundo de la FIFA en 1930?",
     "options": [
@@ -1261,6 +1324,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 3,
     "question_en": "In chess, which piece can only move diagonally across the board?",
     "question_es": "En el ajedrez, ¿qué pieza solo puede moverse en diagonal?",
     "options": [
@@ -1281,6 +1345,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "What is another commonly used name for table tennis?",
     "question_es": "¿Qué otro nombre recibe comúnmente el tenis de mesa?",
     "options": [
@@ -1292,15 +1357,16 @@ const QUESTIONS = [
     "options_es": [
       "A) Squash",
       "B) Bádminton",
-      "C) Ping-Pong",
-      "D) Racquetbol"
+      "C) Ping-pong",
+      "D) Racquetball"
     ],
     "answer": "C) Ping-Pong",
-    "answer_es": "C) Ping-Pong",
+    "answer_es": "C) Ping-pong",
     "correct_letter": "C"
   },
   {
     "category": "Sports",
+    "difficulty": 3,
     "question_en": "In golf, what is the term for scoring one stroke under par on a hole?",
     "question_es": "En golf, ¿cómo se llama completar un hoyo en un golpe menos que el par?",
     "options": [
@@ -1321,6 +1387,7 @@ const QUESTIONS = [
   },
   {
     "category": "Sports",
+    "difficulty": 2,
     "question_en": "Which European city hosted the 2024 Summer Olympic Games?",
     "question_es": "¿Qué ciudad europea fue sede de los Juegos Olímpicos de Verano 2024?",
     "options": [
@@ -1341,6 +1408,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "Which ancient Roman city was buried in ash by the eruption of Mount Vesuvius in 79 AD?",
     "question_es": "¿Qué antigua ciudad romana quedó sepultada por la erupción del Vesubio en el 79 d.C.?",
     "options": [
@@ -1361,6 +1429,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "Who is known as 'El Libertador' for leading independence wars in Colombia, Venezuela, and other nations?",
     "question_es": "¿Quién es conocido como 'El Libertador' por liderar la independencia de Colombia, Venezuela y otros países?",
     "options": [
@@ -1381,6 +1450,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 1,
     "question_en": "What monumental stone structures were built as tombs for ancient Egyptian pharaohs?",
     "question_es": "¿Qué monumentales estructuras de piedra fueron construidas como tumbas para los faraones egipcios?",
     "options": [
@@ -1401,6 +1471,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "Which Renaissance artist sculpted the famous statue of David and painted the Sistine Chapel ceiling?",
     "question_es": "¿Qué artista del Renacimiento esculpió el David y pintó la bóveda de la Capilla Sixtina?",
     "options": [
@@ -1421,6 +1492,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 3,
     "question_en": "In which ancient Greek city-state was democracy first established?",
     "question_es": "¿En qué antigua ciudad-estado griega se estableció por primera vez la democracia?",
     "options": [
@@ -1441,6 +1513,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "In which year did World War I begin?",
     "question_es": "¿En qué año comenzó la Primera Guerra Mundial?",
     "options": [
@@ -1461,6 +1534,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 3,
     "question_en": "What was the name of the first artificial satellite launched into Earth orbit by the USSR in 1957?",
     "question_es": "¿Cuál fue el primer satélite artificial lanzado a la órbita terrestre por la URSS en 1957?",
     "options": [
@@ -1481,6 +1555,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 3,
     "question_en": "Which devastating pandemic wiped out a large portion of Europe's population in the 14th century?",
     "question_es": "¿Qué devastadora pandemia acabó con gran parte de la población europea en el siglo XIV?",
     "options": [
@@ -1501,6 +1576,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "In what year was the United States Declaration of Independence signed?",
     "question_es": "¿En qué año se firmó la Declaración de Independencia de los Estados Unidos?",
     "options": [
@@ -1521,6 +1597,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "Which physicist developed the theory of general relativity?",
     "question_es": "¿Qué físico formuló la teoría de la relatividad general?",
     "options": [
@@ -1541,6 +1618,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "Which symbolic barrier separating East and West Germany fell in November 1989?",
     "question_es": "¿Qué muro simbólico que separaba Alemania Oriental y Occidental cayó en noviembre de 1989?",
     "options": [
@@ -1561,6 +1639,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 2,
     "question_en": "Who spent 27 years in prison before becoming the first Black president of South Africa in 1994?",
     "question_es": "¿Quién pasó 27 años en prisión antes de convertirse en el primer presidente negro de Sudáfrica en 1994?",
     "options": [
@@ -1581,6 +1660,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 3,
     "question_en": "Who pioneered the non-violent resistance philosophy that led India to independence from British rule?",
     "question_es": "¿Quién lideró el movimiento pacífico que llevó a la independencia de la India del dominio británico?",
     "options": [
@@ -1601,6 +1681,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 3,
     "question_en": "What was the capital city of the Aztec Empire, built over a lake in the Valley of Mexico?",
     "question_es": "¿Cuál era la ciudad capital del Imperio Azteca, fundada sobre un lago en el Valle de México?",
     "options": [
@@ -1621,6 +1702,7 @@ const QUESTIONS = [
   },
   {
     "category": "History",
+    "difficulty": 3,
     "question_en": "Who is recognized for inventing the movable-type printing press in Europe around 1440?",
     "question_es": "¿A quién se reconoce la invención de la imprenta de tipos móviles en Europa hacia 1440?",
     "options": [
@@ -1641,6 +1723,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "What is the sum of the interior angles of any triangle?",
     "question_es": "¿Cuánto suman los ángulos interiores de cualquier triángulo?",
     "options": [
@@ -1661,6 +1744,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 1,
     "question_en": "What is 9 × 9?",
     "question_es": "¿Cuánto es 9 × 9?",
     "options": [
@@ -1681,6 +1765,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "What is a geometric polygon with 8 sides called?",
     "question_es": "¿Cómo se llama un polígono de 8 lados?",
     "options": [
@@ -1701,6 +1786,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "If 2x = 20, what is the value of x?",
     "question_es": "Si 2x = 20, ¿cuál es el valor de x?",
     "options": [
@@ -1721,6 +1807,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 1,
     "question_en": "What is 25% of 200?",
     "question_es": "¿Cuánto es el 25% de 200?",
     "options": [
@@ -1741,6 +1828,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 3,
     "question_en": "Which real number is neither positive nor negative?",
     "question_es": "¿Qué número real no es ni positivo ni negativo?",
     "options": [
@@ -1761,6 +1849,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 1,
     "question_en": "What is 15 × 4?",
     "question_es": "¿Cuánto es 15 × 4?",
     "options": [
@@ -1781,6 +1870,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "What is the perimeter of a square with a side length of 6 cm?",
     "question_es": "¿Cuál es el perímetro de un cuadrado cuyos lados miden 6 cm?",
     "options": [
@@ -1801,6 +1891,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 3,
     "question_en": "What is 2 to the power of 5 (2⁵)?",
     "question_es": "¿Cuánto es 2 elevado a la 5 (2⁵)?",
     "options": [
@@ -1821,6 +1912,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "What is the square root of 144?",
     "question_es": "¿Cuál es la raíz cuadrada de 144?",
     "options": [
@@ -1841,6 +1933,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 3,
     "question_en": "What is the only even prime number?",
     "question_es": "¿Cuál es el único número primo que es par?",
     "options": [
@@ -1861,6 +1954,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "What number does the Roman numeral 'L' represent?",
     "question_es": "¿Qué número representa el número romano 'L'?",
     "options": [
@@ -1881,6 +1975,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "What is 250 ÷ 5?",
     "question_es": "¿Cuánto es 250 ÷ 5?",
     "options": [
@@ -1901,6 +1996,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 1,
     "question_en": "What is 13 + 28?",
     "question_es": "¿Cuánto es 13 + 28?",
     "options": [
@@ -1921,6 +2017,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 3,
     "question_en": "In a right-angled triangle, what is the side opposite the right angle called?",
     "question_es": "En un triángulo rectángulo, ¿cómo se llama el lado opuesto al ángulo recto?",
     "options": [
@@ -1941,6 +2038,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 2,
     "question_en": "What is 7² (7 squared)?",
     "question_es": "¿Cuánto es 7² (7 al cuadrado)?",
     "options": [
@@ -1961,6 +2059,7 @@ const QUESTIONS = [
   },
   {
     "category": "Mathematics",
+    "difficulty": 3,
     "question_en": "What is 11 × 11?",
     "question_es": "¿Cuánto es 11 × 11?",
     "options": [
@@ -1981,6 +2080,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 3,
     "question_en": "Which is the longest continental mountain range in the world, running along South America?",
     "question_es": "¿Cuál es la cordillera continental más larga del mundo, que recorre América del Sur?",
     "options": [
@@ -2001,6 +2101,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 2,
     "question_en": "Which river flows directly through the city of London?",
     "question_es": "¿Qué río atraviesa la ciudad de Londres?",
     "options": [
@@ -2021,6 +2122,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 3,
     "question_en": "What is the largest non-continental island in the world by surface area?",
     "question_es": "¿Cuál es la isla más grande del mundo por superficie?",
     "options": [
@@ -2041,6 +2143,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "What is the capital city of Spain?",
     "question_es": "¿Cuál es la capital de España?",
     "options": [
@@ -2061,6 +2164,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "On which continent is the country of Egypt primarily situated?",
     "question_es": "¿En qué continente se encuentra principalmente Egipto?",
     "options": [
@@ -2081,6 +2185,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 2,
     "question_en": "Which ocean separates the American continent from Europe and Africa?",
     "question_es": "¿Qué océano separa el continente americano de Europa y África?",
     "options": [
@@ -2101,6 +2206,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 2,
     "question_en": "Mount Fuji is an iconic volcano and the highest peak in which nation?",
     "question_es": "El Monte Fuji es un volcán icónico y el pico más alto de ¿qué país?",
     "options": [
@@ -2121,6 +2227,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "Which country is composed of 50 federal states?",
     "question_es": "¿Qué país está compuesto por 50 estados federales?",
     "options": [
@@ -2141,6 +2248,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 3,
     "question_en": "Which lake in Siberia is the deepest freshwater lake on Earth?",
     "question_es": "¿Qué lago de Siberia es el lago de agua dulce más profundo del mundo?",
     "options": [
@@ -2161,6 +2269,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 3,
     "question_en": "Angel Falls (Salto Ángel), the world's highest uninterrupted waterfall, is in which country?",
     "question_es": "El Salto Ángel, la cascada ininterrumpida más alta del mundo, se encuentra en ¿qué país?",
     "options": [
@@ -2181,6 +2290,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "What is the capital city of Colombia?",
     "question_es": "¿Cuál es la capital de Colombia?",
     "options": [
@@ -2201,6 +2311,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 2,
     "question_en": "Which body of water separates southern Europe from northern Africa?",
     "question_es": "¿Qué masa de agua separa el sur de Europa del norte de África?",
     "options": [
@@ -2221,6 +2332,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 3,
     "question_en": "Which two countries share the longest international land border in the world?",
     "question_es": "¿Qué dos países comparten la frontera terrestre internacional más larga del mundo?",
     "options": [
@@ -2241,6 +2353,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 1,
     "question_en": "What is the capital city of Germany?",
     "question_es": "¿Cuál es la capital de Alemania?",
     "options": [
@@ -2261,6 +2374,7 @@ const QUESTIONS = [
   },
   {
     "category": "Geography",
+    "difficulty": 2,
     "question_en": "What is the largest living coral reef ecosystem on Earth, located off the coast of Australia?",
     "question_es": "¿Cuál es el sistema de arrecifes de coral más grande de la Tierra, situado en Australia?",
     "options": [
@@ -2270,10 +2384,10 @@ const QUESTIONS = [
       "D) New Caledonia Barrier Reef"
     ],
     "options_es": [
-      "A) Barrera de Coral Mesoamericana",
+      "A) Arrecife Mesoamericano",
       "B) La Gran Barrera de Coral",
       "C) Arrecife del Mar Rojo",
-      "D) Barrera de Coral de Nueva Caledonia"
+      "D) Arrecife de Nueva Caledonia"
     ],
     "answer": "B) The Great Barrier Reef",
     "answer_es": "B) La Gran Barrera de Coral",

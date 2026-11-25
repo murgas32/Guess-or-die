@@ -5,59 +5,145 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google" content="notranslate">
 <title>Guess or Die</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Crimson+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="notranslate" translate="no">
 
-<main id="setup" class="screen">
-  <h1 class="title">Guess or Die</h1>
-  <p class="tag" id="setupTag">Una sola respuesta incorrecta te devolverá al inicio.</p>
+<main id="setup" class="screen menu-screen">
+  <div class="gow-layout">
+    <!-- Columna izquierda: Menú estilo God of War -->
+    <div class="gow-menu-container">
+      <div class="gow-header">
+        <h1 class="gow-game-title">Guess or Die</h1>
+        <p class="gow-subtitle" id="setupTag">Una sola respuesta incorrecta te devolverá al inicio.</p>
+        <div class="gow-divider" aria-hidden="true"></div>
+      </div>
 
-  <div class="setup-panel">
-    <!-- Idioma -->
-    <div class="setup-group">
-      <span class="setup-label" id="langLabel">Idioma de las preguntas / Language:</span>
-      <div class="pill-group" id="langGroup" role="group">
-        <button type="button" class="pill active" data-lang="es">Español</button>
-        <button type="button" class="pill" data-lang="en">English</button>
+      <nav class="gow-nav" role="navigation" aria-label="Menú principal">
+        <button type="button" class="gow-menu-btn" id="menuTilePlay">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuPlay">Jugar</span>
+        </button>
+        <button type="button" class="gow-menu-btn" id="menuTilePlayers">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuPlayers">Jugadores</span>
+        </button>
+        <button type="button" class="gow-menu-btn" id="menuTileTimer">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuTimer">Tiempo</span>
+        </button>
+        <button type="button" class="gow-menu-btn" id="menuTileLang">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuLang">Idioma</span>
+        </button>
+        <button type="button" class="gow-menu-btn" id="menuTileRules">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuRules">Reglas</span>
+        </button>
+        <button type="button" class="gow-menu-btn" id="menuTileCredits">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuCredits">Créditos</span>
+        </button>
+      </nav>
+
+      <!-- Estado actual de configuración estilo GoW -->
+      <div class="gow-status-bar" id="menuStatusBar">
+        <span class="gow-status-pill" id="statusPlayers">2 Jugadores</span>
+        <span class="gow-status-sep" aria-hidden="true">•</span>
+        <span class="gow-status-pill" id="statusTimer">Vela: 20s</span>
+        <span class="gow-status-sep" aria-hidden="true">•</span>
+        <span class="gow-status-pill" id="statusLang">Español</span>
       </div>
     </div>
 
-    <!-- Temporizador -->
-    <div class="setup-group">
-      <span class="setup-label" id="timerLabel">Tiempo por pregunta / Question timer:</span>
-      <div class="pill-group" id="timerGroup" role="group">
-        <button type="button" class="pill" data-timer="15">15s</button>
-        <button type="button" class="pill active" data-timer="20">20s</button>
-        <button type="button" class="pill" data-timer="30">30s</button>
-        <button type="button" class="pill" data-timer="0" id="timerOffBtn">Sin límite</button>
+    <!-- Columna derecha: Logo espiral -->
+    <div class="gow-logo-container">
+      <div class="gow-logo-stage">
+        <img src="assets/logo-spiral.jpg" alt="Guess or Die" class="gow-spiral-img">
       </div>
     </div>
-
-    <!-- Número de jugadores -->
-    <div class="setup-group">
-      <span class="setup-label" id="playersLabel">¿Cuántos jugadores? / How many players?</span>
-      <div class="count" role="group" aria-labelledby="playersLabel">
-        <button type="button" class="count-btn" data-n="1">1</button>
-        <button type="button" class="count-btn active" data-n="2">2</button>
-        <button type="button" class="count-btn" data-n="3">3</button>
-        <button type="button" class="count-btn" data-n="4">4</button>
-      </div>
-    </div>
-
-    <!-- Nombres de los jugadores -->
-    <div class="setup-group" id="namesGroup">
-      <span class="setup-label" id="namesLabel">Nombres de los jugadores:</span>
-      <div id="playerInputs" class="player-inputs"></div>
-    </div>
-
-    <button type="button" id="startBtn" class="start-btn">Entrar a la oscuridad</button>
   </div>
 
-  <p class="note" id="setupNote">Todos juegan en esta computadora, por turnos. El primero en volver al inicio gana.</p>
+  <!-- Modal oscuro para cada opción del menú -->
+  <div id="menuModal" class="menu-modal" hidden>
+    <div class="menu-modal-backdrop" id="modalBackdrop"></div>
+    <div class="menu-modal-card">
+      <button type="button" class="modal-close-btn" id="modalCloseBtn" aria-label="Cerrar">&times;</button>
+
+      <!-- Panel: JUGAR -->
+      <div id="panelPlay" class="modal-panel" hidden>
+        <h2 class="modal-title" id="playTitle">Entrar a la Oscuridad</h2>
+        <p class="modal-subtitle" id="playSetupTag">Una sola respuesta incorrecta te devolverá al inicio.</p>
+        <div id="playRosterSummary" class="roster-summary"></div>
+        <button type="button" id="startBtn" class="start-btn">Comenzar Partida</button>
+        <p class="note" id="setupNote">Todos juegan en esta computadora, por turnos.</p>
+        <p class="note warn" id="setupWarn"></p>
+      </div>
+
+      <!-- Panel: JUGADORES -->
+      <div id="panelPlayers" class="modal-panel" hidden>
+        <h2 class="modal-title" id="playersTitle">Configurar Jugadores</h2>
+        <div class="setup-group">
+          <span class="setup-label" id="playersLabel">¿Cuántos jugadores? / How many players?</span>
+          <div class="count" role="group" aria-labelledby="playersLabel">
+            <button type="button" class="count-btn" data-n="1">1</button>
+            <button type="button" class="count-btn active" data-n="2">2</button>
+            <button type="button" class="count-btn" data-n="3">3</button>
+            <button type="button" class="count-btn" data-n="4">4</button>
+          </div>
+        </div>
+        <div class="setup-group" id="namesGroup">
+          <span class="setup-label" id="namesLabel">Nombres de los jugadores:</span>
+          <div id="playerInputs" class="player-inputs"></div>
+        </div>
+        <button type="button" class="modal-action-btn" id="savePlayersBtn">Listo</button>
+      </div>
+
+      <!-- Panel: TIEMPO -->
+      <div id="panelTimer" class="modal-panel" hidden>
+        <h2 class="modal-title" id="timerTitle">Temporizador de Vela</h2>
+        <p class="modal-subtitle" id="timerSubtitle">Si la vela se apaga antes de responder, la oscuridad te consume.</p>
+        <div class="setup-group">
+          <span class="setup-label" id="timerLabel">Tiempo por pregunta / Question timer:</span>
+          <div class="pill-group" id="timerGroup" role="group">
+            <button type="button" class="pill" data-timer="15">15s</button>
+            <button type="button" class="pill active" data-timer="20">20s</button>
+            <button type="button" class="pill" data-timer="30">30s</button>
+            <button type="button" class="pill" data-timer="0" id="timerOffBtn">Sin límite</button>
+          </div>
+        </div>
+        <button type="button" class="modal-action-btn" id="saveTimerBtn">Listo</button>
+      </div>
+
+      <!-- Panel: IDIOMA -->
+      <div id="panelLang" class="modal-panel" hidden>
+        <h2 class="modal-title" id="langTitle">Idioma de Preguntas</h2>
+        <p class="modal-subtitle" id="langSubtitle">Configura el idioma principal de las preguntas y la interfaz.</p>
+        <div class="setup-group">
+          <span class="setup-label" id="langLabel">Idioma / Language:</span>
+          <div class="pill-group" id="langGroup" role="group">
+            <button type="button" class="pill active" data-lang="es">Español</button>
+            <button type="button" class="pill" data-lang="en">English</button>
+          </div>
+        </div>
+        <button type="button" class="modal-action-btn" id="saveLangBtn">Listo</button>
+      </div>
+
+      <!-- Panel: REGLAS -->
+      <div id="panelRules" class="modal-panel" hidden>
+        <h2 class="modal-title" id="rulesTitle">Reglas y Supervivencia</h2>
+        <div class="rules-scroll" id="rulesContent"></div>
+        <button type="button" class="modal-action-btn" id="closeRulesBtn">Entendido</button>
+      </div>
+
+      <!-- Panel: CRÉDITOS -->
+      <div id="panelCredits" class="modal-panel" hidden>
+        <h2 class="modal-title" id="creditsTitle">Créditos del Proyecto</h2>
+        <div class="credits-scroll" id="creditsContent"></div>
+        <button type="button" class="modal-action-btn" id="closeCreditsBtn">Cerrar</button>
+      </div>
+    </div>
+  </div>
 </main>
 
 <main id="game" class="screen" hidden>
@@ -67,13 +153,14 @@
       <div class="p side" style="--w:4600px;--h:2220px;--x:-2400px;--y:160px;--z:-300px;--r:rotateY(90deg)"><i class="books"></i></div>
       <div class="p side" style="--w:4600px;--h:2220px;--x:2400px;--y:160px;--z:-300px;--r:rotateY(-90deg)"><i class="hearth"></i></div>
       <div class="p floor" style="--w:4800px;--h:4600px;--y:1270px;--z:-300px;--r:rotateX(90deg)"></div>
-      <div class="p rug" style="--w:1700px;--h:1250px;--y:1268px;--z:240px;--r:rotateX(90deg)"></div>
-      <div class="p tabletop" style="--w:960px;--h:800px;--y:760px;--z:240px;--r:rotateX(90deg)"></div>
+      <div class="p rug" style="--w:1800px;--h:1350px;--y:1268px;--z:240px;--r:rotateX(90deg)"></div>
+      <div class="p tabletop" style="--w:1260px;--h:1020px;--y:760px;--z:240px;--r:rotateX(90deg)"></div>
       <div id="board" aria-label="Game board"></div>
+      <div class="p dicetray" style="--w:136px;--h:136px;--x:330px;--y:757px;--z:240px;--r:rotateX(90deg)"></div>
       <div id="dieShadow"></div>
       <div id="dice" aria-label="Die"><div class="cube" id="cube"></div></div>
-      <div class="p tablelight" style="--w:1000px;--h:840px;--y:753px;--z:240px;--r:rotateX(90deg)"></div>
-      <div class="p cone" style="--w:1500px;--h:965px;--y:278px;--z:240px"></div>
+      <div class="p tablelight" style="--w:1360px;--h:1120px;--y:753px;--z:240px;--r:rotateX(90deg)"></div>
+      <div class="p cone" style="--w:1600px;--h:1020px;--y:278px;--z:240px"></div>
       <div class="p cord" style="--w:5px;--h:645px;--y:-628px;--z:240px"></div>
       <div class="p shade" style="--w:300px;--h:100px;--y:-255px;--z:240px"></div>
       <div class="p bloom" style="--w:900px;--h:900px;--y:-225px;--z:244px"></div>
@@ -89,6 +176,7 @@
     <ol id="order"></ol>
     <ul id="log" aria-label="Game log"></ul>
     <button id="rollBtn" disabled>Lanzar el dado</button>
+    <button id="soundBtn">Sonido: sí</button>
     <button id="qualityBtn">Calidad: alta</button>
   </div>
   <section id="front" class="front notranslate" translate="no" hidden>
@@ -112,9 +200,79 @@
 </main>
 
 <div id="end" class="screen overlay" hidden>
-  <h2 id="endTitle" class="title"></h2>
-  <p id="endText"></p>
-  <button id="again">Jugar de nuevo</button>
+  <div id="eyeOverlay" class="eye-overlay" hidden>
+    <svg id="horrorEye" viewBox="0 0 600 350" class="horror-eye-svg">
+      <defs>
+        <radialGradient id="scleraGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#f0e9dc" />
+          <stop offset="60%" stop-color="#dfcfb8" />
+          <stop offset="85%" stop-color="#8a2323" />
+          <stop offset="100%" stop-color="#3d0707" />
+        </radialGradient>
+        <radialGradient id="irisGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#0a0203" />
+          <stop offset="35%" stop-color="#420b0e" />
+          <stop offset="65%" stop-color="#991b1e" />
+          <stop offset="85%" stop-color="#c43b27" />
+          <stop offset="93%" stop-color="#e06336" />
+          <stop offset="100%" stop-color="#1c0304" />
+        </radialGradient>
+        <radialGradient id="corneaShade" cx="45%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.18)" />
+          <stop offset="70%" stop-color="rgba(0,0,0,0)" />
+          <stop offset="100%" stop-color="rgba(0,0,0,0.65)" />
+        </radialGradient>
+        <radialGradient id="socketGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(110, 10, 15, 0.55)" />
+          <stop offset="60%" stop-color="rgba(40, 2, 5, 0.25)" />
+          <stop offset="100%" stop-color="rgba(0,0,0,0)" />
+        </radialGradient>
+        <clipPath id="eyeClip">
+          <path id="eyeClipPath" d="M 80 175 Q 300 175 520 175 Q 300 175 80 175 Z" />
+        </clipPath>
+      </defs>
+      <ellipse cx="300" cy="175" rx="260" ry="140" fill="url(#socketGlow)" />
+      <g clip-path="url(#eyeClip)">
+        <rect x="0" y="0" width="600" height="350" fill="url(#scleraGrad)" />
+        <g stroke="#7d1217" stroke-linecap="round" fill="none" opacity="0.85">
+          <path d="M 85 175 Q 140 160 190 168 Q 210 165 230 170" stroke-width="2.4" />
+          <path d="M 140 160 Q 165 145 195 148" stroke-width="1.3" />
+          <path d="M 120 170 Q 150 185 195 180" stroke-width="1.4" />
+          <path d="M 100 175 Q 155 195 185 205" stroke-width="1.8" />
+          <path d="M 515 175 Q 460 160 410 168 Q 390 165 370 170" stroke-width="2.4" />
+          <path d="M 460 160 Q 435 145 405 148" stroke-width="1.3" />
+          <path d="M 480 170 Q 450 185 405 180" stroke-width="1.4" />
+          <path d="M 500 175 Q 445 195 415 205" stroke-width="1.8" />
+          <path d="M 300 45 Q 295 90 285 115" stroke-width="1.5" />
+          <path d="M 300 305 Q 305 260 315 235" stroke-width="1.5" />
+        </g>
+        <circle id="eyeIris" cx="300" cy="175" r="72" fill="url(#irisGrad)" />
+        <g stroke="rgba(240, 100, 60, 0.4)" stroke-width="1.2" opacity="0.75">
+          <line x1="300" y1="175" x2="245" y2="135" />
+          <line x1="300" y1="175" x2="355" y2="135" />
+          <line x1="300" y1="175" x2="240" y2="185" />
+          <line x1="300" y1="175" x2="360" y2="185" />
+          <line x1="300" y1="175" x2="265" y2="230" />
+          <line x1="300" y1="175" x2="335" y2="230" />
+          <line x1="300" y1="175" x2="280" y2="110" />
+          <line x1="300" y1="175" x2="320" y2="110" />
+        </g>
+        <circle id="eyePupil" cx="300" cy="175" r="30" fill="#020001" />
+        <circle cx="300" cy="175" r="72" fill="url(#corneaShade)" />
+        <ellipse cx="282" cy="155" rx="9" ry="6" transform="rotate(-25 282 155)" fill="#ffffff" opacity="0.88" />
+        <circle cx="320" cy="195" r="3.5" fill="#ffffff" opacity="0.45" />
+        <path id="innerLidShadow" d="M 80 175 Q 300 50 520 175 Q 300 85 80 175 Z" fill="rgba(0,0,0,0.4)" />
+      </g>
+      <path id="upperLidLine" d="M 80 175 Q 300 175 520 175" stroke="#4a080c" stroke-width="4.5" fill="none" stroke-linecap="round" />
+      <path id="lowerLidLine" d="M 80 175 Q 300 175 520 175" stroke="#330407" stroke-width="3" fill="none" stroke-linecap="round" />
+      <path id="upperCrease" d="M 120 165 Q 300 165 480 165" stroke="rgba(100, 15, 20, 0.4)" stroke-width="2" fill="none" opacity="0" />
+    </svg>
+  </div>
+  <div id="endContent" class="end-content">
+    <h2 id="endTitle" class="title"></h2>
+    <p id="endText"></p>
+    <button id="again">Jugar de nuevo</button>
+  </div>
 </div>
 
 <div id="cover" class="screen overlay" hidden>
@@ -124,6 +282,7 @@
 <!-- Screamer jumpscare overlay -->
 <div id="screamerOverlay" class="screamer-overlay" hidden aria-hidden="true">
   <div class="screamer-jumpscare">
+    <div class="screamer-custom"></div>
     <svg viewBox="0 0 800 800" class="screamer-face" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <radialGradient id="scGlow" cx="50%" cy="50%" r="50%">
@@ -167,6 +326,7 @@
   </div>
 </div>
 
+<audio id="menuMusic" src="assets/sounds/song_menu.mp3" loop preload="auto"></audio>
 <script src="questions.js"></script>
 <script src="game.js"></script>
 </body>
