@@ -49,17 +49,6 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const SCREAMER_IMAGES = [];
 const SCREAMER_SOUNDS = [];
 
-// Fisher-Yates: an unbiased shuffle.
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-// A new random board for every game: tile 0 is the start pedestal; the other 31 tiles are
-// 16 questions, 8 benefits and 7 punishments in random order, with a few fairness rules.
 // ---- Sound ----
 let audioCtx = null, soundOn = true;
 function audio() {
@@ -791,7 +780,7 @@ const EFFECTS = {
         const v = await askRoll(p, I18N[gameLang].extraRollPrompt);
         log(I18N[gameLang].rolled(p.name, v));
         await move(p, v);
-        if (p.progress < BOARD_SIZE) await land(p, p.progress % BOARD_SIZE);
+        if (p.progress < BOARD_SIZE - 1) await land(p, p.progress);
       }
     },
     // BEN-05: Wisdom Whisper / Susurro de Sabiduria (50/50 en la siguiente pregunta)
@@ -896,6 +885,26 @@ async function showBannerScene(icon, title, text, fxType = "B") {
   await close();
 }
 
+// Options in random order (so the right answer is not always B or C), relabelled A-D,
+// in the chosen language (options_es holds the Spanish text).
+const LABELS = ["A", "B", "C", "D"];
+const stripLabel = (t) => (t || "").replace(/^[A-D]\)\s*/, "").trim();
+
+function buildChoices(q) {
+  const es = (gameLang === "es") && Array.isArray(q.options_es);
+  const baseOptions = (es && q.options_es.length === 4) ? q.options_es : q.options;
+  const items = q.options.map((o, i) => ({
+    text: stripLabel(baseOptions[i] || o),
+    correct: o.trim()[0] === q.correct_letter,
+  }));
+  shuffle(items);
+  return items.map((it, i) => ({
+    letter: LABELS[i],
+    text: `${LABELS[i]}) ${it.text}`,
+    correct: it.correct
+  }));
+}
+
 // Handles trivia encounters: standard questions or life-or-death LIMBO
 async function askQuestion(p, isLimbo = false) {
   const front = $("front"), card = $("frontCard"), body = $("frontBody"), btn = $("frontBtn");
@@ -905,10 +914,22 @@ async function askQuestion(p, isLimbo = false) {
   btn.hidden = true;
 
   const q = isLimbo ? getLimboQuestion() : getNextQuestion();
-  if (!q) return;
+  if (!q) {
+    await showBannerScene("!", I18N[gameLang].noQuestionsTitle, I18N[gameLang].noQuestionsText, "Q");
+    return;
+  }
 
   setFx(isLimbo ? "limbo" : "Q");
   card.className = `front-card ${isLimbo ? "t-L fx-limbo" : "t-Q fx-Q"}`;
+
+  // Check CAS-05: The Cursed Whisper
+  let isCursed = false;
+  if (p.cursedWhisper) {
+    p.cursedWhisper = false;
+    isCursed = true;
+    p.shield = false; // The curse pierces all shields
+    log(I18N[gameLang].cursedLog(p.name));
+  }
 
   let timerInterval = null;
   const stopTimer = () => {
@@ -952,9 +973,10 @@ async function askQuestion(p, isLimbo = false) {
   const n = primaryText.split(" ").length;
 
   const choices = buildChoices(q);
-  const correctChoice = choices.find((c) => c.correct);
+  const correctChoice = choices.find((c) => c.correct) || choices[0];
   const correctLetter = correctChoice.letter;
   const answerText = correctChoice.text;
+  const answerPrimary = answerText;
 
   const introWarning = isLimbo ? `<div class="limbo-warning">${I18N[gameLang].limboWarning}</div>` : "";
 
@@ -993,9 +1015,13 @@ async function askQuestion(p, isLimbo = false) {
       opts.querySelectorAll(".q-opt-btn").forEach((x) => (x.disabled = true));
       const correctBtn = opts.querySelector(`[data-letter="${correctLetter}"]`);
 
-      if (b && b.dataset.letter === q.correct_letter) {
+      if (b && b.dataset.letter === correctLetter) {
         // CORRECT ANSWER
         b.classList.add("correct");
+        if (isCursed) {
+          p.skipTurn = true;
+          log(I18N[gameLang].cursedVictimLog(p.name));
+        }
         feedback.textContent = isLimbo ? I18N[gameLang].limboEscaped : I18N[gameLang].correctFeedback;
         feedback.className = "q-feedback correct";
         front.classList.add("win");
@@ -1007,6 +1033,11 @@ async function askQuestion(p, isLimbo = false) {
         // WRONG ANSWER
         if (b) b.classList.add("wrong");
         if (correctBtn) correctBtn.classList.add("correct");
+
+        if (isCursed) {
+          p.skipTurn = true;
+          log(I18N[gameLang].cursedVictimLog(p.name));
+        }
 
         if (p.shield && !isCursed) {
           // Protected by Spectral Shield
@@ -1035,10 +1066,18 @@ async function askQuestion(p, isLimbo = false) {
           await close();
           resolveQuestion();
         } else {
-          // Standard question failure: add strike, reset to start
+          // Standard question failure: add strike, reset to start or anchor
           p.failures++;
-          p.progress = 0;
-          renderTokens(p.id);
+          if (p.anchor && p.anchor > 0) {
+            const savedAnchor = p.anchor;
+            p.anchor = 0;
+            p.progress = savedAnchor;
+            renderTokens(p.id);
+            log(I18N[gameLang].anchorSaved(savedAnchor));
+          } else {
+            p.progress = 0;
+            renderTokens(p.id);
+          }
 
           if (p.failures >= 3) {
             p.alive = false;
@@ -1071,6 +1110,11 @@ async function askQuestion(p, isLimbo = false) {
       const correctBtn = opts.querySelector(`[data-letter="${correctLetter}"]`);
       if (correctBtn) correctBtn.classList.add("correct");
 
+      if (isCursed) {
+        p.skipTurn = true;
+        log(I18N[gameLang].cursedVictimLog(p.name));
+      }
+
       if (p.shield && !isCursed) {
         p.shield = false;
         feedback.textContent = isLimbo
@@ -1098,8 +1142,16 @@ async function askQuestion(p, isLimbo = false) {
         resolveQuestion();
       } else {
         p.failures++;
-        p.progress = 0;
-        renderTokens(p.id);
+        if (p.anchor && p.anchor > 0) {
+          const savedAnchor = p.anchor;
+          p.anchor = 0;
+          p.progress = savedAnchor;
+          renderTokens(p.id);
+          log(I18N[gameLang].anchorSaved(savedAnchor));
+        } else {
+          p.progress = 0;
+          renderTokens(p.id);
+        }
 
         if (p.failures >= 3) {
           p.alive = false;
@@ -1331,6 +1383,8 @@ async function warmUp() {
 function start(playerNames) {
   closeMenuModal();
   currentLayout = generateRandomLayout();
+  questionDeck = [];
+  limboQuestionDeck = [];
   players = playerNames.map((name, i) => ({
     id: i,
     name: name,
@@ -1341,6 +1395,10 @@ function start(playerNames) {
     shield: false,
     skipQ: false,
     skipTurn: false,
+    fiftyFifty: false,
+    anchor: 0,
+    timePressure: false,
+    cursedWhisper: false,
   }));
   audio(); // created inside a click, so the browser allows the scream later
   $("menuBtn").textContent = I18N[gameLang].mainMenu;
@@ -1352,7 +1410,7 @@ function start(playerNames) {
   buildBoard();
   buildDice();
   renderTokens();
-  warmUp().then(play);
+  warmUp().then(play).catch((err) => console.error("Game loop error:", err));
 }
 
 // ---------------- SPIRAL MENU & MODAL LOGIC ----------------
