@@ -9,52 +9,141 @@
 </head>
 <body class="notranslate" translate="no">
 
-<main id="setup" class="screen">
-  <h1 class="title">Guess or Die</h1>
-  <p class="tag" id="setupTag">Una sola respuesta incorrecta te devolverá al inicio.</p>
+<main id="setup" class="screen menu-screen">
+  <div class="gow-layout">
+    <!-- Columna izquierda: Menú estilo God of War -->
+    <div class="gow-menu-container">
+      <div class="gow-header">
+        <h1 class="gow-game-title">Guess or Die</h1>
+        <p class="gow-subtitle" id="setupTag">Una sola respuesta incorrecta te devolverá al inicio.</p>
+        <div class="gow-divider" aria-hidden="true"></div>
+      </div>
 
-  <div class="setup-panel">
-    <!-- Idioma -->
-    <div class="setup-group">
-      <span class="setup-label" id="langLabel">Idioma de las preguntas / Language:</span>
-      <div class="pill-group" id="langGroup" role="group">
-        <button type="button" class="pill active" data-lang="es">Español</button>
-        <button type="button" class="pill" data-lang="en">English</button>
+      <nav class="gow-nav" role="navigation" aria-label="Menú principal">
+        <button type="button" class="gow-menu-btn" id="menuTilePlay">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuPlay">Jugar</span>
+        </button>
+        <button type="button" class="gow-menu-btn" id="menuTilePlayers">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuPlayers">Jugadores</span>
+        </button>
+        <button type="button" class="gow-menu-btn" id="menuTileTimer">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuTimer">Tiempo</span>
+        </button>
+        <button type="button" class="gow-menu-btn" id="menuTileLang">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuLang">Idioma</span>
+        </button>
+        <button type="button" class="gow-menu-btn" id="menuTileRules">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuRules">Reglas</span>
+        </button>
+        <button type="button" class="gow-menu-btn" id="menuTileCredits">
+          <span class="gow-btn-slash" aria-hidden="true"></span>
+          <span class="gow-btn-text" id="lblMenuCredits">Créditos</span>
+        </button>
+      </nav>
+
+      <!-- Estado actual de configuración estilo GoW -->
+      <div class="gow-status-bar" id="menuStatusBar">
+        <span class="gow-status-pill" id="statusPlayers">2 Jugadores</span>
+        <span class="gow-status-sep" aria-hidden="true">•</span>
+        <span class="gow-status-pill" id="statusTimer">Vela: 20s</span>
+        <span class="gow-status-sep" aria-hidden="true">•</span>
+        <span class="gow-status-pill" id="statusLang">Español</span>
       </div>
     </div>
 
-    <!-- Temporizador -->
-    <div class="setup-group">
-      <span class="setup-label" id="timerLabel">Tiempo por pregunta / Question timer:</span>
-      <div class="pill-group" id="timerGroup" role="group">
-        <button type="button" class="pill" data-timer="15">15s</button>
-        <button type="button" class="pill active" data-timer="20">20s</button>
-        <button type="button" class="pill" data-timer="30">30s</button>
-        <button type="button" class="pill" data-timer="0" id="timerOffBtn">Sin límite</button>
+    <!-- Columna derecha: Logo espiral -->
+    <div class="gow-logo-container">
+      <div class="gow-logo-stage">
+        <img src="assets/logo-spiral.jpg" alt="Guess or Die" class="gow-spiral-img">
       </div>
     </div>
-
-    <!-- Número de jugadores -->
-    <div class="setup-group">
-      <span class="setup-label" id="playersLabel">¿Cuántos jugadores? / How many players?</span>
-      <div class="count" role="group" aria-labelledby="playersLabel">
-        <button type="button" class="count-btn" data-n="1">1</button>
-        <button type="button" class="count-btn active" data-n="2">2</button>
-        <button type="button" class="count-btn" data-n="3">3</button>
-        <button type="button" class="count-btn" data-n="4">4</button>
-      </div>
-    </div>
-
-    <!-- Nombres de los jugadores -->
-    <div class="setup-group" id="namesGroup">
-      <span class="setup-label" id="namesLabel">Nombres de los jugadores:</span>
-      <div id="playerInputs" class="player-inputs"></div>
-    </div>
-
-    <button type="button" id="startBtn" class="start-btn">Entrar a la oscuridad</button>
   </div>
 
-  <p class="note" id="setupNote">Todos juegan en esta computadora, por turnos. El primero en llegar a la META (casilla 50) o el último sobreviviente gana.</p>
+  <!-- Modal oscuro para cada opción del menú -->
+  <div id="menuModal" class="menu-modal" hidden>
+    <div class="menu-modal-backdrop" id="modalBackdrop"></div>
+    <div class="menu-modal-card">
+      <button type="button" class="modal-close-btn" id="modalCloseBtn" aria-label="Cerrar">&times;</button>
+
+      <!-- Panel: JUGAR -->
+      <div id="panelPlay" class="modal-panel" hidden>
+        <h2 class="modal-title" id="playTitle">Entrar a la Oscuridad</h2>
+        <p class="modal-subtitle" id="playSetupTag">Una sola respuesta incorrecta te devolverá al inicio.</p>
+        <div id="playRosterSummary" class="roster-summary"></div>
+        <button type="button" id="startBtn" class="start-btn">Comenzar Partida</button>
+        <p class="note" id="setupNote">Todos juegan en esta computadora, por turnos.</p>
+        <p class="note warn" id="setupWarn"></p>
+      </div>
+
+      <!-- Panel: JUGADORES -->
+      <div id="panelPlayers" class="modal-panel" hidden>
+        <h2 class="modal-title" id="playersTitle">Configurar Jugadores</h2>
+        <div class="setup-group">
+          <span class="setup-label" id="playersLabel">¿Cuántos jugadores? / How many players?</span>
+          <div class="count" role="group" aria-labelledby="playersLabel">
+            <button type="button" class="count-btn" data-n="1">1</button>
+            <button type="button" class="count-btn active" data-n="2">2</button>
+            <button type="button" class="count-btn" data-n="3">3</button>
+            <button type="button" class="count-btn" data-n="4">4</button>
+          </div>
+        </div>
+        <div class="setup-group" id="namesGroup">
+          <span class="setup-label" id="namesLabel">Nombres de los jugadores:</span>
+          <div id="playerInputs" class="player-inputs"></div>
+        </div>
+        <button type="button" class="modal-action-btn" id="savePlayersBtn">Listo</button>
+      </div>
+
+      <!-- Panel: TIEMPO -->
+      <div id="panelTimer" class="modal-panel" hidden>
+        <h2 class="modal-title" id="timerTitle">Temporizador de Vela</h2>
+        <p class="modal-subtitle" id="timerSubtitle">Si la vela se apaga antes de responder, la oscuridad te consume.</p>
+        <div class="setup-group">
+          <span class="setup-label" id="timerLabel">Tiempo por pregunta / Question timer:</span>
+          <div class="pill-group" id="timerGroup" role="group">
+            <button type="button" class="pill" data-timer="15">15s</button>
+            <button type="button" class="pill active" data-timer="20">20s</button>
+            <button type="button" class="pill" data-timer="30">30s</button>
+            <button type="button" class="pill" data-timer="0" id="timerOffBtn">Sin límite</button>
+          </div>
+        </div>
+        <button type="button" class="modal-action-btn" id="saveTimerBtn">Listo</button>
+      </div>
+
+      <!-- Panel: IDIOMA -->
+      <div id="panelLang" class="modal-panel" hidden>
+        <h2 class="modal-title" id="langTitle">Idioma de Preguntas</h2>
+        <p class="modal-subtitle" id="langSubtitle">Configura el idioma principal de las preguntas y la interfaz.</p>
+        <div class="setup-group">
+          <span class="setup-label" id="langLabel">Idioma / Language:</span>
+          <div class="pill-group" id="langGroup" role="group">
+            <button type="button" class="pill active" data-lang="es">Español</button>
+            <button type="button" class="pill" data-lang="en">English</button>
+          </div>
+        </div>
+        <button type="button" class="modal-action-btn" id="saveLangBtn">Listo</button>
+      </div>
+
+      <!-- Panel: REGLAS -->
+      <div id="panelRules" class="modal-panel" hidden>
+        <h2 class="modal-title" id="rulesTitle">Reglas y Supervivencia</h2>
+        <div class="rules-scroll" id="rulesContent"></div>
+        <button type="button" class="modal-action-btn" id="closeRulesBtn">Entendido</button>
+      </div>
+
+      <!-- Panel: CRÉDITOS -->
+      <div id="panelCredits" class="modal-panel" hidden>
+        <h2 class="modal-title" id="creditsTitle">Créditos del Proyecto</h2>
+        <div class="credits-scroll" id="creditsContent"></div>
+        <button type="button" class="modal-action-btn" id="closeCreditsBtn">Cerrar</button>
+      </div>
+    </div>
+  </div>
 </main>
 
 <main id="game" class="screen" hidden>

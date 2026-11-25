@@ -1,11 +1,3 @@
-/* Fonts are bundled in assets/fonts, so the game looks the same without internet. */
-@font-face { font-family: "Cinzel"; font-weight: 600; font-style: normal; font-display: swap; src: url("assets/fonts/cinzel-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Cinzel"; font-weight: 700; font-style: normal; font-display: swap; src: url("assets/fonts/cinzel-latin-700-normal.woff2") format("woff2"); }
-@font-face { font-family: "Cinzel"; font-weight: 800; font-style: normal; font-display: swap; src: url("assets/fonts/cinzel-latin-800-normal.woff2") format("woff2"); }
-@font-face { font-family: "Crimson Pro"; font-weight: 400; font-style: normal; font-display: swap; src: url("assets/fonts/crimson-pro-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Crimson Pro"; font-weight: 600; font-style: normal; font-display: swap; src: url("assets/fonts/crimson-pro-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Crimson Pro"; font-weight: 700; font-style: normal; font-display: swap; src: url("assets/fonts/crimson-pro-latin-700-normal.woff2") format("woff2"); }
-
 :root {
   --head-turn-dur: 0.65s;
   --head-turn-ease: cubic-bezier(0.25, 1, 0.4, 1);
@@ -34,7 +26,7 @@ body {
   font-family: var(--serif);
   font-style: normal;
   color: var(--bone);
-  background: radial-gradient(ellipse at 50% 40%, var(--bg-glow) 0%, var(--bg) 70%) fixed;
+  background: #000000;
   line-height: 1.5;
 }
 
@@ -55,6 +47,482 @@ button:disabled { opacity: .4; cursor: default; }
 button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 
 .screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; }
+
+/* ---------------- GOD OF WAR MAIN MENU & ANIMATED EYE LOGO ---------------- */
+.menu-screen {
+  padding: 2rem 3rem;
+  overflow: hidden;
+  background: #000000;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.gow-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1350px;
+  gap: 3.5rem;
+  margin: auto;
+}
+
+/* Columna izquierda: Menú GoW */
+.gow-menu-container {
+  flex: 1 1 45%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  z-index: 5;
+}
+
+.gow-header {
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.gow-game-title {
+  font-family: var(--display);
+  font-size: clamp(2.4rem, 4.8vw, 3.8rem);
+  font-weight: 700;
+  font-style: normal;
+  color: #ede3d2;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin: 0 0 0.5rem;
+  text-shadow: 0 0 20px rgba(237, 227, 210, 0.22), 0 4px 14px rgba(0, 0, 0, 0.95);
+  line-height: 1.1;
+}
+
+.gow-subtitle {
+  font-family: var(--serif);
+  font-size: clamp(0.95rem, 1.35vw, 1.1rem);
+  font-style: normal;
+  color: #9c9180;
+  margin: 0 0 1.2rem;
+  line-height: 1.45;
+  max-width: 480px;
+}
+
+.gow-divider {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #c71f37 0%, rgba(205, 195, 170, 0.35) 50%, transparent 100%);
+  position: relative;
+}
+
+.gow-divider::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  background: #c71f37;
+  transform: rotate(45deg);
+  box-shadow: 0 0 8px #d62839;
+}
+
+.gow-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin-bottom: 2.2rem;
+}
+
+.gow-menu-btn {
+  display: flex;
+  align-items: center;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gow-btn-slash {
+  width: 4px;
+  height: 1.35em;
+  background: #c71f37;
+  border-radius: 2px;
+  margin-right: 1.2rem;
+  flex-shrink: 0;
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease;
+  box-shadow: 0 0 10px #d62839, 0 0 20px rgba(214, 40, 57, 0.5);
+}
+
+.gow-btn-text {
+  font-family: var(--display);
+  font-weight: 700;
+  font-style: normal;
+  font-size: clamp(1.35rem, 2.3vw, 2rem);
+  color: #9e9382;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  transition: color 0.22s ease, text-shadow 0.22s ease, letter-spacing 0.22s ease;
+}
+
+.gow-menu-btn:hover,
+.gow-menu-btn:focus-visible {
+  transform: translateX(14px);
+}
+.gow-menu-btn:hover .gow-btn-slash,
+.gow-menu-btn:focus-visible .gow-btn-slash {
+  transform: scaleY(1);
+}
+.gow-menu-btn:hover .gow-btn-text,
+.gow-menu-btn:focus-visible .gow-btn-text {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 245, 230, 0.9), 0 0 22px rgba(199, 31, 55, 0.75);
+  letter-spacing: 0.15em;
+}
+
+.gow-menu-btn:active {
+  transform: translateX(18px) scale(0.98);
+}
+.gow-menu-btn:active .gow-btn-text {
+  color: #ff9da6;
+}
+
+.gow-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-family: var(--display);
+  font-size: clamp(0.75rem, 1.1vw, 0.88rem);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #786f60;
+  padding-top: 0.4rem;
+}
+
+.gow-status-pill {
+  color: #a89f90;
+  font-weight: 700;
+}
+
+.gow-status-sep {
+  color: #7a1e28;
+  font-weight: 700;
+}
+
+/* Columna derecha: Logo espiral y Ojo que se mueve */
+.gow-logo-container {
+  flex: 1 1 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.gow-logo-stage {
+  position: relative;
+  width: min(78vmin, 600px);
+  aspect-ratio: 1 / 1;
+  background: #000000;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.gow-spiral-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #000000;
+  pointer-events: none;
+  border: none;
+}
+
+.gow-eye-stage {
+  position: absolute;
+  top: 40.23%;
+  left: 35.35%;
+  width: 29.30%;
+  height: 19.53%;
+  pointer-events: none;
+  overflow: hidden;
+  background: #000000;
+}
+
+.gow-eye-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Animación del ojo: Izquierda -> Al frente (Centro) -> Derecha */
+.eye-look-left {
+  animation: eyeAnimLeft 11s infinite ease-in-out;
+}
+.eye-look-center {
+  animation: eyeAnimCenter 11s infinite ease-in-out;
+}
+.eye-look-right {
+  animation: eyeAnimRight 11s infinite ease-in-out;
+}
+.eye-look-blink {
+  animation: eyeAnimBlink 11s infinite ease-in-out;
+}
+
+@keyframes eyeAnimLeft {
+  0%, 25% {
+    opacity: 1;
+  }
+  28%, 97% {
+    opacity: 0;
+  }
+  99%, 100% {
+    opacity: 1;
+  }
+}
+
+@keyframes eyeAnimCenter {
+  0%, 25% {
+    opacity: 0;
+  }
+  28%, 56% {
+    opacity: 1;
+  }
+  59%, 85% {
+    opacity: 0;
+  }
+  88%, 94.5% {
+    opacity: 1;
+  }
+  96%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes eyeAnimRight {
+  0%, 57% {
+    opacity: 0;
+  }
+  60%, 85% {
+    opacity: 1;
+  }
+  88%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes eyeAnimBlink {
+  0%, 94.5% {
+    opacity: 0;
+  }
+  95.5%, 96.5% {
+    opacity: 1;
+  }
+  97.5%, 100% {
+    opacity: 0;
+  }
+}
+
+/* Reactividad al posarse sobre el menú (el ojo enfoca a la izquierda) */
+.gow-eye-stage.eye-focus-left .eye-look-left {
+  opacity: 1 !important;
+  animation: none !important;
+  transition: opacity 0.25s ease !important;
+}
+.gow-eye-stage.eye-focus-left .gow-eye-layer:not(.eye-look-left) {
+  opacity: 0 !important;
+  animation: none !important;
+  transition: opacity 0.25s ease !important;
+}
+
+/* Responsive para pantallas medianas o móviles */
+@media (max-width: 960px) {
+  .menu-screen {
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+  }
+  .gow-layout {
+    flex-direction: column-reverse;
+    justify-content: center;
+    gap: 1.8rem;
+    min-height: auto;
+  }
+  .gow-menu-container {
+    max-width: 100%;
+    align-items: center;
+    text-align: center;
+  }
+  .gow-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .gow-divider {
+    background: linear-gradient(90deg, transparent 0%, #c71f37 50%, transparent 100%);
+  }
+  .gow-divider::after {
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+  }
+  .gow-nav {
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .gow-menu-btn {
+    justify-content: center;
+    padding: 0.35rem 1rem;
+  }
+  .gow-menu-btn:hover,
+  .gow-menu-btn:focus-visible {
+    transform: scale(1.08);
+  }
+  .gow-btn-slash {
+    display: none;
+  }
+  .gow-status-bar {
+    justify-content: center;
+  }
+  .gow-logo-stage {
+    width: min(70vmin, 380px);
+  }
+}
+
+/* ---------------- MODAL OVERLAY FOR MENU SECTIONS ---------------- */
+.menu-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+}
+.menu-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.84);
+  backdrop-filter: blur(8px);
+}
+.menu-modal-card {
+  position: relative;
+  z-index: 2;
+  width: min(92vw, 36rem);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: rgba(16, 9, 12, 0.95);
+  border: 1px solid rgba(205, 195, 170, 0.3);
+  border-radius: 8px;
+  padding: 1.8rem 1.6rem;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.95), 0 0 25px rgba(138, 35, 48, 0.2);
+  text-align: center;
+}
+.modal-close-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.9rem;
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+.modal-close-btn:hover { color: var(--bone); background: rgba(255, 255, 255, 0.08); }
+.modal-title {
+  font-family: var(--display);
+  font-size: clamp(1.3rem, 3.8vw, 1.8rem);
+  font-weight: 700;
+  font-style: normal;
+  color: var(--bone);
+  margin: 0 0 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.modal-subtitle {
+  color: var(--dim);
+  font-size: 0.92rem;
+  font-style: normal;
+  margin: 0 0 1.2rem;
+}
+.modal-action-btn {
+  margin-top: 1.4rem;
+  font-size: 1.05rem;
+  padding: 0.7rem 2rem;
+  background: var(--blood);
+  border-color: rgba(230, 220, 203, 0.4);
+  box-shadow: 0 0 14px rgba(138, 35, 48, 0.7);
+  cursor: pointer;
+  color: #fff;
+  border-radius: 4px;
+}
+.modal-action-btn:hover {
+  background: #a81c2b;
+  border-color: #fff;
+}
+.roster-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.2rem 0;
+}
+.roster-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.9rem;
+  background: rgba(10, 5, 6, 0.75);
+  border: 1px solid rgba(205, 195, 170, 0.2);
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+.roster-chip-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+.rules-scroll, .credits-scroll {
+  text-align: left;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #ded6c8;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+.rules-scroll h3, .credits-scroll h3 {
+  font-family: var(--display);
+  font-style: normal;
+  color: #ffd890;
+  font-size: 1.05rem;
+  margin: 1rem 0 0.3rem;
+  border-bottom: 1px solid rgba(205, 195, 170, 0.2);
+  padding-bottom: 0.2rem;
+}
+.rules-scroll ul, .credits-scroll ul {
+  margin: 0.3rem 0 0.8rem;
+  padding-left: 1.2rem;
+}
+.rules-scroll li, .credits-scroll li {
+  margin-bottom: 0.3rem;
+}
 
 .title {
   font-family: var(--display);

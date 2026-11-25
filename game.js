@@ -49,37 +49,6 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const SCREAMER_IMAGES = [];
 const SCREAMER_SOUNDS = [];
 
-// Fisher-Yates: an unbiased shuffle.
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-// A new random board for every game: tile 0 is the start pedestal; the other 31 tiles are
-// 16 questions, 8 benefits and 7 punishments in random order, with a few fairness rules.
-function validLayout(L) {
-  if (L[1] === "P" || L[BOARD_SIZE - 1] === "P") return false; // no punishment right next to the start
-  let run = 1;
-  for (let i = 2; i < BOARD_SIZE; i++) {
-    run = L[i] === L[i - 1] ? run + 1 : 1;
-    if (L[i] === "P" && L[i - 1] === "P") return false;        // never two punishments in a row
-    if (L[i] !== "Q" && run >= 3) return false;                // no trio of benefits or punishments
-    if (L[i] === "Q" && run >= 5) return false;                // no wall of five questions
-  }
-  return true;
-}
-function makeLayout() {
-  const kinds = [..."Q".repeat(16), ..."B".repeat(8), ..."P".repeat(7)];
-  for (let attempt = 0; attempt < 1000; attempt++) {
-    const L = "S" + shuffle(kinds).join("");
-    if (validLayout(L)) return L;
-  }
-  return "SQQBQPQBQQPQBQPQBQQPQBPBQQPQBPBQ";
-}
-
 // ---- Sound ----
 let audioCtx = null, soundOn = true;
 function audio() {
@@ -126,6 +95,26 @@ const I18N = {
     playersLabel: "¿Cuántos jugadores? / How many players?",
     namesLabel: "Nombres de los jugadores:",
     defaultPlayer: (i) => `Jugador ${i}`,
+    menuPlay: "Jugar",
+    menuPlayers: "Jugadores",
+    menuTimer: "Tiempo",
+    menuLang: "Idioma",
+    menuRules: "Reglas",
+    menuCredits: "Créditos",
+    playModalTitle: "Entrar a la oscuridad",
+    playersModalTitle: "Configurar Jugadores",
+    timerModalTitle: "Temporizador de Vela",
+    langModalTitle: "Idioma de Preguntas",
+    rulesModalTitle: "Reglas y Supervivencia",
+    creditsModalTitle: "Créditos del Proyecto",
+    timerSubtitle: "Si la vela se apaga antes de responder, la oscuridad te consume.",
+    langSubtitle: "Configura el idioma principal de las preguntas y la interfaz.",
+    btnSave: "Listo",
+    btnUnderstood: "Entendido",
+    btnClose: "Cerrar",
+    statusPlayers: (count) => `${count} ${count === 1 ? "Jugador" : "Jugadores"}`,
+    statusTimer: (seconds) => seconds === 0 ? "Vela: sin límite" : `Vela: ${seconds}s`,
+    statusLang: "Español",
     startBtn: "Entrar a la oscuridad",
     rollBtn: "Lanzar el dado",
     qualityHigh: "Calidad: alta",
@@ -215,6 +204,26 @@ const I18N = {
     playersLabel: "How many players? / ¿Cuántos jugadores?",
     namesLabel: "Player names:",
     defaultPlayer: (i) => `Player ${i}`,
+    menuPlay: "Play",
+    menuPlayers: "Players",
+    menuTimer: "Time",
+    menuLang: "Language",
+    menuRules: "Rules",
+    menuCredits: "Credits",
+    playModalTitle: "Enter the darkness",
+    playersModalTitle: "Configure Players",
+    timerModalTitle: "Candle Timer",
+    langModalTitle: "Question Language",
+    rulesModalTitle: "Rules and Survival",
+    creditsModalTitle: "Project Credits",
+    timerSubtitle: "If the candle goes out before you answer, the darkness consumes you.",
+    langSubtitle: "Set the primary language for questions and the interface.",
+    btnSave: "Done",
+    btnUnderstood: "Got it",
+    btnClose: "Close",
+    statusPlayers: (count) => `${count} ${count === 1 ? "Player" : "Players"}`,
+    statusTimer: (seconds) => seconds === 0 ? "No limit" : `Candle: ${seconds}s`,
+    statusLang: "English",
     startBtn: "Enter the Dark",
     rollBtn: "Roll the die",
     qualityHigh: "Quality: high",
@@ -771,7 +780,7 @@ const EFFECTS = {
         const v = await askRoll(p, I18N[gameLang].extraRollPrompt);
         log(I18N[gameLang].rolled(p.name, v));
         await move(p, v);
-        if (p.progress < BOARD_SIZE) await land(p, p.progress % BOARD_SIZE);
+        if (p.progress < BOARD_SIZE - 1) await land(p, p.progress);
       }
     },
     // BEN-05: Wisdom Whisper / Susurro de Sabiduria (50/50 en la siguiente pregunta)
@@ -876,6 +885,26 @@ async function showBannerScene(icon, title, text, fxType = "B") {
   await close();
 }
 
+// Options in random order (so the right answer is not always B or C), relabelled A-D,
+// in the chosen language (options_es holds the Spanish text).
+const LABELS = ["A", "B", "C", "D"];
+const stripLabel = (t) => (t || "").replace(/^[A-D]\)\s*/, "").trim();
+
+function buildChoices(q) {
+  const es = (gameLang === "es") && Array.isArray(q.options_es);
+  const baseOptions = (es && q.options_es.length === 4) ? q.options_es : q.options;
+  const items = q.options.map((o, i) => ({
+    text: stripLabel(baseOptions[i] || o),
+    correct: o.trim()[0] === q.correct_letter,
+  }));
+  shuffle(items);
+  return items.map((it, i) => ({
+    letter: LABELS[i],
+    text: `${LABELS[i]}) ${it.text}`,
+    correct: it.correct
+  }));
+}
+
 // Handles trivia encounters: standard questions or life-or-death LIMBO
 async function askQuestion(p, isLimbo = false) {
   const front = $("front"), card = $("frontCard"), body = $("frontBody"), btn = $("frontBtn");
@@ -885,10 +914,22 @@ async function askQuestion(p, isLimbo = false) {
   btn.hidden = true;
 
   const q = isLimbo ? getLimboQuestion() : getNextQuestion();
-  if (!q) return;
+  if (!q) {
+    await showBannerScene("!", I18N[gameLang].noQuestionsTitle, I18N[gameLang].noQuestionsText, "Q");
+    return;
+  }
 
   setFx(isLimbo ? "limbo" : "Q");
   card.className = `front-card ${isLimbo ? "t-L fx-limbo" : "t-Q fx-Q"}`;
+
+  // Check CAS-05: The Cursed Whisper
+  let isCursed = false;
+  if (p.cursedWhisper) {
+    p.cursedWhisper = false;
+    isCursed = true;
+    p.shield = false; // The curse pierces all shields
+    log(I18N[gameLang].cursedLog(p.name));
+  }
 
   let timerInterval = null;
   const stopTimer = () => {
@@ -932,9 +973,10 @@ async function askQuestion(p, isLimbo = false) {
   const n = primaryText.split(" ").length;
 
   const choices = buildChoices(q);
-  const correctChoice = choices.find((c) => c.correct);
+  const correctChoice = choices.find((c) => c.correct) || choices[0];
   const correctLetter = correctChoice.letter;
   const answerText = correctChoice.text;
+  const answerPrimary = answerText;
 
   const introWarning = isLimbo ? `<div class="limbo-warning">${I18N[gameLang].limboWarning}</div>` : "";
 
@@ -973,9 +1015,13 @@ async function askQuestion(p, isLimbo = false) {
       opts.querySelectorAll(".q-opt-btn").forEach((x) => (x.disabled = true));
       const correctBtn = opts.querySelector(`[data-letter="${correctLetter}"]`);
 
-      if (b && b.dataset.letter === q.correct_letter) {
+      if (b && b.dataset.letter === correctLetter) {
         // CORRECT ANSWER
         b.classList.add("correct");
+        if (isCursed) {
+          p.skipTurn = true;
+          log(I18N[gameLang].cursedVictimLog(p.name));
+        }
         feedback.textContent = isLimbo ? I18N[gameLang].limboEscaped : I18N[gameLang].correctFeedback;
         feedback.className = "q-feedback correct";
         front.classList.add("win");
@@ -987,6 +1033,11 @@ async function askQuestion(p, isLimbo = false) {
         // WRONG ANSWER
         if (b) b.classList.add("wrong");
         if (correctBtn) correctBtn.classList.add("correct");
+
+        if (isCursed) {
+          p.skipTurn = true;
+          log(I18N[gameLang].cursedVictimLog(p.name));
+        }
 
         if (p.shield && !isCursed) {
           // Protected by Spectral Shield
@@ -1015,10 +1066,18 @@ async function askQuestion(p, isLimbo = false) {
           await close();
           resolveQuestion();
         } else {
-          // Standard question failure: add strike, reset to start
+          // Standard question failure: add strike, reset to start or anchor
           p.failures++;
-          p.progress = 0;
-          renderTokens(p.id);
+          if (p.anchor && p.anchor > 0) {
+            const savedAnchor = p.anchor;
+            p.anchor = 0;
+            p.progress = savedAnchor;
+            renderTokens(p.id);
+            log(I18N[gameLang].anchorSaved(savedAnchor));
+          } else {
+            p.progress = 0;
+            renderTokens(p.id);
+          }
 
           if (p.failures >= 3) {
             p.alive = false;
@@ -1051,6 +1110,11 @@ async function askQuestion(p, isLimbo = false) {
       const correctBtn = opts.querySelector(`[data-letter="${correctLetter}"]`);
       if (correctBtn) correctBtn.classList.add("correct");
 
+      if (isCursed) {
+        p.skipTurn = true;
+        log(I18N[gameLang].cursedVictimLog(p.name));
+      }
+
       if (p.shield && !isCursed) {
         p.shield = false;
         feedback.textContent = isLimbo
@@ -1078,8 +1142,16 @@ async function askQuestion(p, isLimbo = false) {
         resolveQuestion();
       } else {
         p.failures++;
-        p.progress = 0;
-        renderTokens(p.id);
+        if (p.anchor && p.anchor > 0) {
+          const savedAnchor = p.anchor;
+          p.anchor = 0;
+          p.progress = savedAnchor;
+          renderTokens(p.id);
+          log(I18N[gameLang].anchorSaved(savedAnchor));
+        } else {
+          p.progress = 0;
+          renderTokens(p.id);
+        }
 
         if (p.failures >= 3) {
           p.alive = false;
@@ -1309,7 +1381,10 @@ async function warmUp() {
 }
 
 function start(playerNames) {
+  closeMenuModal();
   currentLayout = generateRandomLayout();
+  questionDeck = [];
+  limboQuestionDeck = [];
   players = playerNames.map((name, i) => ({
     id: i,
     name: name,
@@ -1320,9 +1395,12 @@ function start(playerNames) {
     shield: false,
     skipQ: false,
     skipTurn: false,
+    fiftyFifty: false,
+    anchor: 0,
+    timePressure: false,
+    cursedWhisper: false,
   }));
   audio(); // created inside a click, so the browser allows the scream later
-  LAYOUT = makeLayout(); // a different board every game
   $("menuBtn").textContent = I18N[gameLang].mainMenu;
   $("qualityBtn").textContent = I18N[gameLang].qualityHigh;
   $("soundBtn").textContent = I18N[gameLang].soundOn;
@@ -1332,11 +1410,108 @@ function start(playerNames) {
   buildBoard();
   buildDice();
   renderTokens();
-  warmUp().then(play);
+  warmUp().then(play).catch((err) => console.error("Game loop error:", err));
 }
 
-// ---------------- SETUP SCREEN LOGIC ----------------
+// ---------------- SPIRAL MENU & MODAL LOGIC ----------------
 let selectedPlayerCount = 2;
+
+function getRulesHTML(lang) {
+  if (lang === "en") {
+    return `
+      <h3>Objective</h3>
+      <p>Travel through the 32 cursed tiles of the board and be the first survivor to complete the lap and return to the start.</p>
+      <h3>Survival & 3 Lives</h3>
+      <p>Each player begins with <strong>3 lives</strong>. Answering incorrectly or letting the candle burn out costs 1 life and sends you back to the start (unless protected by a shield or anchor). Losing all 3 lives eliminates you and activates <strong>Spectator Mode</strong> to watch the remaining players.</p>
+      <h3>Cursed Tiles</h3>
+      <ul>
+        <li><strong>Question (?)</strong>: Bilingual trivia across 4 categories with progressive difficulty.</li>
+        <li><strong>Benefits (+)</strong>: Spectral Shield, Swift Step (+2), Protective Whisper (skips next question), Spectral Roll (extra die toss), 50/50 Wisdom and Safety Anchor (checkpoint).</li>
+        <li><strong>Punishments (+)</strong>: Spectral Drag (-2), Fear Paralysis (skips turn), Time Pressure (halved time) and The Cursed Whisper.</li>
+        <li><strong>LIMBO (†)</strong>: A rare, extreme life-or-death confrontation tile.</li>
+      </ul>
+      <h3>Category Nemeses</h3>
+      <p>Each discipline is guarded by a horror entity with its own jumpscare: The Referee (Sports), The Chronicler (History), The Reckoner (Mathematics), and The Cartographer (Geography).</p>
+    `;
+  }
+  return `
+    <h3>Objetivo</h3>
+    <p>Recorre las 32 casillas malditas del tablero y sé el primer superviviente en completar la vuelta y regresar al inicio.</p>
+    <h3>Supervivencia y 3 Vidas</h3>
+    <p>Cada jugador cuenta con <strong>3 vidas</strong>. Responder incorrectamente o que se consuma la vela cuesta 1 vida y regresa al peón a la casilla de salida (salvo protección de escudos o anclas). Perder las 3 vidas elimina al jugador y activa el <strong>Modo Espectador</strong> para seguir presenciando la partida.</p>
+    <h3>Casillas del Tablero</h3>
+    <ul>
+      <li><strong>Pregunta (?)</strong>: Preguntas bilingües en 4 categorías con dificultad progresiva según tu avance.</li>
+      <li><strong>Beneficios (+)</strong>: Escudo Espectral, Paso Veloz (+2), Susurro Protector, Tirada Espectral (dado extra), Susurro 50/50 y Ancla Espectral (checkpoint de caída).</li>
+      <li><strong>Castigos (+)</strong>: Retroceso (-2), Parálisis (pierde turno), Presión Temporal (tiempo a la mitad) y Maldición del Susurro.</li>
+      <li><strong>LIMBO (†)</strong>: Casilla oculta de juicio mortal extremo.</li>
+    </ul>
+    <h3>Entidades por Categoría</h3>
+    <p>Cada área está custodiada por un enemigo temático con su propio screamer: El Árbitro (Deportes), El Cronista (Historia), El Contador (Matemáticas) y El Cartógrafo (Geografía).</p>
+  `;
+}
+
+function getCreditsHTML(lang) {
+  return `
+    <h3>Guess or Die</h3>
+    <p><strong>Programa:</strong> Análisis y Desarrollo de Software (ADSO)<br><strong>Ficha:</strong> 3408345 | <strong>Centro:</strong> SENA</p>
+    <h3>Equipo de Desarrollo</h3>
+    <ul>
+      <li><strong>Miguel Andrés Murgas García</strong> — Líder de Proyecto / Frontend</li>
+      <li><strong>Joiman Enoc Rico Bueno</strong> — Lógica y Mecánicas de Juego</li>
+      <li><strong>Jesús Samuel Suarez Padilla</strong> — Diseño UI/UX y CSS 3D</li>
+      <li><strong>Yoimer Jimenez Peinado</strong> — Contenido Bilingüe y Preguntas</li>
+      <li><strong>Jesús José Castro Genez</strong> — Audio, Screamers y Enemigos</li>
+      <li><strong>Jose Angel Soto Mejia</strong> — Documentación Técnica y QA</li>
+    </ul>
+    <h3>Tecnología</h3>
+    <p>Desarrollado en HTML5 semántico, CSS 3D nativo y JavaScript moderno (ES6+ Vanilla). Sin librerías externas.</p>
+  `;
+}
+
+function updateRosterSummary() {
+  const container = $("playRosterSummary");
+  if (!container) return;
+  const inputs = document.querySelectorAll(".player-name-input");
+  container.innerHTML = "";
+  inputs.forEach((inp, i) => {
+    const val = inp.value.trim() || I18N[gameLang].defaultPlayer(i + 1);
+    const chip = document.createElement("div");
+    chip.className = "roster-chip";
+    chip.innerHTML = `<span class="roster-chip-dot" style="background:${COLORS[i]};color:${COLORS[i]}"></span><span>${val}</span>`;
+    container.appendChild(chip);
+  });
+}
+
+function updateStatusBar() {
+  const t = I18N[gameLang];
+  if ($("statusPlayers")) $("statusPlayers").textContent = t.statusPlayers(selectedPlayerCount);
+  if ($("statusTimer")) $("statusTimer").textContent = t.statusTimer(timerSeconds);
+  if ($("statusLang")) $("statusLang").textContent = t.statusLang;
+}
+
+function openMenuModal(panelId) {
+  const modal = $("menuModal");
+  if (!modal) return;
+  modal.querySelectorAll(".modal-panel").forEach((p) => (p.hidden = true));
+  const target = $(panelId);
+  if (target) {
+    target.hidden = false;
+    modal.hidden = false;
+    if (panelId === "panelPlay") updateRosterSummary();
+    if (panelId === "panelRules") $("rulesContent").innerHTML = getRulesHTML(gameLang);
+    if (panelId === "panelCredits") $("creditsContent").innerHTML = getCreditsHTML(gameLang);
+  }
+}
+
+function closeMenuModal() {
+  const modal = $("menuModal");
+  if (!modal) return;
+  modal.hidden = true;
+  modal.querySelectorAll(".modal-panel").forEach((p) => (p.hidden = true));
+  updateStatusBar();
+  updateRosterSummary();
+}
 
 function renderPlayerInputs(n) {
   const container = $("playerInputs");
@@ -1365,19 +1540,49 @@ function renderPlayerInputs(n) {
     row.appendChild(input);
     container.appendChild(row);
   }
+  updateRosterSummary();
 }
 
 function updateSetupTexts() {
   const t = I18N[gameLang];
-  $("setupTag").textContent = t.tag;
-  $("setupNote").textContent = t.note;
-  $("langLabel").textContent = t.langLabel;
-  $("timerLabel").textContent = t.timerLabel;
-  $("timerOffBtn").textContent = t.timerOff;
-  $("playersLabel").textContent = t.playersLabel;
-  $("namesLabel").textContent = t.namesLabel;
-  $("startBtn").textContent = t.startBtn;
-  $("setupWarn").textContent = t.warning;
+  if ($("setupTag")) $("setupTag").textContent = t.tag;
+  if ($("playSetupTag")) $("playSetupTag").textContent = t.tag;
+  if ($("setupNote")) $("setupNote").textContent = selectedPlayerCount === 1 ? t.noteSolo : t.note;
+  if ($("langLabel")) $("langLabel").textContent = t.langLabel;
+  if ($("timerLabel")) $("timerLabel").textContent = t.timerLabel;
+  if ($("timerOffBtn")) $("timerOffBtn").textContent = t.timerOff;
+  if ($("playersLabel")) $("playersLabel").textContent = t.playersLabel;
+  if ($("namesLabel")) $("namesLabel").textContent = t.namesLabel;
+  if ($("startBtn")) $("startBtn").textContent = t.startBtn;
+  if ($("setupWarn")) $("setupWarn").textContent = t.warning;
+
+  // Spiral menu buttons
+  if ($("lblMenuPlay")) $("lblMenuPlay").textContent = t.menuPlay;
+  if ($("lblMenuPlayers")) $("lblMenuPlayers").textContent = t.menuPlayers;
+  if ($("lblMenuTimer")) $("lblMenuTimer").textContent = t.menuTimer;
+  if ($("lblMenuLang")) $("lblMenuLang").textContent = t.menuLang;
+  if ($("lblMenuRules")) $("lblMenuRules").textContent = t.menuRules;
+  if ($("lblMenuCredits")) $("lblMenuCredits").textContent = t.menuCredits;
+
+  // Modal titles & subtitles
+  if ($("playTitle")) $("playTitle").textContent = t.playModalTitle;
+  if ($("playersTitle")) $("playersTitle").textContent = t.playersModalTitle;
+  if ($("timerTitle")) $("timerTitle").textContent = t.timerModalTitle;
+  if ($("timerSubtitle")) $("timerSubtitle").textContent = t.timerSubtitle;
+  if ($("langTitle")) $("langTitle").textContent = t.langModalTitle;
+  if ($("langSubtitle")) $("langSubtitle").textContent = t.langSubtitle;
+  if ($("rulesTitle")) $("rulesTitle").textContent = t.rulesModalTitle;
+  if ($("creditsTitle")) $("creditsTitle").textContent = t.creditsModalTitle;
+
+  // Modal action buttons
+  if ($("savePlayersBtn")) $("savePlayersBtn").textContent = t.btnSave;
+  if ($("saveTimerBtn")) $("saveTimerBtn").textContent = t.btnSave;
+  if ($("saveLangBtn")) $("saveLangBtn").textContent = t.btnSave;
+  if ($("closeRulesBtn")) $("closeRulesBtn").textContent = t.btnUnderstood;
+  if ($("closeCreditsBtn")) $("closeCreditsBtn").textContent = t.btnClose;
+
+  updateStatusBar();
+  updateRosterSummary();
 
   // Update existing inputs if they still hold default names
   const inputs = document.querySelectorAll(".player-name-input");
@@ -1406,6 +1611,7 @@ document.querySelectorAll("#timerGroup .pill").forEach((btn) => {
     document.querySelectorAll("#timerGroup .pill").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     timerSeconds = Number(btn.dataset.timer);
+    updateStatusBar();
   });
 });
 
@@ -1415,7 +1621,36 @@ document.querySelectorAll(".count-btn").forEach((btn) => {
     btn.classList.add("active");
     selectedPlayerCount = Number(btn.dataset.n);
     renderPlayerInputs(selectedPlayerCount);
+    updateStatusBar();
+    if ($("setupNote")) {
+      $("setupNote").textContent = selectedPlayerCount === 1
+        ? I18N[gameLang].noteSolo
+        : I18N[gameLang].note;
+    }
   });
+});
+
+// God of War menu navigation
+$("menuTilePlay").addEventListener("click", () => openMenuModal("panelPlay"));
+$("menuTilePlayers").addEventListener("click", () => openMenuModal("panelPlayers"));
+$("menuTileTimer").addEventListener("click", () => openMenuModal("panelTimer"));
+$("menuTileLang").addEventListener("click", () => openMenuModal("panelLang"));
+$("menuTileRules").addEventListener("click", () => openMenuModal("panelRules"));
+$("menuTileCredits").addEventListener("click", () => openMenuModal("panelCredits"));
+
+// Modal close buttons
+$("modalCloseBtn").addEventListener("click", closeMenuModal);
+$("modalBackdrop").addEventListener("click", closeMenuModal);
+$("savePlayersBtn").addEventListener("click", closeMenuModal);
+$("saveTimerBtn").addEventListener("click", closeMenuModal);
+$("saveLangBtn").addEventListener("click", closeMenuModal);
+$("closeRulesBtn").addEventListener("click", closeMenuModal);
+$("closeCreditsBtn").addEventListener("click", closeMenuModal);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && $("menuModal") && !$("menuModal").hidden) {
+    closeMenuModal();
+  }
 });
 
 $("startBtn").addEventListener("click", () => {
