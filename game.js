@@ -155,6 +155,84 @@ function playFichaSound() {
   a.play().catch(() => {});
 }
 
+// ---- Question Countdown Audios by Category ----
+const QUESTION_AUDIO_CONFIG = {
+  Sports: {
+    src: "assets/sounds/question_sports.mp3",
+    elemId: "qAudioSports",
+    duration: 14.00
+  },
+  Geography: {
+    src: "assets/sounds/question_geography.mp3",
+    elemId: "qAudioGeography",
+    duration: 19.96
+  },
+  History: {
+    src: "assets/sounds/question_history.mp3",
+    elemId: "qAudioHistory",
+    duration: 20.07
+  },
+  Mathematics: {
+    src: "assets/sounds/question_math.mp3",
+    elemId: "qAudioMath",
+    duration: 19.52
+  }
+};
+
+let currentQuestionAudio = null;
+
+function startQuestionAudio(category, effectiveSeconds) {
+  if (!soundOn) return;
+  stopQuestionAudio();
+
+  const cfg = QUESTION_AUDIO_CONFIG[category] || QUESTION_AUDIO_CONFIG.History;
+  const audio = $(cfg.elemId) || new Audio(cfg.src);
+  audio.volume = 0.85;
+
+  if (effectiveSeconds > 0) {
+    // Adapta el audio a la duración exacta del temporizador (15s, 20s, 30s o presión temporal)
+    const rate = cfg.duration / effectiveSeconds;
+    const clampedRate = Math.max(0.15, Math.min(4.0, rate));
+    audio.playbackRate = clampedRate;
+    audio.defaultPlaybackRate = clampedRate;
+    audio.loop = false;
+    audio.currentTime = 0;
+    audio.onplay = () => { audio.playbackRate = clampedRate; };
+    // Si concluye ligeramente antes del tiempo de vela, se reinicia suavemente
+    audio.onended = () => {
+      if (currentQuestionAudio === audio) {
+        audio.currentTime = 0;
+        audio.playbackRate = clampedRate;
+        audio.play().catch(() => {});
+      }
+    };
+  } else {
+    // Si lo pone en ilimitado (sin límite), el audio se repite infinitamente
+    audio.playbackRate = 1.0;
+    audio.defaultPlaybackRate = 1.0;
+    audio.loop = true;
+    audio.currentTime = 0;
+    audio.onended = () => {
+      if (currentQuestionAudio === audio) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }
+    };
+  }
+
+  currentQuestionAudio = audio;
+  audio.play().catch(() => {});
+}
+
+function stopQuestionAudio() {
+  if (currentQuestionAudio) {
+    currentQuestionAudio.pause();
+    currentQuestionAudio.currentTime = 0;
+    currentQuestionAudio.onended = null;
+    currentQuestionAudio = null;
+  }
+}
+
 function playScream() {
   if (!soundOn) return;
   if (SCREAMER_SOUNDS.length) {
@@ -1041,6 +1119,7 @@ async function askQuestion(p, isLimbo = false) {
     }
     timerWrap.hidden = true;
     timerWrap.classList.remove("urgent");
+    stopQuestionAudio();
   };
 
   const open = () => {
@@ -1052,6 +1131,7 @@ async function askQuestion(p, isLimbo = false) {
 
   const close = async () => {
     stopTimer();
+    stopQuestionAudio();
     front.classList.remove("show", "win", "fail");
     card.classList.remove("hit");
     $("game").classList.remove("to-front");
@@ -1290,6 +1370,7 @@ async function askQuestion(p, isLimbo = false) {
     const beginCountdown = () => {
       if (timerStarted || resolved || effectiveSeconds <= 0) return;
       timerStarted = true;
+      startQuestionAudio(q.category, effectiveSeconds);
       const totalMs = effectiveSeconds * 1000;
       const startAt = performance.now();
       timerInterval = setInterval(() => {
@@ -1321,8 +1402,20 @@ async function askQuestion(p, isLimbo = false) {
     });
 
     if (effectiveSeconds > 0) {
-      opts.lastElementChild.addEventListener("animationend", beginCountdown, { once: true });
+      if (opts.lastElementChild) {
+        opts.lastElementChild.addEventListener("animationend", beginCountdown, { once: true });
+      }
       setTimeout(beginCountdown, Math.round((0.35 + n * 0.05 + 3 * 0.12 + 0.6) * 1000) + 700); // fallback
+    } else {
+      // Sin límite: reproduce el audio de la categoría en bucle infinito
+      const startUnlimited = () => {
+        if (resolved) return;
+        startQuestionAudio(q.category, 0);
+      };
+      if (opts.lastElementChild) {
+        opts.lastElementChild.addEventListener("animationend", startUnlimited, { once: true });
+      }
+      setTimeout(startUnlimited, Math.round((0.35 + n * 0.05 + 3 * 0.12 + 0.6) * 1000) + 700); // fallback
     }
 
     // Check BEN-05: Wisdom Whisper (50/50 effect banishing 2 incorrect options)
@@ -1675,6 +1768,7 @@ async function warmUp() {
 function start(playerNames) {
   closeMenuModal();
   stopMenuMusic();
+  stopQuestionAudio();
   currentLayout = generateRandomLayout();
   questionDeck = [];
   limboQuestionDeck = [];
@@ -1965,6 +2059,7 @@ $("soundBtn").addEventListener("click", () => {
   $("soundBtn").textContent = soundOn ? I18N[gameLang].soundOn : I18N[gameLang].soundOff;
   if (!soundOn) {
     stopMenuMusic();
+    stopQuestionAudio();
   } else if ($("setup") && !$("setup").hidden) {
     if (menuAudio) {
       menuAudio.currentTime = 0;
