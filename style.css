@@ -1795,7 +1795,7 @@ button {
   border-color: #ffffff;
 } }
 /* Atmosphere layers */
-#fxLayer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }.front::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity var(--head-turn-dur) var(--head-turn-ease); }.front.show::after { opacity: 1; }.front.fx-Q::after { background: radial-gradient(ellipse at 50% 40%, rgba(110, 70, 190, .24), transparent 62%); }.front.fx-B::after { background: radial-gradient(ellipse at 50% 62%, rgba(255, 170, 60, .30), transparent 64%); }.front.fx-P::after, .front.fail::after { background: radial-gradient(ellipse at 50% 50%, transparent 32%, rgba(150, 10, 25, .55) 100%); }.front.win::after { background: radial-gradient(ellipse at 50% 50%, rgba(140, 230, 100, .2), transparent 62%); }.front.show.fx-Q::after, .front.show.fx-B::after { animation: breathe 5s ease-in-out infinite alternate; }.front.show.fx-P::after, .front.show.fail::after { animation: pulse 1.8s ease-in-out infinite; }@keyframes breathe { from { opacity: .65; }
+#fxLayer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }.front.fx-B.show::before { background: radial-gradient(circle at 50% 42%, rgba(255, 232, 175, .05) 0%, rgba(12, 8, 5, .38) 46%, rgba(10, 5, 6, .80) 88%); }.front.fx-P.show::before { background: radial-gradient(circle at 50% 42%, rgba(10, 4, 6, .16) 0%, rgba(10, 5, 6, .45) 45%, rgba(10, 5, 6, .86) 88%); }.front::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity var(--head-turn-dur) var(--head-turn-ease); }.front.show::after { opacity: 1; }.front.fx-Q::after { background: radial-gradient(ellipse at 50% 40%, rgba(110, 70, 190, .24), transparent 62%); }.front.fx-B::after { background: radial-gradient(circle at 50% 42%, rgba(255, 242, 196, .42) 0%, rgba(255, 195, 95, .24) 24%, rgba(255, 165, 55, .10) 48%, transparent 72%); }.front.fx-P::after, .front.fail::after { background: radial-gradient(ellipse at 50% 50%, transparent 32%, rgba(150, 10, 25, .55) 100%); }.front.win::after { background: radial-gradient(ellipse at 50% 50%, rgba(140, 230, 100, .2), transparent 62%); }.front.show.fx-Q::after, .front.show.fx-B::after { animation: breathe 5s ease-in-out infinite alternate; }.front.show.fx-P::after, .front.show.fail::after { animation: pulse 1.8s ease-in-out infinite; }@keyframes breathe { from { opacity: .65; }
 
 /* ---------------- WIN CINEMATIC OVERLAY ---------------- */
 .win-cinematic {
@@ -3085,7 +3085,7 @@ button {
 /* Continue: plain text, no button box */
 #frontBtn, #frontBtn:hover:not(:disabled) { background: none; border: 0; box-shadow: none; }#frontBtn { font-size: 1.1rem; letter-spacing: .14em; text-transform: uppercase; color: var(--bone); padding: .5rem 1rem; text-shadow: 0 0 12px #000; }#frontBtn::after { content: " \2192"; }#frontBtn:hover:not(:disabled) { color: #fff; text-shadow: 0 0 16px rgba(230, 220, 203, .8); }
 @media (prefers-reduced-motion: reduce) {
-  .w, .q-opt-btn { animation: none; opacity: 1; transform: none; }  .ember, .front::after, .front-card { animation: none !important; }  .front, .front-card { transition-duration: .01s; }}
+  .w, .q-opt-btn { animation: none; opacity: 1; transform: none; }  .ember, .front::after, .front-card, .win-flare, .window-beam, .win-shadow { animation: none !important; }  .front, .front-card { transition-duration: .01s; }}
 /* ---------- The room: one 3D world. Camera = the player's head, at the origin. ----------
    Eye-relative units: x right, y down, z = 1000px - distance ahead (perspective is 1000px).
    Floor at y=1270, table top at y=760, ceiling at y=-570. Only one light: the lamp above the table. */
@@ -3113,10 +3113,127 @@ button {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 620px; border-top: 10px solid rgba(0, 0, 0, .6);
   background: repeating-linear-gradient(90deg, transparent 0 420px, rgba(0, 0, 0, .5) 420px 428px), linear-gradient(rgba(3, 2, 2, .6), rgba(3, 2, 2, .6)), var(--wood) 0 0 / 700px;
 }
-/* Back wall (4800 x 2220): window with moonlight, sofa, two portraits */
-.window { left: 1800px; top: 330px; width: 1200px; height: 1000px; border: 26px solid #0a0605;
-  background: linear-gradient(#0a0605, #0a0605) 50% 0 / 16px 100% no-repeat, linear-gradient(#0a0605, #0a0605) 0 50% / 100% 16px no-repeat, linear-gradient(175deg, #5f7898, #26364f 55%, #0e1726);
-  box-shadow: 0 0 80px rgba(120, 150, 200, .24), inset 0 0 50px rgba(0, 0, 0, .55); }.curtain { top: 270px; width: 230px; height: 1150px; box-shadow: inset 0 -60px 90px rgba(0, 0, 0, .6), 0 0 30px #000; background: repeating-linear-gradient(90deg, #35101a 0 20px, #210a10 20px 44px); }.curtain.a { left: 1540px; }
+/* Back wall (4800 x 2220): window with moonlight, sofa */
+.window {
+  left: 1800px;
+  top: 330px;
+  width: 1200px;
+  height: 1000px;
+  border: 26px solid #0a0605;
+  overflow: hidden;
+  background: #0e1726;
+  box-shadow: 0 0 80px rgba(120, 150, 200, .24), inset 0 0 50px rgba(0, 0, 0, .55);
+  transition: box-shadow var(--head-turn-dur) var(--head-turn-ease);
+}
+.window > span {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+.win-sky {
+  background: linear-gradient(175deg, #5f7898, #26364f 55%, #0e1726);
+  transition: background var(--head-turn-dur) var(--head-turn-ease), filter var(--head-turn-dur) var(--head-turn-ease);
+}
+.win-flare {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255, 253, 236, .98) 0%, rgba(255, 232, 160, .86) 24%, rgba(255, 185, 80, .48) 54%, transparent 82%),
+    conic-gradient(from 12deg at 50% 46%,
+      transparent 0deg 20deg, rgba(255, 246, 208, .42) 32deg, transparent 46deg 76deg,
+      rgba(255, 238, 185, .36) 92deg, transparent 108deg 142deg,
+      rgba(255, 246, 208, .45) 160deg, transparent 178deg 212deg,
+      rgba(255, 238, 185, .36) 228deg, transparent 246deg 284deg,
+      rgba(255, 246, 208, .42) 302deg, transparent 322deg 360deg);
+  mix-blend-mode: screen;
+  transform: scale(0.92);
+  transition: opacity var(--head-turn-dur) var(--head-turn-ease), transform var(--head-turn-dur) var(--head-turn-ease);
+}
+.win-shadow {
+  opacity: 0;
+  transform: translateY(28px) scale(0.95);
+  transform-origin: 50% 100%;
+  transition: opacity var(--head-turn-dur) var(--head-turn-ease), transform var(--head-turn-dur) var(--head-turn-ease);
+}
+.win-shadow svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.win-mullions {
+  background:
+    linear-gradient(#0a0605, #0a0605) 50% 0 / 16px 100% no-repeat,
+    linear-gradient(#0a0605, #0a0605) 0 50% / 100% 16px no-repeat;
+  box-shadow: inset 0 0 54px rgba(0, 0, 0, .58);
+}
+.window-beam {
+  position: absolute;
+  display: block;
+  z-index: 2;
+  left: 900px;
+  top: -120px;
+  width: 3000px;
+  height: 2350px;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 36% 32% at 50% 42%, rgba(255, 244, 205, .72) 0%, rgba(255, 210, 120, .38) 38%, rgba(255, 170, 65, .12) 66%, transparent 86%),
+    conic-gradient(from 144deg at 50% 34%,
+      transparent 0deg, rgba(255, 240, 185, .30) 14deg, transparent 26deg,
+      rgba(255, 232, 165, .38) 36deg, transparent 48deg,
+      rgba(255, 240, 185, .28) 58deg, transparent 72deg);
+  -webkit-mask-image: radial-gradient(ellipse 52% 62% at 50% 44%, #000 18%, rgba(0, 0, 0, .55) 55%, transparent 82%);
+  mask-image: radial-gradient(ellipse 52% 62% at 50% 44%, #000 18%, rgba(0, 0, 0, .55) 55%, transparent 82%);
+  mix-blend-mode: screen;
+  transition: opacity var(--head-turn-dur) var(--head-turn-ease);
+}
+
+/* Benefit tile: radiant burst of light coming out of the window */
+#game.scene-B .window {
+  box-shadow:
+    0 0 180px rgba(255, 224, 145, .82),
+    0 0 380px rgba(255, 185, 85, .48),
+    inset 0 0 60px rgba(255, 245, 205, .65);
+}
+#game.scene-B .win-sky {
+  background: radial-gradient(circle at 50% 46%, #fffef4 0%, #ffeaa8 34%, #eba948 72%, #6e481c 100%);
+}
+#game.scene-B .win-flare {
+  opacity: 1;
+  transform: scale(1.06);
+  animation: winLightPulse 3.6s ease-in-out infinite alternate;
+}
+#game.scene-B .window-beam {
+  opacity: 1;
+  animation: winBeamPulse 3.6s ease-in-out infinite alternate;
+}
+
+/* Punishment tile: silhouette of a shadow standing on the other side of the window */
+#game.scene-P .window {
+  box-shadow: 0 0 130px rgba(145, 170, 210, .38), inset 0 0 42px rgba(0, 0, 0, .55);
+}
+#game.scene-P .win-sky {
+  background: radial-gradient(circle at 50% 46%, #9fb3cc 0%, #566882 48%, #161d2b 100%);
+}
+#game.scene-P .win-shadow {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  animation: winShadowLoom 4.4s ease-in-out infinite alternate;
+}
+
+@keyframes winLightPulse {
+  from { opacity: .88; transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1.1); }
+}
+@keyframes winBeamPulse {
+  from { opacity: .82; }
+  to { opacity: 1; }
+}
+@keyframes winShadowLoom {
+  from { transform: translateY(6px) scale(0.99); }
+  to { transform: translateY(-4px) scale(1.025); }
+}
+.curtain { top: 270px; width: 230px; height: 1150px; box-shadow: inset 0 -60px 90px rgba(0, 0, 0, .6), 0 0 30px #000; background: repeating-linear-gradient(90deg, #35101a 0 20px, #210a10 20px 44px); }.curtain.a { left: 1540px; }
 
 /* ---------------- WIN CINEMATIC OVERLAY ---------------- */
 .win-cinematic {
@@ -3225,8 +3342,7 @@ button {
   border-color: #ffffff;
 } .curtain.b { left: 3030px; }.sofa { left: 1500px; bottom: 0; width: 1800px; height: 560px; border-radius: 80px 80px 18px 18px;
   background: linear-gradient(90deg, transparent 33%, rgba(0, 0, 0, .5) 33% 34%, transparent 34% 66%, rgba(0, 0, 0, .5) 66% 67%, transparent 67%), linear-gradient(#2a1b15, #0f0806);
-  box-shadow: inset 0 14px 0 rgba(255, 220, 180, .05), inset 0 0 80px #000; }.frame { top: 420px; width: 330px; height: 440px; border: 16px solid #4a301c; box-shadow: 0 10px 20px rgba(0, 0, 0, .7), inset 0 0 24px rgba(0, 0, 0, .7);
-  background: radial-gradient(circle at 50% 34%, #15100c 0 13%, transparent 14%), radial-gradient(ellipse at 50% 100%, #15100c 0 36%, transparent 37%), linear-gradient(#5a4b38, #2e251a); }.frame.a { left: 620px; }
+  box-shadow: inset 0 14px 0 rgba(255, 220, 180, .05), inset 0 0 80px #000; }
 
 /* ---------------- WIN CINEMATIC OVERLAY ---------------- */
 .win-cinematic {
@@ -3333,7 +3449,7 @@ button {
 .win-again-btn:hover {
   background: rgba(199, 31, 55, 0.25);
   border-color: #ffffff;
-} .frame.b { left: 3850px; }
+}
 /* Left wall: bookshelf. Right wall: fireplace. */
 .books { left: 2500px; top: 250px; width: 1000px; height: 1750px; border: 22px solid #100a06; box-shadow: inset 0 0 90px #000, 0 0 40px #000;
   background: linear-gradient(rgba(0, 0, 0, .5), rgba(0, 0, 0, .5)), repeating-linear-gradient(180deg, transparent 0 340px, #100a06 340px 362px), repeating-linear-gradient(90deg, #4a1e1e 0 22px, #1f2c3a 22px 40px, #3a2e1a 40px 66px, #2b2036 66px 84px, #52432a 84px 108px), #0b0705; }.hearth { left: 1450px; bottom: 0; width: 760px; height: 700px; border: 26px solid #382819; border-bottom: 0;

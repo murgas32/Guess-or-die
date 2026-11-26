@@ -825,7 +825,9 @@ const words = (text) => esc(text).split(" ").map((w, i) => `<span class="w" styl
 
 // Atmosphere effects (particles and lighting)
 function setFx(type) {
-  const front = $("front"), layer = $("fxLayer");
+  const game = $("game"), front = $("front"), layer = $("fxLayer");
+  game.classList.remove("scene-Q", "scene-B", "scene-P", "scene-limbo");
+  game.classList.add("scene-" + type);
   front.classList.remove("fx-Q", "fx-B", "fx-P", "fx-limbo", "win", "fail");
   front.classList.add("fx-" + type);
   layer.innerHTML = "";
@@ -887,6 +889,7 @@ async function showBannerScene(icon, title, text, fxType = "B") {
     card.classList.remove("hit");
     $("game").classList.remove("to-front");
     await sleep(600);
+    $("game").classList.remove("scene-Q", "scene-B", "scene-P", "scene-limbo");
     front.hidden = true;
     body.innerHTML = "";
   };
@@ -966,6 +969,7 @@ async function askQuestion(p, isLimbo = false) {
     card.classList.remove("hit");
     $("game").classList.remove("to-front");
     await sleep(600);
+    $("game").classList.remove("scene-Q", "scene-B", "scene-P", "scene-limbo");
     front.hidden = true;
     body.innerHTML = "";
   };
