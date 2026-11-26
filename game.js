@@ -155,6 +155,150 @@ function playFichaSound() {
   a.play().catch(() => {});
 }
 
+// ---- Question Countdown Audios by Category ----
+const QUESTION_AUDIO_CONFIG = {
+  Sports: {
+    src: "assets/sounds/question_sports.mp3",
+    elemId: "qAudioSports",
+    duration: 14.00
+  },
+  Geography: {
+    src: "assets/sounds/question_geography.mp3",
+    elemId: "qAudioGeography",
+    duration: 19.96
+  },
+  History: {
+    src: "assets/sounds/question_history.mp3",
+    elemId: "qAudioHistory",
+    duration: 20.07
+  },
+  Mathematics: {
+    src: "assets/sounds/question_math.mp3",
+    elemId: "qAudioMath",
+    duration: 19.52
+  }
+};
+
+let currentQuestionAudio = null;
+
+function startQuestionAudio(category, effectiveSeconds) {
+  if (!soundOn) return;
+  stopQuestionAudio();
+
+  const cfg = QUESTION_AUDIO_CONFIG[category] || QUESTION_AUDIO_CONFIG.History;
+  const audio = $(cfg.elemId) || new Audio(cfg.src);
+  audio.volume = 0.85;
+
+  if (effectiveSeconds > 0) {
+    // Adapta el audio a la duración exacta del temporizador (15s, 20s, 30s o presión temporal)
+    const rate = cfg.duration / effectiveSeconds;
+    const clampedRate = Math.max(0.15, Math.min(4.0, rate));
+    audio.playbackRate = clampedRate;
+    audio.defaultPlaybackRate = clampedRate;
+    audio.loop = false;
+    audio.currentTime = 0;
+    audio.onplay = () => { audio.playbackRate = clampedRate; };
+    // Si concluye ligeramente antes del tiempo de vela, se reinicia suavemente
+    audio.onended = () => {
+      if (currentQuestionAudio === audio) {
+        audio.currentTime = 0;
+        audio.playbackRate = clampedRate;
+        audio.play().catch(() => {});
+      }
+    };
+  } else {
+    // Si lo pone en ilimitado (sin límite), el audio se repite infinitamente
+    audio.playbackRate = 1.0;
+    audio.defaultPlaybackRate = 1.0;
+    audio.loop = true;
+    audio.currentTime = 0;
+    audio.onended = () => {
+      if (currentQuestionAudio === audio) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }
+    };
+  }
+
+  currentQuestionAudio = audio;
+  audio.play().catch(() => {});
+}
+
+function stopQuestionAudio() {
+  if (currentQuestionAudio) {
+    currentQuestionAudio.pause();
+    currentQuestionAudio.currentTime = 0;
+    currentQuestionAudio.onended = null;
+    currentQuestionAudio = null;
+  }
+}
+
+// ---- Event & Question Atmosphere Audios ----
+let currentBenefitAudio = null;
+let currentPunishmentAudio = null;
+let currentWhisperAudio = null;
+
+function playBenefitAudio() {
+  if (!soundOn) return;
+  stopBenefitAudio();
+  const a = $("audioBenefit") || new Audio("assets/sounds/benefit.mp3");
+  a.currentTime = 0;
+  a.volume = 0.85;
+  a.play().catch(() => {});
+  currentBenefitAudio = a;
+}
+
+function stopBenefitAudio() {
+  if (currentBenefitAudio) {
+    currentBenefitAudio.pause();
+    currentBenefitAudio.currentTime = 0;
+    currentBenefitAudio = null;
+  }
+}
+
+function playPunishmentAudio() {
+  if (!soundOn) return;
+  stopPunishmentAudio();
+  const a = $("audioPunishment") || new Audio("assets/sounds/punishment.mp3");
+  a.currentTime = 0;
+  a.volume = 0.85;
+  a.play().catch(() => {});
+  currentPunishmentAudio = a;
+}
+
+function stopPunishmentAudio() {
+  if (currentPunishmentAudio) {
+    currentPunishmentAudio.pause();
+    currentPunishmentAudio.currentTime = 0;
+    currentPunishmentAudio = null;
+  }
+}
+
+function playQuestionWhisper() {
+  if (!soundOn) return;
+  stopQuestionWhisper();
+  const a = $("audioWhisperQ") || new Audio("assets/sounds/whisper_question.mp3");
+  a.currentTime = 0;
+  a.volume = 0.95;
+  a.play().catch(() => {});
+  currentWhisperAudio = a;
+}
+
+function stopQuestionWhisper() {
+  if (currentWhisperAudio) {
+    currentWhisperAudio.pause();
+    currentWhisperAudio.currentTime = 0;
+    currentWhisperAudio.onended = null;
+    currentWhisperAudio = null;
+  }
+  const el = $("audioWhisperQ");
+  if (el) {
+    el.pause();
+    el.currentTime = 0;
+    el.onended = null;
+  }
+}
+
 function playScream() {
   if (!soundOn) return;
   if (SCREAMER_SOUNDS.length) {
@@ -977,6 +1121,12 @@ async function showBannerScene(icon, title, text, fxType = "B") {
   $("frontTitle").textContent = title;
   $("frontText").innerHTML = words(text);
 
+  if (fxType === "B") {
+    playBenefitAudio();
+  } else if (fxType === "P") {
+    playPunishmentAudio();
+  }
+
   const waitContinue = () => new Promise((res) => btn.addEventListener("click", res, { once: true }));
   const open = () => {
     front.hidden = false;
@@ -985,6 +1135,8 @@ async function showBannerScene(icon, title, text, fxType = "B") {
     front.classList.add("show");
   };
   const close = async () => {
+    stopBenefitAudio();
+    stopPunishmentAudio();
     front.classList.remove("show", "win", "fail");
     card.classList.remove("hit");
     $("game").classList.remove("to-front");
@@ -1053,6 +1205,8 @@ async function askQuestion(p, isLimbo = false) {
     }
     timerWrap.hidden = true;
     timerWrap.classList.remove("urgent");
+    stopQuestionWhisper();
+    stopQuestionAudio();
   };
 
   const open = () => {
@@ -1060,10 +1214,13 @@ async function askQuestion(p, isLimbo = false) {
     void front.offsetWidth;
     $("game").classList.add("to-front");
     front.classList.add("show");
+    playQuestionWhisper();
   };
 
   const close = async () => {
     stopTimer();
+    stopQuestionWhisper();
+    stopQuestionAudio();
     front.classList.remove("show", "win", "fail");
     card.classList.remove("hit");
     $("game").classList.remove("to-front");
@@ -1297,11 +1454,12 @@ async function askQuestion(p, isLimbo = false) {
       log(I18N[gameLang].timePressureLog(p.name));
     }
 
-    // Countdown: it starts once the options are visible, so reading time is not lost.
+    // Countdown: it starts once the options are visible (no need to wait for whispers to end)
     let timerStarted = false;
     const beginCountdown = () => {
       if (timerStarted || resolved || effectiveSeconds <= 0) return;
       timerStarted = true;
+      startQuestionAudio(q.category, effectiveSeconds);
       const totalMs = effectiveSeconds * 1000;
       const startAt = performance.now();
       timerInterval = setInterval(() => {
@@ -1312,6 +1470,24 @@ async function askQuestion(p, isLimbo = false) {
         if (remainingMs <= 0) handleTimeout();
       }, 100);
     };
+
+    const startUnlimited = () => {
+      if (timerStarted || resolved) return;
+      timerStarted = true;
+      startQuestionAudio(q.category, 0);
+    };
+
+    let countdownTriggered = false;
+    const triggerCountdown = () => {
+      if (countdownTriggered || resolved) return;
+      countdownTriggered = true;
+      if (effectiveSeconds > 0) {
+        beginCountdown();
+      } else {
+        startUnlimited();
+      }
+    };
+
     if (effectiveSeconds > 0) {
       timerWrap.hidden = false;
       timerWrap.classList.toggle("urgent", isPressured || effectiveSeconds <= 5);
@@ -1332,10 +1508,11 @@ async function askQuestion(p, isLimbo = false) {
       opts.appendChild(b);
     });
 
-    if (effectiveSeconds > 0) {
-      opts.lastElementChild.addEventListener("animationend", beginCountdown, { once: true });
-      setTimeout(beginCountdown, Math.round((0.35 + n * 0.05 + 3 * 0.12 + 0.6) * 1000) + 700); // fallback
+    const optionsDurationMs = Math.round((0.35 + n * 0.05 + 3 * 0.12 + 0.6) * 1000);
+    if (opts.lastElementChild) {
+      opts.lastElementChild.addEventListener("animationend", triggerCountdown, { once: true });
     }
+    setTimeout(triggerCountdown, optionsDurationMs + 300);
 
     // Check BEN-05: Wisdom Whisper (50/50 effect banishing 2 incorrect options)
     if (p.fiftyFifty) {
@@ -1687,6 +1864,10 @@ async function warmUp() {
 function start(playerNames) {
   closeMenuModal();
   stopMenuMusic();
+  stopQuestionWhisper();
+  stopQuestionAudio();
+  stopBenefitAudio();
+  stopPunishmentAudio();
   currentLayout = generateRandomLayout();
   questionDeck = [];
   limboQuestionDeck = [];
@@ -1977,6 +2158,10 @@ $("soundBtn").addEventListener("click", () => {
   $("soundBtn").textContent = soundOn ? I18N[gameLang].soundOn : I18N[gameLang].soundOff;
   if (!soundOn) {
     stopMenuMusic();
+    stopQuestionWhisper();
+    stopQuestionAudio();
+    stopBenefitAudio();
+    stopPunishmentAudio();
   } else if ($("setup") && !$("setup").hidden) {
     if (menuAudio) {
       menuAudio.currentTime = 0;
