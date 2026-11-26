@@ -404,26 +404,72 @@ function getCasilla1Path() {
   return "M " + pts.join(" L ") + " Z";
 }
 
-// Emblem drawn on each kind of tile.
+// White-pencil on black hand-drawn SVG emblems for each tile type (matching logo style)
 const GLYPHS = {
-  Q: '<span class="g-q"><b>?</b></span>',
-  B: '<span class="g-b"><i class="salt"></i><i class="flame"></i><i class="wax"></i></span>',
-  P: '<span class="g-p"><i class="tri"></i><i class="eye"></i></span>',
-  L: '<span class="g-l"><b class="limbo-mark">&#x2620;</b></span>',
-  M: '<span class="g-m"><b class="meta-mark">&#x2605;</b></span>',
+  Q: `<span class="pencil-glyph pg-q" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44">
+          <circle cx="24" cy="24" r="18" fill="none" stroke="#e8e4dc" stroke-width="1.6" stroke-dasharray="38 4 28 3" stroke-linecap="round"/>
+          <circle cx="24" cy="24" r="15.2" fill="none" stroke="#e8e4dc" stroke-width="0.9" stroke-opacity="0.55" stroke-dasharray="18 5 22 4" stroke-linecap="round"/>
+          <path d="M19.5 18.5 C19.5 14.2 28.5 13.8 28.5 18.5 C28.5 22 24 22.8 24 26.5" fill="none" stroke="#f0ece4" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="24" cy="32.2" r="1.7" fill="#f0ece4"/>
+        </svg>
+      </span>`,
+  B: `<span class="pencil-glyph pg-b" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44">
+          <circle cx="24" cy="24" r="19" fill="none" stroke="#e8e4dc" stroke-width="1.4" stroke-dasharray="2.5 4.5" stroke-linecap="round" stroke-opacity="0.78"/>
+          <path d="M24 8 C26.8 12.5 28 15.8 26.8 18.8 C25.9 20.8 22.1 20.8 21.2 18.8 C20 15.8 21.2 12.5 24 8 Z" fill="none" stroke="#f2eee6" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="M24 12.5 C24.8 14.5 25.1 16.2 24 17.6" fill="none" stroke="#f2eee6" stroke-width="1.1" stroke-linecap="round"/>
+          <line x1="24" y1="19.5" x2="24" y2="22" stroke="#e8e4dc" stroke-width="1.3" stroke-linecap="round"/>
+          <path d="M19.5 22 L28.5 22 L28.2 37.5 L19.8 37.5 Z" fill="none" stroke="#e8e4dc" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="M21 22 C21.2 26 22.8 26 23 22 M25.5 22 C25.7 28 27 28 27.2 22" fill="none" stroke="#e8e4dc" stroke-width="1.1" stroke-linecap="round" stroke-opacity="0.8"/>
+          <line x1="16.5" y1="37.8" x2="31.5" y2="37.8" stroke="#e8e4dc" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </span>`,
+  P: `<span class="pencil-glyph pg-p" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44">
+          <polygon points="8,12 40,12 24,39" fill="none" stroke="#e8e4dc" stroke-width="1.8" stroke-linejoin="round"/>
+          <polygon points="12.5,14.5 35.5,14.5 24,34.5" fill="none" stroke="#e8e4dc" stroke-width="0.9" stroke-opacity="0.55" stroke-linejoin="round"/>
+          <path d="M16 20.5 Q24 14.5 32 20.5 Q24 26.5 16 20.5 Z" fill="none" stroke="#f0ece4" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="24" cy="20.5" r="2.7" fill="#f0ece4"/>
+          <circle cx="23.2" cy="19.7" r="0.8" fill="#000000"/>
+        </svg>
+      </span>`,
+  L: `<span class="pencil-glyph pg-l" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44">
+          <circle cx="24" cy="24" r="19" fill="none" stroke="#e8e4dc" stroke-width="1.4" stroke-dasharray="14 4 22 4" stroke-linecap="round"/>
+          <path d="M15.5 23 C15.5 15.5 32.5 15.5 32.5 23 C32.5 26.8 30.2 28.8 29 30.2 L29 34.5 L19 34.5 L19 30.2 C17.8 28.8 15.5 26.8 15.5 23 Z" fill="none" stroke="#f0ece4" stroke-width="1.6" stroke-linejoin="round"/>
+          <circle cx="20.2" cy="22.8" r="2.3" fill="none" stroke="#f0ece4" stroke-width="1.4"/>
+          <circle cx="27.8" cy="22.8" r="2.3" fill="none" stroke="#f0ece4" stroke-width="1.4"/>
+          <path d="M24 26.2 L22.7 28.8 L25.3 28.8 Z" fill="none" stroke="#f0ece4" stroke-width="1.1" stroke-linejoin="round"/>
+          <line x1="21.5" y1="31.5" x2="21.5" y2="34.5" stroke="#f0ece4" stroke-width="1.2"/>
+          <line x1="24" y1="31.5" x2="24" y2="34.5" stroke="#f0ece4" stroke-width="1.2"/>
+          <line x1="26.5" y1="31.5" x2="26.5" y2="34.5" stroke="#f0ece4" stroke-width="1.2"/>
+        </svg>
+      </span>`,
+  M: `<span class="pencil-glyph pg-m" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44">
+          <circle cx="24" cy="24" r="19" fill="none" stroke="#f0ece4" stroke-width="1.5" stroke-dasharray="28 4 18 4" stroke-linecap="round"/>
+          <polygon points="24,8.5 27.6,18.2 38,18.6 29.8,25 32.6,35 24,29.2 15.4,35 18.2,25 10,18.6 20.4,18.2" fill="none" stroke="#f2eee6" stroke-width="1.7" stroke-linejoin="round"/>
+          <circle cx="24" cy="23.5" r="3.2" fill="none" stroke="#f2eee6" stroke-width="1.2"/>
+        </svg>
+      </span>`,
   S: "",
 };
 
 function buildPedestal() {
   const ped = document.createElement("div");
-  ped.className = "ped";
-  [["base", 64, 64, 8, 0], ["col", 44, 44, 30, 8], ["cap", 56, 56, 6, 38]].forEach(([cls, w, d, h, z]) => {
-    const box = document.createElement("div");
-    box.className = "box " + cls;
-    box.style.cssText = `--w:${w}px;--d:${d}px;--h:${h}px;--z:${z}px`;
-    box.innerHTML = '<i class="f top"></i><i class="f n"></i><i class="f s"></i><i class="f e"></i><i class="f w"></i>';
-    ped.appendChild(box);
-  });
+  ped.className = "ped ped-eye";
+  ped.innerHTML = `
+    <div class="ped-eye-rim" aria-hidden="true"></div>
+    <div class="ped-eye-top" aria-hidden="true">
+      <div class="ped-eye-stage">
+        <img src="assets/eye-sclera.png" alt="" class="gow-eye-sclera">
+        <img src="assets/eye-pupil.png" alt="" class="gow-eye-pupil">
+        <img src="assets/eye-eyelids.png" alt="" class="gow-eye-eyelids">
+        <img src="assets/eye-blink.png" alt="" class="gow-eye-blink">
+      </div>
+    </div>
+  `;
   return ped;
 }
 
@@ -432,7 +478,7 @@ function buildBoard() {
   board.innerHTML = "";
   tiles = [];
 
-  // 1. Create SVG spiral board
+  // 1. Create SVG spiral board matching the logo's white-pencil-on-black style
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.id = "boardSvg";
   svg.setAttribute("viewBox", "0 0 680 680");
@@ -441,43 +487,16 @@ function buildBoard() {
 
   let svgInner = `
     <defs>
-      <radialGradient id="boardBaseGrad" cx="45%" cy="40%" r="55%">
-        <stop offset="0%" stop-color="#181312" />
-        <stop offset="65%" stop-color="#0c0909" />
-        <stop offset="100%" stop-color="#040303" />
-      </radialGradient>
-      <linearGradient id="qGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#241a2e" />
-        <stop offset="100%" stop-color="#0c0712" />
-      </linearGradient>
-      <linearGradient id="bGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#2d2114" />
-        <stop offset="100%" stop-color="#0d0905" />
-      </linearGradient>
-      <linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#2c0f13" />
-        <stop offset="100%" stop-color="#0d0305" />
-      </linearGradient>
-      <linearGradient id="sGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#38131a" />
-        <stop offset="100%" stop-color="#120407" />
-      </linearGradient>
-      <linearGradient id="mGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#142c1b" />
-        <stop offset="100%" stop-color="#050e08" />
-      </linearGradient>
-      <linearGradient id="lGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#363336" />
-        <stop offset="50%" stop-color="#222123" />
-        <stop offset="100%" stop-color="#111013" />
-      </linearGradient>
-      <path id="arcTop" d="M 90,340 A 250,250 0 0 1 590,340" />
-      <path id="arcBottom" d="M 590,340 A 250,250 0 0 1 90,340" />
+      <filter id="chalkStroke" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="2" result="noise" seed="7" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <path id="arcTop" d="M 16,340 A 324,324 0 0 1 664,340" />
+      <path id="arcBottom" d="M 664,340 A 324,324 0 0 1 16,340" />
     </defs>
-    <circle cx="340" cy="340" r="338" fill="url(#boardBaseGrad)" stroke="#c5b89a" stroke-width="2.6" stroke-opacity="0.4" />
-    <circle cx="340" cy="340" r="332" fill="none" stroke="#c5b89a" stroke-width="1" stroke-dasharray="3,5" stroke-opacity="0.25" />
-    <circle cx="340" cy="340" r="326" fill="none" stroke="#c5b89a" stroke-width="0.7" stroke-opacity="0.15" />
-    <g fill="#c5b89a" fill-opacity="0.32" font-family="'Cinzel', Georgia, serif" font-size="11.5" text-anchor="middle" letter-spacing="14">
+    <circle cx="340" cy="340" r="338" fill="#000000" stroke="#e4e0d8" stroke-width="2.6" stroke-opacity="0.78" filter="url(#chalkStroke)" />
+    <circle cx="340" cy="340" r="313" fill="none" stroke="#dcd8d0" stroke-width="1.1" stroke-dasharray="6,4,2,4" stroke-opacity="0.4" filter="url(#chalkStroke)" />
+    <g fill="#e6e2da" fill-opacity="0.82" font-family="'Cinzel', Georgia, serif" font-size="13.5" font-weight="700" text-anchor="middle" dominant-baseline="middle" letter-spacing="14" filter="url(#chalkStroke)">
       <text><textPath href="#arcTop" startOffset="50%">GUESS</textPath></text>
       <text><textPath href="#arcBottom" startOffset="50%">OR DIE</textPath></text>
     </g>
@@ -493,9 +512,7 @@ function buildBoard() {
     if (type === "S") {
       path = getCasilla1Path();
       innerContent = `
-        <circle cx="340" cy="340" r="26" fill="none" stroke="#c5b89a" stroke-width="0.9" stroke-dasharray="2,3" stroke-opacity="0.4" />
-        <text class="casilla-label salida" x="340" y="347">SALIDA</text>
-        <text class="casilla-sublabel" fill="#c2323e" x="340" y="358">▲ INICIO</text>
+        <circle cx="340" cy="340" r="44" fill="none" stroke="#e4e0d8" stroke-width="1.1" stroke-dasharray="3,4" stroke-opacity="0.55" filter="url(#chalkStroke)" />
       `;
     } else if (type === "M") {
       path = getSpiralTilePath(coord.th1, coord.th2);
@@ -512,19 +529,14 @@ function buildBoard() {
       innerContent = ``;
     }
 
-    let grad = `url(#${type.toLowerCase()}Grad)`;
-    let strokeCol = "#c5b89a";
-    let strokeOpacity = "0.4";
-    if (type === "Q") strokeCol = "#b7a4e0";
-    else if (type === "B") strokeCol = "#e7b552";
-    else if (type === "P") strokeCol = "#c2323e";
-    else if (type === "L") { strokeCol = "#dedad2"; strokeOpacity = "0.75"; }
-    else if (type === "M") { strokeCol = "#52c48a"; strokeOpacity = "0.7"; }
-    else if (type === "S") { strokeCol = "#c2323e"; strokeOpacity = "0.6"; }
+    const isSpecial = type === "L" || type === "M" || type === "S";
+    const strokeCol = isSpecial ? "#f0ece4" : "#d8d4cc";
+    const strokeOpacity = isSpecial ? "0.85" : "0.65";
+    const strokeWidth = isSpecial ? "1.9" : "1.5";
 
     svgInner += `
       <g id="casilla-${num}" class="casilla-g type-${type}">
-        <path class="casilla-path" d="${path}" fill="${grad}" stroke="${strokeCol}" stroke-width="1.4" stroke-opacity="${strokeOpacity}" />
+        <path class="casilla-path" d="${path}" fill="#000000" stroke="${strokeCol}" stroke-width="${strokeWidth}" stroke-opacity="${strokeOpacity}" filter="url(#chalkStroke)" />
         ${innerContent}
       </g>
     `;
