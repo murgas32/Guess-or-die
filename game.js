@@ -47,19 +47,21 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // Your own screamer files go here, e.g. "assets/screamers/1.jpg" and "assets/screamers/1.mp3".
 // While these lists are empty, the built-in face and a synthesized scream are used.
 const SCREAMER_IMAGES = [];
-const SCREAMER_SOUNDS = [];
+const SCREAMER_SOUNDS = ["assets/sounds/screamer.wav"];
 
 // ---- Sound Assets & System ----
 const SOUND_FILES = {
   menu: "assets/sounds/song_menu.mp3",
   dice: "assets/sounds/dados.mp3",
-  ficha: "assets/sounds/fichas.mp3"
+  ficha: "assets/sounds/fichas.mp3",
+  screamer: "assets/sounds/screamer.wav"
 };
 
 let audioCtx = null, soundOn = true;
 let menuAudio = null;
 let diceBuffer = null;
 let fichaBuffer = null;
+let screamerBuffer = null;
 let buffersLoading = false;
 
 function audio() {
@@ -75,7 +77,8 @@ function loadSoundBuffers() {
   buffersLoading = true;
   Promise.all([
     fetch(SOUND_FILES.dice).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { diceBuffer = decoded; }).catch(() => {}),
-    fetch(SOUND_FILES.ficha).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { fichaBuffer = decoded; }).catch(() => {})
+    fetch(SOUND_FILES.ficha).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { fichaBuffer = decoded; }).catch(() => {}),
+    fetch(SOUND_FILES.screamer).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { screamerBuffer = decoded; }).catch(() => {})
   ]).finally(() => { buffersLoading = false; });
 }
 
@@ -301,29 +304,80 @@ function stopQuestionWhisper() {
 
 function playScream() {
   if (!soundOn) return;
-  if (SCREAMER_SOUNDS.length) {
-    new Audio(SCREAMER_SOUNDS[Math.floor(Math.random() * SCREAMER_SOUNDS.length)]).play().catch(() => {});
-    return;
-  }
+
+  // 1. Reproducción de cero latencia del buffer de audio decodificado
   const c = audio();
-  if (!c) return;
-  const t = c.currentTime, out = c.createGain();
-  out.gain.setValueAtTime(0.0001, t);
-  out.gain.exponentialRampToValueAtTime(0.6, t + 0.02);
-  out.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
-  out.connect(c.destination);
-  const buf = c.createBuffer(1, Math.floor(c.sampleRate * 1.3), c.sampleRate), data = buf.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-  const noise = c.createBufferSource(), band = c.createBiquadFilter();
-  noise.buffer = buf; band.type = "bandpass"; band.Q.value = 0.8;
-  band.frequency.setValueAtTime(2500, t); band.frequency.exponentialRampToValueAtTime(400, t + 1.2);
-  noise.connect(band); band.connect(out); noise.start(t);
-  const screech = c.createOscillator(); screech.type = "sawtooth";
-  screech.frequency.setValueAtTime(1400, t); screech.frequency.exponentialRampToValueAtTime(180, t + 1.1);
-  screech.connect(out); screech.start(t); screech.stop(t + 1.3);
-  const boom = c.createOscillator(); boom.type = "sine";
-  boom.frequency.setValueAtTime(90, t); boom.frequency.exponentialRampToValueAtTime(35, t + 0.6);
-  boom.connect(out); boom.start(t); boom.stop(t + 0.8);
+  let bufferPlayed = false;
+  if (c && screamerBuffer) {
+    try {
+      const src = c.createBufferSource();
+      const gain = c.createGain();
+      src.buffer = screamerBuffer;
+      gain.gain.setValueAtTime(1.0, c.currentTime);
+      src.connect(gain);
+      gain.connect(c.destination);
+      src.start(0);
+      bufferPlayed = true;
+    } catch (e) {}
+  }
+
+  // 2. Elemento de audio precargado como respaldo inmediato
+  if (!bufferPlayed) {
+    try {
+      const a = $("audioScreamer");
+      if (a) {
+        a.currentTime = 0;
+        a.volume = 1.0;
+        a.play().catch(() => {});
+      } else {
+        const soundFile = SCREAMER_SOUNDS.length
+          ? SCREAMER_SOUNDS[Math.floor(Math.random() * SCREAMER_SOUNDS.length)]
+          : "assets/sounds/screamer.wav";
+        const audioObj = new Audio(soundFile);
+        audioObj.volume = 1.0;
+        audioObj.play().catch(() => {});
+      }
+    } catch (e) {}
+  }
+
+  // 3. Capa física de refuerzo sintético (sub-bass visceral que retumba en el pecho + distorsión abrasiva)
+  if (c) {
+    try {
+      const t = c.currentTime;
+      // Sub-bass thump súbito (golpe sordo)
+      const subOsc = c.createOscillator();
+      const subGain = c.createGain();
+      subOsc.type = "sine";
+      subOsc.frequency.setValueAtTime(130, t);
+      subOsc.frequency.exponentialRampToValueAtTime(28, t + 0.45);
+      subGain.gain.setValueAtTime(0.85, t);
+      subGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+      subOsc.connect(subGain);
+      subGain.connect(c.destination);
+      subOsc.start(t);
+      subOsc.stop(t + 0.75);
+
+      // Desgarro ruidoso de choque transitorio
+      const buf = c.createBuffer(1, Math.floor(c.sampleRate * 0.35), c.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (c.sampleRate * 0.08));
+      }
+      const noise = c.createBufferSource();
+      noise.buffer = buf;
+      const band = c.createBiquadFilter();
+      band.type = "bandpass";
+      band.frequency.setValueAtTime(3400, t);
+      band.Q.value = 2.8;
+      const noiseGain = c.createGain();
+      noiseGain.gain.setValueAtTime(0.65, t);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      noise.connect(band);
+      band.connect(noiseGain);
+      noiseGain.connect(c.destination);
+      noise.start(t);
+    } catch (e) {}
+  }
 }
 
 // Multi-language dictionary
@@ -1687,44 +1741,34 @@ function playTypeSound() {
 
 function animateEyeSequence() {
   return new Promise((resolve) => {
-    const clipPath = $("eyeClipPath");
-    const upperLine = $("upperLidLine");
-    const lowerLine = $("lowerLidLine");
-    const innerShadow = $("innerLidShadow");
-    const upperCrease = $("upperCrease");
-    const pupil = $("eyePupil");
+    const stage = $("winEyeStage");
+    const lidTop = $("winLidTop");
+    const lidBottom = $("winLidBottom");
+    const blink = $("winEyeBlink");
+    const pupil = $("winPupil");
 
     const tOpen = 2400;   // 2.4s para abrirse lentamente
-    const tHold = 2000;   // 2.0s mirando fijamente al jugador
+    const tHold = 2200;   // 2.2s mirando fijamente al jugador
     const tClose = 1800;  // 1.8s para volver a cerrarse
     const startTime = performance.now();
 
     function setEyeProgress(progress, elapsed) {
       // progress: 0 (cerrado) a 1 (completamente abierto)
-      const upperY = 175 - 130 * progress;
-      const lowerY = 175 + 130 * progress;
-      const shadowY = 175 - 90 * progress;
+      const clamped = Math.max(0, Math.min(1, progress));
+      const openPct = (clamped * 49).toFixed(2);
+      const topPct = (-clamped * 110).toFixed(2);
+      const botPct = (clamped * 110).toFixed(2);
+      const blinkOp = (1 - clamped).toFixed(3);
 
-      const dClip = `M 80 175 Q 300 ${upperY} 520 175 Q 300 ${lowerY} 80 175 Z`;
-      const dUpper = `M 80 175 Q 300 ${upperY} 520 175`;
-      const dLower = `M 80 175 Q 300 ${lowerY} 520 175`;
-      const dShadow = `M 80 175 Q 300 ${upperY} 520 175 Q 300 ${shadowY} 80 175 Z`;
-
-      if (clipPath) clipPath.setAttribute("d", dClip);
-      if (upperLine) upperLine.setAttribute("d", dUpper);
-      if (lowerLine) lowerLine.setAttribute("d", dLower);
-      if (innerShadow) innerShadow.setAttribute("d", dShadow);
-
-      if (upperCrease) {
-        const creaseY = 175 - 150 * progress;
-        upperCrease.setAttribute("d", `M 120 165 Q 300 ${creaseY} 480 165`);
-        upperCrease.style.opacity = String(progress * 0.7);
-      }
+      if (stage) stage.style.setProperty("--eye-open", `${openPct}%`);
+      if (lidTop) lidTop.style.setProperty("--lid-top-y", `${topPct}%`);
+      if (lidBottom) lidBottom.style.setProperty("--lid-bottom-y", `${botPct}%`);
+      if (blink) blink.style.setProperty("--blink-opacity", blinkOp);
 
       if (pupil) {
-        const baseR = 30;
-        const pulse = Math.sin(elapsed / 320) * 2.2 * progress;
-        pupil.setAttribute("r", String(Math.max(20, baseR + pulse)));
+        // Mirada fija al frente, con un sutil micro-latido de presencia viva
+        const breath = 1 + Math.sin(elapsed / 320) * 0.02 * clamped;
+        pupil.style.transform = `translateX(0) scale(${breath.toFixed(4)})`;
       }
     }
 
@@ -1753,6 +1797,7 @@ function animateEyeSequence() {
       }
     }
 
+    setEyeProgress(0, 0);
     requestAnimationFrame(frame);
   });
 }
@@ -1799,7 +1844,9 @@ async function playWinCinematic(winner, explanation) {
 
   // 2. El ojo se abre lentamente, mirando al frente, y luego vuelve a cerrarse
   playEyeDrone();
+  playQuestionWhisper();
   await animateEyeSequence();
+  stopQuestionWhisper();
 
   // Pausa en negro tras cerrarse el ojo
   await sleep(500);
@@ -1915,7 +1962,7 @@ function getRulesHTML(lang) {
   if (lang === "en") {
     return `
       <h3>Objective</h3>
-      <p>Travel through the 32 cursed tiles of the board and be the first survivor to complete the lap and return to the start.</p>
+      <p>Travel through the 50 cursed tiles of the spiral board and be the first survivor to reach the GOAL (tile 50) or be the last one standing.</p>
       <h3>Survival & 3 Lives</h3>
       <p>Each player begins with <strong>3 lives</strong>. Answering incorrectly or letting the candle burn out costs 1 life and sends you back to the start (unless protected by a shield or anchor). Losing all 3 lives eliminates you and activates <strong>Spectator Mode</strong> to watch the remaining players.</p>
       <h3>Cursed Tiles</h3>
@@ -1931,7 +1978,7 @@ function getRulesHTML(lang) {
   }
   return `
     <h3>Objetivo</h3>
-    <p>Recorre las 32 casillas malditas del tablero y sé el primer superviviente en completar la vuelta y regresar al inicio.</p>
+    <p>Recorre las 50 casillas malditas del tablero en espiral y sé el primer superviviente en alcanzar la META (casilla 50) o ser el último en pie.</p>
     <h3>Supervivencia y 3 Vidas</h3>
     <p>Cada jugador cuenta con <strong>3 vidas</strong>. Responder incorrectamente o que se consuma la vela cuesta 1 vida y regresa al peón a la casilla de salida (salvo protección de escudos o anclas). Perder las 3 vidas elimina al jugador y activa el <strong>Modo Espectador</strong> para seguir presenciando la partida.</p>
     <h3>Casillas del Tablero</h3>
@@ -1952,12 +1999,12 @@ function getCreditsHTML(lang) {
     <p><strong>Programa:</strong> Análisis y Desarrollo de Software (ADSO)<br><strong>Ficha:</strong> 3408345 | <strong>Centro:</strong> SENA</p>
     <h3>Equipo de Desarrollo</h3>
     <ul>
-      <li><strong>Miguel Andrés Murgas García</strong> — Líder de Proyecto / Frontend</li>
-      <li><strong>Joiman Enoc Rico Bueno</strong> — Lógica y Mecánicas de Juego</li>
-      <li><strong>Jesús Samuel Suarez Padilla</strong> — Diseño UI/UX y CSS 3D</li>
-      <li><strong>Yoimer Jimenez Peinado</strong> — Contenido Bilingüe y Preguntas</li>
-      <li><strong>Jesús José Castro Genez</strong> — Audio, Screamers y Enemigos</li>
-      <li><strong>Jose Angel Soto Mejia</strong> — Documentación Técnica y QA</li>
+      <li><strong>Miguel Andrés Murgas García</strong></li>
+      <li><strong>Joiman Enoc Rico Bueno</strong></li>
+      <li><strong>Jesús Samuel Suarez Padilla</strong></li>
+      <li><strong>Yoimer Jimenez Peinado</strong></li>
+      <li><strong>Jesús José Castro Genez</strong></li>
+      <li><strong>Jose Angel Soto Mejia</strong></li>
     </ul>
     <h3>Tecnología</h3>
     <p>Desarrollado en HTML5 semántico, CSS 3D nativo y JavaScript moderno (ES6+ Vanilla). Sin librerías externas.</p>
