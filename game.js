@@ -49,13 +49,256 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const SCREAMER_IMAGES = [];
 const SCREAMER_SOUNDS = [];
 
-// ---- Sound ----
+// ---- Sound Assets & System ----
+const SOUND_FILES = {
+  menu: "assets/sounds/song_menu.mp3",
+  dice: "assets/sounds/dados.mp3",
+  ficha: "assets/sounds/fichas.mp3"
+};
+
 let audioCtx = null, soundOn = true;
+let menuAudio = null;
+let diceBuffer = null;
+let fichaBuffer = null;
+let buffersLoading = false;
+
 function audio() {
   if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { /* no audio */ } }
   if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
   return audioCtx;
 }
+
+function loadSoundBuffers() {
+  if (buffersLoading || diceBuffer) return;
+  const c = audio();
+  if (!c) return;
+  buffersLoading = true;
+  Promise.all([
+    fetch(SOUND_FILES.dice).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { diceBuffer = decoded; }).catch(() => {}),
+    fetch(SOUND_FILES.ficha).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { fichaBuffer = decoded; }).catch(() => {})
+  ]).finally(() => { buffersLoading = false; });
+}
+
+function initAudioSystem() {
+  menuAudio = $("menuMusic") || new Audio(SOUND_FILES.menu);
+  menuAudio.loop = true;
+  menuAudio.volume = 0.825; // Incrementado un 50% (de 0.55 a 0.825)
+
+  // Garantizar bucle continuo: cada que termine el sonido del menú, se repite
+  menuAudio.addEventListener("ended", () => {
+    if (soundOn && $("setup") && !$("setup").hidden) {
+      menuAudio.currentTime = 0;
+      menuAudio.play().catch(() => {});
+    }
+  });
+
+  const startMenuPlayback = () => {
+    loadSoundBuffers();
+    if (soundOn && menuAudio && $("setup") && !$("setup").hidden && menuAudio.paused) {
+      menuAudio.play().catch(() => {});
+    }
+  };
+
+  // Intentar reproducción inmediata o en primera interacción (política autoplay del navegador)
+  if (soundOn && $("setup") && !$("setup").hidden) {
+    menuAudio.play().catch(() => {});
+  }
+  window.addEventListener("click", startMenuPlayback, { passive: true });
+  window.addEventListener("keydown", startMenuPlayback, { passive: true });
+  window.addEventListener("touchstart", startMenuPlayback, { passive: true });
+}
+
+function stopMenuMusic() {
+  if (menuAudio) {
+    menuAudio.pause();
+    menuAudio.currentTime = 0;
+  }
+}
+
+function playDiceSound() {
+  if (!soundOn) return;
+  const c = audio();
+  if (c && diceBuffer) {
+    try {
+      const src = c.createBufferSource();
+      const gain = c.createGain();
+      gain.gain.value = 0.95;
+      src.buffer = diceBuffer;
+      src.connect(gain);
+      gain.connect(c.destination);
+      src.start(0);
+      return;
+    } catch (e) {}
+  }
+  const a = new Audio(SOUND_FILES.dice);
+  a.volume = 0.95;
+  a.play().catch(() => {});
+}
+
+function playFichaSound() {
+  if (!soundOn) return;
+  const c = audio();
+  if (c && fichaBuffer) {
+    try {
+      const src = c.createBufferSource();
+      const gain = c.createGain();
+      gain.gain.value = 0.85;
+      src.buffer = fichaBuffer;
+      src.connect(gain);
+      gain.connect(c.destination);
+      src.start(0);
+      return;
+    } catch (e) {}
+  }
+  const a = new Audio(SOUND_FILES.ficha);
+  a.volume = 0.85;
+  a.play().catch(() => {});
+}
+
+// ---- Question Countdown Audios by Category ----
+const QUESTION_AUDIO_CONFIG = {
+  Sports: {
+    src: "assets/sounds/question_sports.mp3",
+    elemId: "qAudioSports",
+    duration: 14.00
+  },
+  Geography: {
+    src: "assets/sounds/question_geography.mp3",
+    elemId: "qAudioGeography",
+    duration: 19.96
+  },
+  History: {
+    src: "assets/sounds/question_history.mp3",
+    elemId: "qAudioHistory",
+    duration: 20.07
+  },
+  Mathematics: {
+    src: "assets/sounds/question_math.mp3",
+    elemId: "qAudioMath",
+    duration: 19.52
+  }
+};
+
+let currentQuestionAudio = null;
+
+function startQuestionAudio(category, effectiveSeconds) {
+  if (!soundOn) return;
+  stopQuestionAudio();
+
+  const cfg = QUESTION_AUDIO_CONFIG[category] || QUESTION_AUDIO_CONFIG.History;
+  const audio = $(cfg.elemId) || new Audio(cfg.src);
+  audio.volume = 0.85;
+
+  if (effectiveSeconds > 0) {
+    // Adapta el audio a la duración exacta del temporizador (15s, 20s, 30s o presión temporal)
+    const rate = cfg.duration / effectiveSeconds;
+    const clampedRate = Math.max(0.15, Math.min(4.0, rate));
+    audio.playbackRate = clampedRate;
+    audio.defaultPlaybackRate = clampedRate;
+    audio.loop = false;
+    audio.currentTime = 0;
+    audio.onplay = () => { audio.playbackRate = clampedRate; };
+    // Si concluye ligeramente antes del tiempo de vela, se reinicia suavemente
+    audio.onended = () => {
+      if (currentQuestionAudio === audio) {
+        audio.currentTime = 0;
+        audio.playbackRate = clampedRate;
+        audio.play().catch(() => {});
+      }
+    };
+  } else {
+    // Si lo pone en ilimitado (sin límite), el audio se repite infinitamente
+    audio.playbackRate = 1.0;
+    audio.defaultPlaybackRate = 1.0;
+    audio.loop = true;
+    audio.currentTime = 0;
+    audio.onended = () => {
+      if (currentQuestionAudio === audio) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }
+    };
+  }
+
+  currentQuestionAudio = audio;
+  audio.play().catch(() => {});
+}
+
+function stopQuestionAudio() {
+  if (currentQuestionAudio) {
+    currentQuestionAudio.pause();
+    currentQuestionAudio.currentTime = 0;
+    currentQuestionAudio.onended = null;
+    currentQuestionAudio = null;
+  }
+}
+
+// ---- Event & Question Atmosphere Audios ----
+let currentBenefitAudio = null;
+let currentPunishmentAudio = null;
+let currentWhisperAudio = null;
+
+function playBenefitAudio() {
+  if (!soundOn) return;
+  stopBenefitAudio();
+  const a = $("audioBenefit") || new Audio("assets/sounds/benefit.mp3");
+  a.currentTime = 0;
+  a.volume = 0.85;
+  a.play().catch(() => {});
+  currentBenefitAudio = a;
+}
+
+function stopBenefitAudio() {
+  if (currentBenefitAudio) {
+    currentBenefitAudio.pause();
+    currentBenefitAudio.currentTime = 0;
+    currentBenefitAudio = null;
+  }
+}
+
+function playPunishmentAudio() {
+  if (!soundOn) return;
+  stopPunishmentAudio();
+  const a = $("audioPunishment") || new Audio("assets/sounds/punishment.mp3");
+  a.currentTime = 0;
+  a.volume = 0.85;
+  a.play().catch(() => {});
+  currentPunishmentAudio = a;
+}
+
+function stopPunishmentAudio() {
+  if (currentPunishmentAudio) {
+    currentPunishmentAudio.pause();
+    currentPunishmentAudio.currentTime = 0;
+    currentPunishmentAudio = null;
+  }
+}
+
+function playQuestionWhisper() {
+  if (!soundOn) return;
+  stopQuestionWhisper();
+  const a = $("audioWhisperQ") || new Audio("assets/sounds/whisper_question.mp3");
+  a.currentTime = 0;
+  a.volume = 0.95;
+  a.play().catch(() => {});
+  currentWhisperAudio = a;
+}
+
+function stopQuestionWhisper() {
+  if (currentWhisperAudio) {
+    currentWhisperAudio.pause();
+    currentWhisperAudio.currentTime = 0;
+    currentWhisperAudio.onended = null;
+    currentWhisperAudio = null;
+  }
+  const el = $("audioWhisperQ");
+  if (el) {
+    el.pause();
+    el.currentTime = 0;
+    el.onended = null;
+  }
+}
+
 function playScream() {
   if (!soundOn) return;
   if (SCREAMER_SOUNDS.length) {
@@ -404,26 +647,72 @@ function getCasilla1Path() {
   return "M " + pts.join(" L ") + " Z";
 }
 
-// Emblem drawn on each kind of tile.
+// White-pencil on black hand-drawn SVG emblems for each tile type (matching logo style)
 const GLYPHS = {
-  Q: '<span class="g-q"><b>?</b></span>',
-  B: '<span class="g-b"><i class="salt"></i><i class="flame"></i><i class="wax"></i></span>',
-  P: '<span class="g-p"><i class="tri"></i><i class="eye"></i></span>',
-  L: '<span class="g-l"><b class="limbo-mark">&#x2620;</b></span>',
-  M: '<span class="g-m"><b class="meta-mark">&#x2605;</b></span>',
+  Q: `<span class="pencil-glyph pg-q" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44">
+          <circle cx="24" cy="24" r="18" fill="none" stroke="#e8e4dc" stroke-width="1.6" stroke-dasharray="38 4 28 3" stroke-linecap="round"/>
+          <circle cx="24" cy="24" r="15.2" fill="none" stroke="#e8e4dc" stroke-width="0.9" stroke-opacity="0.55" stroke-dasharray="18 5 22 4" stroke-linecap="round"/>
+          <path d="M19.5 18.5 C19.5 14.2 28.5 13.8 28.5 18.5 C28.5 22 24 22.8 24 26.5" fill="none" stroke="#f0ece4" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="24" cy="32.2" r="1.7" fill="#f0ece4"/>
+        </svg>
+      </span>`,
+  B: `<span class="pencil-glyph pg-b" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44">
+          <circle cx="24" cy="24" r="19" fill="none" stroke="#e8e4dc" stroke-width="1.4" stroke-dasharray="2.5 4.5" stroke-linecap="round" stroke-opacity="0.78"/>
+          <path d="M24 8 C26.8 12.5 28 15.8 26.8 18.8 C25.9 20.8 22.1 20.8 21.2 18.8 C20 15.8 21.2 12.5 24 8 Z" fill="none" stroke="#f2eee6" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="M24 12.5 C24.8 14.5 25.1 16.2 24 17.6" fill="none" stroke="#f2eee6" stroke-width="1.1" stroke-linecap="round"/>
+          <line x1="24" y1="19.5" x2="24" y2="22" stroke="#e8e4dc" stroke-width="1.3" stroke-linecap="round"/>
+          <path d="M19.5 22 L28.5 22 L28.2 37.5 L19.8 37.5 Z" fill="none" stroke="#e8e4dc" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="M21 22 C21.2 26 22.8 26 23 22 M25.5 22 C25.7 28 27 28 27.2 22" fill="none" stroke="#e8e4dc" stroke-width="1.1" stroke-linecap="round" stroke-opacity="0.8"/>
+          <line x1="16.5" y1="37.8" x2="31.5" y2="37.8" stroke="#e8e4dc" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </span>`,
+  P: `<span class="pencil-glyph pg-p" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44">
+          <polygon points="8,12 40,12 24,39" fill="none" stroke="#e8e4dc" stroke-width="1.8" stroke-linejoin="round"/>
+          <polygon points="12.5,14.5 35.5,14.5 24,34.5" fill="none" stroke="#e8e4dc" stroke-width="0.9" stroke-opacity="0.55" stroke-linejoin="round"/>
+          <path d="M16 20.5 Q24 14.5 32 20.5 Q24 26.5 16 20.5 Z" fill="none" stroke="#f0ece4" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="24" cy="20.5" r="2.7" fill="#f0ece4"/>
+          <circle cx="23.2" cy="19.7" r="0.8" fill="#000000"/>
+        </svg>
+      </span>`,
+  L: `<span class="pencil-glyph pg-l" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44">
+          <circle cx="24" cy="24" r="19" fill="none" stroke="#e8e4dc" stroke-width="1.4" stroke-dasharray="14 4 22 4" stroke-linecap="round"/>
+          <path d="M15.5 23 C15.5 15.5 32.5 15.5 32.5 23 C32.5 26.8 30.2 28.8 29 30.2 L29 34.5 L19 34.5 L19 30.2 C17.8 28.8 15.5 26.8 15.5 23 Z" fill="none" stroke="#f0ece4" stroke-width="1.6" stroke-linejoin="round"/>
+          <circle cx="20.2" cy="22.8" r="2.3" fill="none" stroke="#f0ece4" stroke-width="1.4"/>
+          <circle cx="27.8" cy="22.8" r="2.3" fill="none" stroke="#f0ece4" stroke-width="1.4"/>
+          <path d="M24 26.2 L22.7 28.8 L25.3 28.8 Z" fill="none" stroke="#f0ece4" stroke-width="1.1" stroke-linejoin="round"/>
+          <line x1="21.5" y1="31.5" x2="21.5" y2="34.5" stroke="#f0ece4" stroke-width="1.2"/>
+          <line x1="24" y1="31.5" x2="24" y2="34.5" stroke="#f0ece4" stroke-width="1.2"/>
+          <line x1="26.5" y1="31.5" x2="26.5" y2="34.5" stroke="#f0ece4" stroke-width="1.2"/>
+        </svg>
+      </span>`,
+  M: `<span class="pencil-glyph pg-m" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44">
+          <circle cx="24" cy="24" r="19" fill="none" stroke="#f0ece4" stroke-width="1.5" stroke-dasharray="28 4 18 4" stroke-linecap="round"/>
+          <polygon points="24,8.5 27.6,18.2 38,18.6 29.8,25 32.6,35 24,29.2 15.4,35 18.2,25 10,18.6 20.4,18.2" fill="none" stroke="#f2eee6" stroke-width="1.7" stroke-linejoin="round"/>
+          <circle cx="24" cy="23.5" r="3.2" fill="none" stroke="#f2eee6" stroke-width="1.2"/>
+        </svg>
+      </span>`,
   S: "",
 };
 
 function buildPedestal() {
   const ped = document.createElement("div");
-  ped.className = "ped";
-  [["base", 64, 64, 8, 0], ["col", 44, 44, 30, 8], ["cap", 56, 56, 6, 38]].forEach(([cls, w, d, h, z]) => {
-    const box = document.createElement("div");
-    box.className = "box " + cls;
-    box.style.cssText = `--w:${w}px;--d:${d}px;--h:${h}px;--z:${z}px`;
-    box.innerHTML = '<i class="f top"></i><i class="f n"></i><i class="f s"></i><i class="f e"></i><i class="f w"></i>';
-    ped.appendChild(box);
-  });
+  ped.className = "ped ped-eye";
+  ped.innerHTML = `
+    <div class="ped-eye-rim" aria-hidden="true"></div>
+    <div class="ped-eye-top" aria-hidden="true">
+      <div class="ped-eye-stage">
+        <img src="assets/eye-sclera.png" alt="" class="gow-eye-sclera">
+        <img src="assets/eye-pupil.png" alt="" class="gow-eye-pupil">
+        <img src="assets/eye-eyelids.png" alt="" class="gow-eye-eyelids">
+        <img src="assets/eye-blink.png" alt="" class="gow-eye-blink">
+      </div>
+    </div>
+  `;
   return ped;
 }
 
@@ -432,7 +721,7 @@ function buildBoard() {
   board.innerHTML = "";
   tiles = [];
 
-  // 1. Create SVG spiral board
+  // 1. Create SVG spiral board matching the logo's white-pencil-on-black style
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.id = "boardSvg";
   svg.setAttribute("viewBox", "0 0 680 680");
@@ -441,43 +730,16 @@ function buildBoard() {
 
   let svgInner = `
     <defs>
-      <radialGradient id="boardBaseGrad" cx="45%" cy="40%" r="55%">
-        <stop offset="0%" stop-color="#181312" />
-        <stop offset="65%" stop-color="#0c0909" />
-        <stop offset="100%" stop-color="#040303" />
-      </radialGradient>
-      <linearGradient id="qGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#241a2e" />
-        <stop offset="100%" stop-color="#0c0712" />
-      </linearGradient>
-      <linearGradient id="bGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#2d2114" />
-        <stop offset="100%" stop-color="#0d0905" />
-      </linearGradient>
-      <linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#2c0f13" />
-        <stop offset="100%" stop-color="#0d0305" />
-      </linearGradient>
-      <linearGradient id="sGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#38131a" />
-        <stop offset="100%" stop-color="#120407" />
-      </linearGradient>
-      <linearGradient id="mGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#142c1b" />
-        <stop offset="100%" stop-color="#050e08" />
-      </linearGradient>
-      <linearGradient id="lGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#363336" />
-        <stop offset="50%" stop-color="#222123" />
-        <stop offset="100%" stop-color="#111013" />
-      </linearGradient>
-      <path id="arcTop" d="M 90,340 A 250,250 0 0 1 590,340" />
-      <path id="arcBottom" d="M 590,340 A 250,250 0 0 1 90,340" />
+      <filter id="chalkStroke" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="2" result="noise" seed="7" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <path id="arcTop" d="M 16,340 A 324,324 0 0 1 664,340" />
+      <path id="arcBottom" d="M 664,340 A 324,324 0 0 1 16,340" />
     </defs>
-    <circle cx="340" cy="340" r="338" fill="url(#boardBaseGrad)" stroke="#c5b89a" stroke-width="2.6" stroke-opacity="0.4" />
-    <circle cx="340" cy="340" r="332" fill="none" stroke="#c5b89a" stroke-width="1" stroke-dasharray="3,5" stroke-opacity="0.25" />
-    <circle cx="340" cy="340" r="326" fill="none" stroke="#c5b89a" stroke-width="0.7" stroke-opacity="0.15" />
-    <g fill="#c5b89a" fill-opacity="0.32" font-family="'Cinzel', Georgia, serif" font-size="11.5" text-anchor="middle" letter-spacing="14">
+    <circle cx="340" cy="340" r="338" fill="#000000" stroke="#e4e0d8" stroke-width="2.6" stroke-opacity="0.78" filter="url(#chalkStroke)" />
+    <circle cx="340" cy="340" r="313" fill="none" stroke="#dcd8d0" stroke-width="1.1" stroke-dasharray="6,4,2,4" stroke-opacity="0.4" filter="url(#chalkStroke)" />
+    <g fill="#e6e2da" fill-opacity="0.82" font-family="'Cinzel', Georgia, serif" font-size="13.5" font-weight="700" text-anchor="middle" dominant-baseline="middle" letter-spacing="14" filter="url(#chalkStroke)">
       <text><textPath href="#arcTop" startOffset="50%">GUESS</textPath></text>
       <text><textPath href="#arcBottom" startOffset="50%">OR DIE</textPath></text>
     </g>
@@ -493,9 +755,7 @@ function buildBoard() {
     if (type === "S") {
       path = getCasilla1Path();
       innerContent = `
-        <circle cx="340" cy="340" r="26" fill="none" stroke="#c5b89a" stroke-width="0.9" stroke-dasharray="2,3" stroke-opacity="0.4" />
-        <text class="casilla-label salida" x="340" y="347">SALIDA</text>
-        <text class="casilla-sublabel" fill="#c2323e" x="340" y="358">▲ INICIO</text>
+        <circle cx="340" cy="340" r="44" fill="none" stroke="#e4e0d8" stroke-width="1.1" stroke-dasharray="3,4" stroke-opacity="0.55" filter="url(#chalkStroke)" />
       `;
     } else if (type === "M") {
       path = getSpiralTilePath(coord.th1, coord.th2);
@@ -512,19 +772,14 @@ function buildBoard() {
       innerContent = ``;
     }
 
-    let grad = `url(#${type.toLowerCase()}Grad)`;
-    let strokeCol = "#c5b89a";
-    let strokeOpacity = "0.4";
-    if (type === "Q") strokeCol = "#b7a4e0";
-    else if (type === "B") strokeCol = "#e7b552";
-    else if (type === "P") strokeCol = "#c2323e";
-    else if (type === "L") { strokeCol = "#dedad2"; strokeOpacity = "0.75"; }
-    else if (type === "M") { strokeCol = "#52c48a"; strokeOpacity = "0.7"; }
-    else if (type === "S") { strokeCol = "#c2323e"; strokeOpacity = "0.6"; }
+    const isSpecial = type === "L" || type === "M" || type === "S";
+    const strokeCol = isSpecial ? "#f0ece4" : "#d8d4cc";
+    const strokeOpacity = isSpecial ? "0.85" : "0.65";
+    const strokeWidth = isSpecial ? "1.9" : "1.5";
 
     svgInner += `
       <g id="casilla-${num}" class="casilla-g type-${type}">
-        <path class="casilla-path" d="${path}" fill="${grad}" stroke="${strokeCol}" stroke-width="1.4" stroke-opacity="${strokeOpacity}" />
+        <path class="casilla-path" d="${path}" fill="#000000" stroke="${strokeCol}" stroke-width="${strokeWidth}" stroke-opacity="${strokeOpacity}" filter="url(#chalkStroke)" />
         ${innerContent}
       </g>
     `;
@@ -664,6 +919,7 @@ async function askRoll(p, prompt) {
   btn.focus({ preventScroll: true });
   await new Promise((res) => btn.addEventListener("click", res, { once: true }));
   btn.disabled = true;
+  playDiceSound();
   const value = 1 + Math.floor(Math.random() * 6);
   const dice = $("dice"), shadow = $("dieShadow");
   dice.classList.add("toss");
@@ -699,6 +955,7 @@ async function rollOff(list) {
 async function move(p, steps) {
   for (let s = 0; s < steps; s++) {
     p.progress++;
+    playFichaSound();
     renderTokens(p.id);
     await sleep(260);
     if (p.progress >= BOARD_SIZE - 1) break; // reached META
@@ -793,6 +1050,7 @@ const EFFECTS = {
     { id: "P1", run: async (p) => {
         for (let i = 0; i < 2 && p.progress > 0; i++) {
           p.progress--;
+          playFichaSound();
           renderTokens(p.id);
           await sleep(260);
         }
@@ -813,7 +1071,9 @@ const words = (text) => esc(text).split(" ").map((w, i) => `<span class="w" styl
 
 // Atmosphere effects (particles and lighting)
 function setFx(type) {
-  const front = $("front"), layer = $("fxLayer");
+  const game = $("game"), front = $("front"), layer = $("fxLayer");
+  game.classList.remove("scene-Q", "scene-B", "scene-P", "scene-limbo");
+  game.classList.add("scene-" + type);
   front.classList.remove("fx-Q", "fx-B", "fx-P", "fx-limbo", "win", "fail");
   front.classList.add("fx-" + type);
   layer.innerHTML = "";
@@ -863,6 +1123,12 @@ async function showBannerScene(icon, title, text, fxType = "B") {
   $("frontTitle").textContent = title;
   $("frontText").innerHTML = words(text);
 
+  if (fxType === "B") {
+    playBenefitAudio();
+  } else if (fxType === "P") {
+    playPunishmentAudio();
+  }
+
   const waitContinue = () => new Promise((res) => btn.addEventListener("click", res, { once: true }));
   const open = () => {
     front.hidden = false;
@@ -871,10 +1137,13 @@ async function showBannerScene(icon, title, text, fxType = "B") {
     front.classList.add("show");
   };
   const close = async () => {
+    stopBenefitAudio();
+    stopPunishmentAudio();
     front.classList.remove("show", "win", "fail");
     card.classList.remove("hit");
     $("game").classList.remove("to-front");
     await sleep(600);
+    $("game").classList.remove("scene-Q", "scene-B", "scene-P", "scene-limbo");
     front.hidden = true;
     body.innerHTML = "";
   };
@@ -939,6 +1208,8 @@ async function askQuestion(p, isLimbo = false) {
     }
     timerWrap.hidden = true;
     timerWrap.classList.remove("urgent");
+    stopQuestionWhisper();
+    stopQuestionAudio();
   };
 
   const open = () => {
@@ -946,14 +1217,18 @@ async function askQuestion(p, isLimbo = false) {
     void front.offsetWidth;
     $("game").classList.add("to-front");
     front.classList.add("show");
+    playQuestionWhisper();
   };
 
   const close = async () => {
     stopTimer();
+    stopQuestionWhisper();
+    stopQuestionAudio();
     front.classList.remove("show", "win", "fail");
     card.classList.remove("hit");
     $("game").classList.remove("to-front");
     await sleep(600);
+    $("game").classList.remove("scene-Q", "scene-B", "scene-P", "scene-limbo");
     front.hidden = true;
     body.innerHTML = "";
   };
@@ -1183,11 +1458,12 @@ async function askQuestion(p, isLimbo = false) {
       log(I18N[gameLang].timePressureLog(p.name));
     }
 
-    // Countdown: it starts once the options are visible, so reading time is not lost.
+    // Countdown: it starts once the options are visible (no need to wait for whispers to end)
     let timerStarted = false;
     const beginCountdown = () => {
       if (timerStarted || resolved || effectiveSeconds <= 0) return;
       timerStarted = true;
+      startQuestionAudio(q.category, effectiveSeconds);
       const totalMs = effectiveSeconds * 1000;
       const startAt = performance.now();
       timerInterval = setInterval(() => {
@@ -1198,6 +1474,24 @@ async function askQuestion(p, isLimbo = false) {
         if (remainingMs <= 0) handleTimeout();
       }, 100);
     };
+
+    const startUnlimited = () => {
+      if (timerStarted || resolved) return;
+      timerStarted = true;
+      startQuestionAudio(q.category, 0);
+    };
+
+    let countdownTriggered = false;
+    const triggerCountdown = () => {
+      if (countdownTriggered || resolved) return;
+      countdownTriggered = true;
+      if (effectiveSeconds > 0) {
+        beginCountdown();
+      } else {
+        startUnlimited();
+      }
+    };
+
     if (effectiveSeconds > 0) {
       timerWrap.hidden = false;
       timerWrap.classList.toggle("urgent", isPressured || effectiveSeconds <= 5);
@@ -1218,10 +1512,11 @@ async function askQuestion(p, isLimbo = false) {
       opts.appendChild(b);
     });
 
-    if (effectiveSeconds > 0) {
-      opts.lastElementChild.addEventListener("animationend", beginCountdown, { once: true });
-      setTimeout(beginCountdown, Math.round((0.35 + n * 0.05 + 3 * 0.12 + 0.6) * 1000) + 700); // fallback
+    const optionsDurationMs = Math.round((0.35 + n * 0.05 + 3 * 0.12 + 0.6) * 1000);
+    if (opts.lastElementChild) {
+      opts.lastElementChild.addEventListener("animationend", triggerCountdown, { once: true });
     }
+    setTimeout(triggerCountdown, optionsDurationMs + 300);
 
     // Check BEN-05: Wisdom Whisper (50/50 effect banishing 2 incorrect options)
     if (p.fiftyFifty) {
@@ -1470,8 +1765,8 @@ async function typewrite(element, text, speed = 40) {
 
 async function playWinCinematic(winner, explanation) {
   const t = I18N[gameLang];
-  const winTitleText = gameLang === "en"
-    ? `${winner.name} escaped the darkness`
+  const winTitleText = gameLang === "en" 
+    ? `${winner.name} escaped the darkness` 
     : `${winner.name} escapó de la oscuridad`;
 
   const endScreen = $("end");
@@ -1537,7 +1832,6 @@ function finish(winner) {
 function finishAllDead() {
   const solo = players.length === 1;
   const t = I18N[gameLang];
-  $("end").style.background = "";
   $("eyeOverlay").hidden = true;
   $("endContent").hidden = false;
   $("endTitle").textContent = solo ? t.soloGameOverTitle : t.gameOverAllDeadTitle;
@@ -1573,6 +1867,11 @@ async function warmUp() {
 
 function start(playerNames) {
   closeMenuModal();
+  stopMenuMusic();
+  stopQuestionWhisper();
+  stopQuestionAudio();
+  stopBenefitAudio();
+  stopPunishmentAudio();
   currentLayout = generateRandomLayout();
   questionDeck = [];
   limboQuestionDeck = [];
@@ -1861,6 +2160,18 @@ $("menuBtn").addEventListener("click", () => {
 $("soundBtn").addEventListener("click", () => {
   soundOn = !soundOn;
   $("soundBtn").textContent = soundOn ? I18N[gameLang].soundOn : I18N[gameLang].soundOff;
+  if (!soundOn) {
+    stopMenuMusic();
+    stopQuestionWhisper();
+    stopQuestionAudio();
+    stopBenefitAudio();
+    stopPunishmentAudio();
+  } else if ($("setup") && !$("setup").hidden) {
+    if (menuAudio) {
+      menuAudio.currentTime = 0;
+      menuAudio.play().catch(() => {});
+    }
+  }
 });
 $("qualityBtn").addEventListener("click", () => setLite(!$("game").classList.contains("lite")));
 
@@ -1887,3 +2198,4 @@ function bakeTextures() {
   });
 }
 bakeTextures();
+initAudioSystem();
