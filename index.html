@@ -239,9 +239,79 @@
 </main>
 
 <div id="end" class="screen overlay" hidden>
-  <h2 id="endTitle" class="title"></h2>
-  <p id="endText"></p>
-  <button id="again">Jugar de nuevo</button>
+  <div id="eyeOverlay" class="eye-overlay" hidden>
+    <svg id="horrorEye" viewBox="0 0 600 350" class="horror-eye-svg">
+      <defs>
+        <radialGradient id="scleraGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#f0e9dc" />
+          <stop offset="60%" stop-color="#dfcfb8" />
+          <stop offset="85%" stop-color="#8a2323" />
+          <stop offset="100%" stop-color="#3d0707" />
+        </radialGradient>
+        <radialGradient id="irisGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#0a0203" />
+          <stop offset="35%" stop-color="#420b0e" />
+          <stop offset="65%" stop-color="#991b1e" />
+          <stop offset="85%" stop-color="#c43b27" />
+          <stop offset="93%" stop-color="#e06336" />
+          <stop offset="100%" stop-color="#1c0304" />
+        </radialGradient>
+        <radialGradient id="corneaShade" cx="45%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.18)" />
+          <stop offset="70%" stop-color="rgba(0,0,0,0)" />
+          <stop offset="100%" stop-color="rgba(0,0,0,0.65)" />
+        </radialGradient>
+        <radialGradient id="socketGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(110, 10, 15, 0.55)" />
+          <stop offset="60%" stop-color="rgba(40, 2, 5, 0.25)" />
+          <stop offset="100%" stop-color="rgba(0,0,0,0)" />
+        </radialGradient>
+        <clipPath id="eyeClip">
+          <path id="eyeClipPath" d="M 80 175 Q 300 175 520 175 Q 300 175 80 175 Z" />
+        </clipPath>
+      </defs>
+      <ellipse cx="300" cy="175" rx="260" ry="140" fill="url(#socketGlow)" />
+      <g clip-path="url(#eyeClip)">
+        <rect x="0" y="0" width="600" height="350" fill="url(#scleraGrad)" />
+        <g stroke="#7d1217" stroke-linecap="round" fill="none" opacity="0.85">
+          <path d="M 85 175 Q 140 160 190 168 Q 210 165 230 170" stroke-width="2.4" />
+          <path d="M 140 160 Q 165 145 195 148" stroke-width="1.3" />
+          <path d="M 120 170 Q 150 185 195 180" stroke-width="1.4" />
+          <path d="M 100 175 Q 155 195 185 205" stroke-width="1.8" />
+          <path d="M 515 175 Q 460 160 410 168 Q 390 165 370 170" stroke-width="2.4" />
+          <path d="M 460 160 Q 435 145 405 148" stroke-width="1.3" />
+          <path d="M 480 170 Q 450 185 405 180" stroke-width="1.4" />
+          <path d="M 500 175 Q 445 195 415 205" stroke-width="1.8" />
+          <path d="M 300 45 Q 295 90 285 115" stroke-width="1.5" />
+          <path d="M 300 305 Q 305 260 315 235" stroke-width="1.5" />
+        </g>
+        <circle id="eyeIris" cx="300" cy="175" r="72" fill="url(#irisGrad)" />
+        <g stroke="rgba(240, 100, 60, 0.4)" stroke-width="1.2" opacity="0.75">
+          <line x1="300" y1="175" x2="245" y2="135" />
+          <line x1="300" y1="175" x2="355" y2="135" />
+          <line x1="300" y1="175" x2="240" y2="185" />
+          <line x1="300" y1="175" x2="360" y2="185" />
+          <line x1="300" y1="175" x2="265" y2="230" />
+          <line x1="300" y1="175" x2="335" y2="230" />
+          <line x1="300" y1="175" x2="280" y2="110" />
+          <line x1="300" y1="175" x2="320" y2="110" />
+        </g>
+        <circle id="eyePupil" cx="300" cy="175" r="30" fill="#020001" />
+        <circle cx="300" cy="175" r="72" fill="url(#corneaShade)" />
+        <ellipse cx="282" cy="155" rx="9" ry="6" transform="rotate(-25 282 155)" fill="#ffffff" opacity="0.88" />
+        <circle cx="320" cy="195" r="3.5" fill="#ffffff" opacity="0.45" />
+        <path id="innerLidShadow" d="M 80 175 Q 300 50 520 175 Q 300 85 80 175 Z" fill="rgba(0,0,0,0.4)" />
+      </g>
+      <path id="upperLidLine" d="M 80 175 Q 300 175 520 175" stroke="#4a080c" stroke-width="4.5" fill="none" stroke-linecap="round" />
+      <path id="lowerLidLine" d="M 80 175 Q 300 175 520 175" stroke="#330407" stroke-width="3" fill="none" stroke-linecap="round" />
+      <path id="upperCrease" d="M 120 165 Q 300 165 480 165" stroke="rgba(100, 15, 20, 0.4)" stroke-width="2" fill="none" opacity="0" />
+    </svg>
+  </div>
+  <div id="endContent" class="end-content">
+    <h2 id="endTitle" class="title"></h2>
+    <p id="endText"></p>
+    <button id="again">Jugar de nuevo</button>
+  </div>
 </div>
 
 <div id="cover" class="screen overlay" hidden>
@@ -295,6 +365,14 @@
   </div>
 </div>
 
+<audio id="menuMusic" src="assets/sounds/song_menu.mp3" loop preload="auto"></audio>
+<audio id="qAudioSports" src="assets/sounds/question_sports.mp3" preload="auto"></audio>
+<audio id="qAudioGeography" src="assets/sounds/question_geography.mp3" preload="auto"></audio>
+<audio id="qAudioHistory" src="assets/sounds/question_history.mp3" preload="auto"></audio>
+<audio id="qAudioMath" src="assets/sounds/question_math.mp3" preload="auto"></audio>
+<audio id="audioBenefit" src="assets/sounds/benefit.mp3" preload="auto"></audio>
+<audio id="audioPunishment" src="assets/sounds/punishment.mp3" preload="auto"></audio>
+<audio id="audioWhisperQ" src="assets/sounds/whisper_question.mp3" preload="auto"></audio>
 <script src="questions.js"></script>
 <script src="game.js"></script>
 </body>
