@@ -49,13 +49,256 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const SCREAMER_IMAGES = [];
 const SCREAMER_SOUNDS = [];
 
-// ---- Sound ----
+// ---- Sound Assets & System ----
+const SOUND_FILES = {
+  menu: "assets/sounds/song_menu.mp3",
+  dice: "assets/sounds/dados.mp3",
+  ficha: "assets/sounds/fichas.mp3"
+};
+
 let audioCtx = null, soundOn = true;
+let menuAudio = null;
+let diceBuffer = null;
+let fichaBuffer = null;
+let buffersLoading = false;
+
 function audio() {
   if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { /* no audio */ } }
   if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
   return audioCtx;
 }
+
+function loadSoundBuffers() {
+  if (buffersLoading || diceBuffer) return;
+  const c = audio();
+  if (!c) return;
+  buffersLoading = true;
+  Promise.all([
+    fetch(SOUND_FILES.dice).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { diceBuffer = decoded; }).catch(() => {}),
+    fetch(SOUND_FILES.ficha).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { fichaBuffer = decoded; }).catch(() => {})
+  ]).finally(() => { buffersLoading = false; });
+}
+
+function initAudioSystem() {
+  menuAudio = $("menuMusic") || new Audio(SOUND_FILES.menu);
+  menuAudio.loop = true;
+  menuAudio.volume = 0.825; // Incrementado un 50% (de 0.55 a 0.825)
+
+  // Garantizar bucle continuo: cada que termine el sonido del menú, se repite
+  menuAudio.addEventListener("ended", () => {
+    if (soundOn && $("setup") && !$("setup").hidden) {
+      menuAudio.currentTime = 0;
+      menuAudio.play().catch(() => {});
+    }
+  });
+
+  const startMenuPlayback = () => {
+    loadSoundBuffers();
+    if (soundOn && menuAudio && $("setup") && !$("setup").hidden && menuAudio.paused) {
+      menuAudio.play().catch(() => {});
+    }
+  };
+
+  // Intentar reproducción inmediata o en primera interacción (política autoplay del navegador)
+  if (soundOn && $("setup") && !$("setup").hidden) {
+    menuAudio.play().catch(() => {});
+  }
+  window.addEventListener("click", startMenuPlayback, { passive: true });
+  window.addEventListener("keydown", startMenuPlayback, { passive: true });
+  window.addEventListener("touchstart", startMenuPlayback, { passive: true });
+}
+
+function stopMenuMusic() {
+  if (menuAudio) {
+    menuAudio.pause();
+    menuAudio.currentTime = 0;
+  }
+}
+
+function playDiceSound() {
+  if (!soundOn) return;
+  const c = audio();
+  if (c && diceBuffer) {
+    try {
+      const src = c.createBufferSource();
+      const gain = c.createGain();
+      gain.gain.value = 0.95;
+      src.buffer = diceBuffer;
+      src.connect(gain);
+      gain.connect(c.destination);
+      src.start(0);
+      return;
+    } catch (e) {}
+  }
+  const a = new Audio(SOUND_FILES.dice);
+  a.volume = 0.95;
+  a.play().catch(() => {});
+}
+
+function playFichaSound() {
+  if (!soundOn) return;
+  const c = audio();
+  if (c && fichaBuffer) {
+    try {
+      const src = c.createBufferSource();
+      const gain = c.createGain();
+      gain.gain.value = 0.85;
+      src.buffer = fichaBuffer;
+      src.connect(gain);
+      gain.connect(c.destination);
+      src.start(0);
+      return;
+    } catch (e) {}
+  }
+  const a = new Audio(SOUND_FILES.ficha);
+  a.volume = 0.85;
+  a.play().catch(() => {});
+}
+
+// ---- Question Countdown Audios by Category ----
+const QUESTION_AUDIO_CONFIG = {
+  Sports: {
+    src: "assets/sounds/question_sports.mp3",
+    elemId: "qAudioSports",
+    duration: 14.00
+  },
+  Geography: {
+    src: "assets/sounds/question_geography.mp3",
+    elemId: "qAudioGeography",
+    duration: 19.96
+  },
+  History: {
+    src: "assets/sounds/question_history.mp3",
+    elemId: "qAudioHistory",
+    duration: 20.07
+  },
+  Mathematics: {
+    src: "assets/sounds/question_math.mp3",
+    elemId: "qAudioMath",
+    duration: 19.52
+  }
+};
+
+let currentQuestionAudio = null;
+
+function startQuestionAudio(category, effectiveSeconds) {
+  if (!soundOn) return;
+  stopQuestionAudio();
+
+  const cfg = QUESTION_AUDIO_CONFIG[category] || QUESTION_AUDIO_CONFIG.History;
+  const audio = $(cfg.elemId) || new Audio(cfg.src);
+  audio.volume = 0.85;
+
+  if (effectiveSeconds > 0) {
+    // Adapta el audio a la duración exacta del temporizador (15s, 20s, 30s o presión temporal)
+    const rate = cfg.duration / effectiveSeconds;
+    const clampedRate = Math.max(0.15, Math.min(4.0, rate));
+    audio.playbackRate = clampedRate;
+    audio.defaultPlaybackRate = clampedRate;
+    audio.loop = false;
+    audio.currentTime = 0;
+    audio.onplay = () => { audio.playbackRate = clampedRate; };
+    // Si concluye ligeramente antes del tiempo de vela, se reinicia suavemente
+    audio.onended = () => {
+      if (currentQuestionAudio === audio) {
+        audio.currentTime = 0;
+        audio.playbackRate = clampedRate;
+        audio.play().catch(() => {});
+      }
+    };
+  } else {
+    // Si lo pone en ilimitado (sin límite), el audio se repite infinitamente
+    audio.playbackRate = 1.0;
+    audio.defaultPlaybackRate = 1.0;
+    audio.loop = true;
+    audio.currentTime = 0;
+    audio.onended = () => {
+      if (currentQuestionAudio === audio) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }
+    };
+  }
+
+  currentQuestionAudio = audio;
+  audio.play().catch(() => {});
+}
+
+function stopQuestionAudio() {
+  if (currentQuestionAudio) {
+    currentQuestionAudio.pause();
+    currentQuestionAudio.currentTime = 0;
+    currentQuestionAudio.onended = null;
+    currentQuestionAudio = null;
+  }
+}
+
+// ---- Event & Question Atmosphere Audios ----
+let currentBenefitAudio = null;
+let currentPunishmentAudio = null;
+let currentWhisperAudio = null;
+
+function playBenefitAudio() {
+  if (!soundOn) return;
+  stopBenefitAudio();
+  const a = $("audioBenefit") || new Audio("assets/sounds/benefit.mp3");
+  a.currentTime = 0;
+  a.volume = 0.85;
+  a.play().catch(() => {});
+  currentBenefitAudio = a;
+}
+
+function stopBenefitAudio() {
+  if (currentBenefitAudio) {
+    currentBenefitAudio.pause();
+    currentBenefitAudio.currentTime = 0;
+    currentBenefitAudio = null;
+  }
+}
+
+function playPunishmentAudio() {
+  if (!soundOn) return;
+  stopPunishmentAudio();
+  const a = $("audioPunishment") || new Audio("assets/sounds/punishment.mp3");
+  a.currentTime = 0;
+  a.volume = 0.85;
+  a.play().catch(() => {});
+  currentPunishmentAudio = a;
+}
+
+function stopPunishmentAudio() {
+  if (currentPunishmentAudio) {
+    currentPunishmentAudio.pause();
+    currentPunishmentAudio.currentTime = 0;
+    currentPunishmentAudio = null;
+  }
+}
+
+function playQuestionWhisper() {
+  if (!soundOn) return;
+  stopQuestionWhisper();
+  const a = $("audioWhisperQ") || new Audio("assets/sounds/whisper_question.mp3");
+  a.currentTime = 0;
+  a.volume = 0.95;
+  a.play().catch(() => {});
+  currentWhisperAudio = a;
+}
+
+function stopQuestionWhisper() {
+  if (currentWhisperAudio) {
+    currentWhisperAudio.pause();
+    currentWhisperAudio.currentTime = 0;
+    currentWhisperAudio.onended = null;
+    currentWhisperAudio = null;
+  }
+  const el = $("audioWhisperQ");
+  if (el) {
+    el.pause();
+    el.currentTime = 0;
+    el.onended = null;
+  }
+}
+
 function playScream() {
   if (!soundOn) return;
   if (SCREAMER_SOUNDS.length) {
@@ -676,6 +919,7 @@ async function askRoll(p, prompt) {
   btn.focus({ preventScroll: true });
   await new Promise((res) => btn.addEventListener("click", res, { once: true }));
   btn.disabled = true;
+  playDiceSound();
   const value = 1 + Math.floor(Math.random() * 6);
   const dice = $("dice"), shadow = $("dieShadow");
   dice.classList.add("toss");
@@ -711,6 +955,7 @@ async function rollOff(list) {
 async function move(p, steps) {
   for (let s = 0; s < steps; s++) {
     p.progress++;
+    playFichaSound();
     renderTokens(p.id);
     await sleep(260);
     if (p.progress >= BOARD_SIZE - 1) break; // reached META
@@ -805,6 +1050,7 @@ const EFFECTS = {
     { id: "P1", run: async (p) => {
         for (let i = 0; i < 2 && p.progress > 0; i++) {
           p.progress--;
+          playFichaSound();
           renderTokens(p.id);
           await sleep(260);
         }
@@ -877,6 +1123,12 @@ async function showBannerScene(icon, title, text, fxType = "B") {
   $("frontTitle").textContent = title;
   $("frontText").innerHTML = words(text);
 
+  if (fxType === "B") {
+    playBenefitAudio();
+  } else if (fxType === "P") {
+    playPunishmentAudio();
+  }
+
   const waitContinue = () => new Promise((res) => btn.addEventListener("click", res, { once: true }));
   const open = () => {
     front.hidden = false;
@@ -885,6 +1137,8 @@ async function showBannerScene(icon, title, text, fxType = "B") {
     front.classList.add("show");
   };
   const close = async () => {
+    stopBenefitAudio();
+    stopPunishmentAudio();
     front.classList.remove("show", "win", "fail");
     card.classList.remove("hit");
     $("game").classList.remove("to-front");
@@ -954,6 +1208,8 @@ async function askQuestion(p, isLimbo = false) {
     }
     timerWrap.hidden = true;
     timerWrap.classList.remove("urgent");
+    stopQuestionWhisper();
+    stopQuestionAudio();
   };
 
   const open = () => {
@@ -961,10 +1217,13 @@ async function askQuestion(p, isLimbo = false) {
     void front.offsetWidth;
     $("game").classList.add("to-front");
     front.classList.add("show");
+    playQuestionWhisper();
   };
 
   const close = async () => {
     stopTimer();
+    stopQuestionWhisper();
+    stopQuestionAudio();
     front.classList.remove("show", "win", "fail");
     card.classList.remove("hit");
     $("game").classList.remove("to-front");
@@ -1199,11 +1458,12 @@ async function askQuestion(p, isLimbo = false) {
       log(I18N[gameLang].timePressureLog(p.name));
     }
 
-    // Countdown: it starts once the options are visible, so reading time is not lost.
+    // Countdown: it starts once the options are visible (no need to wait for whispers to end)
     let timerStarted = false;
     const beginCountdown = () => {
       if (timerStarted || resolved || effectiveSeconds <= 0) return;
       timerStarted = true;
+      startQuestionAudio(q.category, effectiveSeconds);
       const totalMs = effectiveSeconds * 1000;
       const startAt = performance.now();
       timerInterval = setInterval(() => {
@@ -1214,6 +1474,24 @@ async function askQuestion(p, isLimbo = false) {
         if (remainingMs <= 0) handleTimeout();
       }, 100);
     };
+
+    const startUnlimited = () => {
+      if (timerStarted || resolved) return;
+      timerStarted = true;
+      startQuestionAudio(q.category, 0);
+    };
+
+    let countdownTriggered = false;
+    const triggerCountdown = () => {
+      if (countdownTriggered || resolved) return;
+      countdownTriggered = true;
+      if (effectiveSeconds > 0) {
+        beginCountdown();
+      } else {
+        startUnlimited();
+      }
+    };
+
     if (effectiveSeconds > 0) {
       timerWrap.hidden = false;
       timerWrap.classList.toggle("urgent", isPressured || effectiveSeconds <= 5);
@@ -1234,10 +1512,11 @@ async function askQuestion(p, isLimbo = false) {
       opts.appendChild(b);
     });
 
-    if (effectiveSeconds > 0) {
-      opts.lastElementChild.addEventListener("animationend", beginCountdown, { once: true });
-      setTimeout(beginCountdown, Math.round((0.35 + n * 0.05 + 3 * 0.12 + 0.6) * 1000) + 700); // fallback
+    const optionsDurationMs = Math.round((0.35 + n * 0.05 + 3 * 0.12 + 0.6) * 1000);
+    if (opts.lastElementChild) {
+      opts.lastElementChild.addEventListener("animationend", triggerCountdown, { once: true });
     }
+    setTimeout(triggerCountdown, optionsDurationMs + 300);
 
     // Check BEN-05: Wisdom Whisper (50/50 effect banishing 2 incorrect options)
     if (p.fiftyFifty) {
@@ -1351,33 +1630,223 @@ async function play() {
   }
 }
 
+function playEyeDrone() {
+  if (!soundOn) return;
+  const c = audio();
+  if (!c) return;
+  try {
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(45, t);
+    osc.frequency.exponentialRampToValueAtTime(32, t + 5.5);
+
+    const filter = c.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(120, t);
+    filter.frequency.exponentialRampToValueAtTime(260, t + 2.4);
+    filter.frequency.exponentialRampToValueAtTime(80, t + 6.0);
+
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.25, t + 2.0);
+    gain.gain.setValueAtTime(0.25, t + 4.2);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 6.2);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(c.destination);
+    osc.start(t);
+    osc.stop(t + 6.3);
+  } catch (e) {}
+}
+
+function playTypeSound() {
+  if (!soundOn) return;
+  const c = audio();
+  if (!c) return;
+  try {
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(420 + Math.random() * 80, t);
+    gain.gain.setValueAtTime(0.035, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+    osc.connect(gain);
+    gain.connect(c.destination);
+    osc.start(t);
+    osc.stop(t + 0.03);
+  } catch (e) {}
+}
+
+function animateEyeSequence() {
+  return new Promise((resolve) => {
+    const clipPath = $("eyeClipPath");
+    const upperLine = $("upperLidLine");
+    const lowerLine = $("lowerLidLine");
+    const innerShadow = $("innerLidShadow");
+    const upperCrease = $("upperCrease");
+    const pupil = $("eyePupil");
+
+    const tOpen = 2400;   // 2.4s para abrirse lentamente
+    const tHold = 2000;   // 2.0s mirando fijamente al jugador
+    const tClose = 1800;  // 1.8s para volver a cerrarse
+    const startTime = performance.now();
+
+    function setEyeProgress(progress, elapsed) {
+      // progress: 0 (cerrado) a 1 (completamente abierto)
+      const upperY = 175 - 130 * progress;
+      const lowerY = 175 + 130 * progress;
+      const shadowY = 175 - 90 * progress;
+
+      const dClip = `M 80 175 Q 300 ${upperY} 520 175 Q 300 ${lowerY} 80 175 Z`;
+      const dUpper = `M 80 175 Q 300 ${upperY} 520 175`;
+      const dLower = `M 80 175 Q 300 ${lowerY} 520 175`;
+      const dShadow = `M 80 175 Q 300 ${upperY} 520 175 Q 300 ${shadowY} 80 175 Z`;
+
+      if (clipPath) clipPath.setAttribute("d", dClip);
+      if (upperLine) upperLine.setAttribute("d", dUpper);
+      if (lowerLine) lowerLine.setAttribute("d", dLower);
+      if (innerShadow) innerShadow.setAttribute("d", dShadow);
+
+      if (upperCrease) {
+        const creaseY = 175 - 150 * progress;
+        upperCrease.setAttribute("d", `M 120 165 Q 300 ${creaseY} 480 165`);
+        upperCrease.style.opacity = String(progress * 0.7);
+      }
+
+      if (pupil) {
+        const baseR = 30;
+        const pulse = Math.sin(elapsed / 320) * 2.2 * progress;
+        pupil.setAttribute("r", String(Math.max(20, baseR + pulse)));
+      }
+    }
+
+    function easeInOutCubic(x) {
+      return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    }
+
+    function frame(now) {
+      const elapsed = now - startTime;
+
+      if (elapsed < tOpen) {
+        const p = easeInOutCubic(elapsed / tOpen);
+        setEyeProgress(p, elapsed);
+        requestAnimationFrame(frame);
+      } else if (elapsed < tOpen + tHold) {
+        setEyeProgress(1, elapsed);
+        requestAnimationFrame(frame);
+      } else if (elapsed < tOpen + tHold + tClose) {
+        const closeElapsed = elapsed - (tOpen + tHold);
+        const p = 1 - easeInOutCubic(closeElapsed / tClose);
+        setEyeProgress(Math.max(0, p), elapsed);
+        requestAnimationFrame(frame);
+      } else {
+        setEyeProgress(0, elapsed);
+        resolve();
+      }
+    }
+
+    requestAnimationFrame(frame);
+  });
+}
+
+async function typewrite(element, text, speed = 40) {
+  element.textContent = "";
+  element.classList.add("typing");
+  for (let i = 0; i < text.length; i++) {
+    element.textContent += text[i];
+    if (i % 2 === 0) playTypeSound();
+    await sleep(speed);
+  }
+  element.classList.remove("typing");
+}
+
+async function playWinCinematic(winner, explanation) {
+  const t = I18N[gameLang];
+  const winTitleText = gameLang === "en" 
+    ? `${winner.name} escaped the darkness` 
+    : `${winner.name} escapó de la oscuridad`;
+
+  const endScreen = $("end");
+  const eyeOverlay = $("eyeOverlay");
+  const endContent = $("endContent");
+  const titleEl = $("endTitle");
+  const textEl = $("endText");
+  const againBtn = $("again");
+
+  // 1. Pantalla en negro total
+  endScreen.style.background = "#000000";
+  titleEl.textContent = "";
+  textEl.textContent = "";
+  againBtn.style.opacity = "0";
+  againBtn.style.pointerEvents = "none";
+  againBtn.textContent = t.playAgain;
+
+  endContent.hidden = true;
+  eyeOverlay.hidden = false;
+  eyeOverlay.style.opacity = "1";
+  endScreen.hidden = false;
+
+  // Pausa en negro antes de abrir el ojo
+  await sleep(650);
+
+  // 2. El ojo se abre lentamente, mirando al frente, y luego vuelve a cerrarse
+  playEyeDrone();
+  await animateEyeSequence();
+
+  // Pausa en negro tras cerrarse el ojo
+  await sleep(500);
+  eyeOverlay.style.transition = "opacity 0.6s ease";
+  eyeOverlay.style.opacity = "0";
+  await sleep(600);
+  eyeOverlay.hidden = true;
+
+  // 3. Aparece el texto escribiéndose
+  endContent.hidden = false;
+  await sleep(350);
+
+  // Escribir: "$jugador escapó de la oscuridad"
+  await typewrite(titleEl, winTitleText, 45);
+  await sleep(400);
+
+  // Escribir la breve explicación de por qué
+  await typewrite(textEl, explanation, 35);
+  await sleep(600);
+
+  // Botón "Jugar de nuevo" aparece suavemente
+  againBtn.style.transition = "opacity 0.8s ease";
+  againBtn.style.opacity = "1";
+  againBtn.style.pointerEvents = "auto";
+  againBtn.focus();
+}
+
 function finish(winner) {
   const solo = players.length === 1;
   const t = I18N[gameLang];
-  $("endTitle").textContent = solo ? t.soloWinTitle : t.multiWinTitle(winner.name);
-  $("endText").textContent = solo ? t.soloWinText : t.multiWinText;
-  $("again").textContent = t.playAgain;
-  $("end").hidden = false;
-  $("again").focus();
+  const explanation = solo ? t.soloWinText : t.multiWinText;
+  playWinCinematic(winner, explanation);
 }
 
 function finishAllDead() {
   const solo = players.length === 1;
   const t = I18N[gameLang];
+  $("eyeOverlay").hidden = true;
+  $("endContent").hidden = false;
   $("endTitle").textContent = solo ? t.soloGameOverTitle : t.gameOverAllDeadTitle;
   $("endText").textContent = solo ? t.soloGameOverText : t.gameOverAllDeadText;
   $("again").textContent = t.playAgain;
+  $("again").style.opacity = "1";
+  $("again").style.pointerEvents = "auto";
   $("end").hidden = false;
   $("again").focus();
 }
 
 function finishLastSurvivor(winner) {
   const t = I18N[gameLang];
-  $("endTitle").textContent = t.lastSurvivorTitle(winner.name);
-  $("endText").textContent = t.lastSurvivorText;
-  $("again").textContent = t.playAgain;
-  $("end").hidden = false;
-  $("again").focus();
+  const explanation = t.lastSurvivorText;
+  playWinCinematic(winner, explanation);
 }
 
 async function warmUp() {
@@ -1398,6 +1867,11 @@ async function warmUp() {
 
 function start(playerNames) {
   closeMenuModal();
+  stopMenuMusic();
+  stopQuestionWhisper();
+  stopQuestionAudio();
+  stopBenefitAudio();
+  stopPunishmentAudio();
   currentLayout = generateRandomLayout();
   questionDeck = [];
   limboQuestionDeck = [];
@@ -1686,6 +2160,18 @@ $("menuBtn").addEventListener("click", () => {
 $("soundBtn").addEventListener("click", () => {
   soundOn = !soundOn;
   $("soundBtn").textContent = soundOn ? I18N[gameLang].soundOn : I18N[gameLang].soundOff;
+  if (!soundOn) {
+    stopMenuMusic();
+    stopQuestionWhisper();
+    stopQuestionAudio();
+    stopBenefitAudio();
+    stopPunishmentAudio();
+  } else if ($("setup") && !$("setup").hidden) {
+    if (menuAudio) {
+      menuAudio.currentTime = 0;
+      menuAudio.play().catch(() => {});
+    }
+  }
 });
 $("qualityBtn").addEventListener("click", () => setLite(!$("game").classList.contains("lite")));
 
@@ -1712,3 +2198,4 @@ function bakeTextures() {
   });
 }
 bakeTextures();
+initAudioSystem();
