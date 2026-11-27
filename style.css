@@ -965,12 +965,26 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
   perspective: 1000px; perspective-origin: 50% 50%; overflow: hidden; pointer-events: none;
 }
 .front.show { pointer-events: auto; }
+
 .front::before {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 45%, rgba(10, 5, 6, .45) 0%, rgba(10, 5, 6, .82) 85%);
-  opacity: 0; transition: opacity var(--head-turn-dur) var(--head-turn-ease); pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(8, 4, 5, 0.48) 0%, rgba(8, 4, 5, 0.82) 85%),
+    url("assets/grimorio.webp") center / cover no-repeat;
+  opacity: 0;
+  transform: scale(1.06) translateY(24px);
+  transition:
+    opacity var(--head-turn-dur) var(--head-turn-ease),
+    transform var(--head-turn-dur) var(--head-turn-ease);
+  pointer-events: none;
 }
-.front.show::before { opacity: 1; }
+
+.front.show::before {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
 
 .front-card {
   position: relative; width: min(92vw, 44rem); padding: 1rem; text-align: center;
@@ -1326,16 +1340,130 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 .translate-btn, .translate-btn:hover:not(:disabled) { background: none; border: 0; box-shadow: none; }
 .translate-btn { padding: .2rem .4rem; font: inherit; font-size: .85rem; color: var(--dim); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; text-shadow: 0 1px 6px #000; }
 .translate-btn:hover:not(:disabled) { color: var(--bone); }
-.q-options { display: grid; grid-template-columns: 1fr; gap: .2rem 2.5rem; margin: 1rem auto 1.2rem; max-width: 36rem; }
-@media (min-width: 560px) { .q-options { grid-template-columns: 1fr 1fr; } }
+.q-options {
+  position: static;
+  display: block;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
 
-.q-opt-btn, .q-opt-btn:hover:not(:disabled) { background: none !important; border: 0 !important; border-radius: 0; box-shadow: none; }
-.q-opt-btn { position: relative; padding: .45rem .3rem .45rem 1.3rem; font: inherit; font-size: clamp(1.05rem, 2.6vw, 1.35rem); text-align: left; color: var(--bone); cursor: pointer; opacity: 0; animation: ghost .6s ease-out forwards; text-shadow: 0 2px 8px #000; font-style: normal; }
-.q-opt-btn::before { content: "\2726"; position: absolute; left: 0; top: .5rem; font-size: .8em; opacity: 0; transition: opacity .2s; }
-.q-opt-btn::after { content: ""; position: absolute; left: 1.3rem; right: .3rem; bottom: .15rem; height: 1px; background: linear-gradient(90deg, rgba(230, 220, 200, .7), transparent); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
-.q-opt-btn:hover:not(:disabled) { color: #fff; text-shadow: 0 0 14px rgba(200, 170, 255, .95), 0 2px 8px #000; }
-.q-opt-btn:hover:not(:disabled)::before { opacity: 1; }
-.q-opt-btn:hover:not(:disabled)::after { transform: scaleX(1); }
+.q-opt-btn,
+.q-opt-btn:hover:not(:disabled) {
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.q-opt-btn {
+  position: fixed !important;
+  z-index: 6;
+  width: 19vw;
+  max-width: 240px;
+  min-height: 70px;
+  padding: 0.4rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font: inherit;
+  font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1.2;
+  color: #f3e6cc;
+  text-shadow: 0 2px 6px #000, 0 0 14px rgba(0, 0, 0, 0.95);
+  cursor: pointer;
+  opacity: 0;
+  animation: ghost 0.55s ease-out forwards;
+}
+
+/* Pergamino superior izquierdo -> Opción A */
+.q-opt-btn:nth-child(1) {
+  left: 4% !important;
+  right: auto !important;
+  top: 51% !important;
+  bottom: auto !important;
+}
+
+/* Pergamino superior derecho -> Opción B */
+.q-opt-btn:nth-child(2) {
+  right: 4% !important;
+  left: auto !important;
+  top: 51% !important;
+  bottom: auto !important;
+}
+
+/* Pergamino inferior izquierdo -> Opción C */
+.q-opt-btn:nth-child(3) {
+  left: 9% !important;
+  right: auto !important;
+  bottom: 10% !important;
+  top: auto !important;
+}
+
+/* Pergamino inferior derecho -> Opción D */
+.q-opt-btn:nth-child(4) {
+  right: 8% !important;
+  left: auto !important;
+  bottom: 10% !important;
+  top: auto !important;
+}
+
+.q-opt-btn::before {
+  content: "\2726";
+  position: absolute;
+  left: 0.3rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8em;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.q-opt-btn::after {
+  content: "";
+  position: absolute;
+  left: 0.9rem;
+  right: 0.9rem;
+  bottom: 0.3rem;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(243, 230, 204, 0.75), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+
+.q-opt-btn:hover:not(:disabled) {
+  color: #fff8ea;
+  text-shadow: 0 0 14px rgba(255, 210, 130, 0.9), 0 2px 8px #000;
+}
+
+.q-opt-btn:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.q-opt-btn:hover:not(:disabled)::after {
+  transform: scaleX(1);
+}
+
+.front:not(.show) .q-opt-btn {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.12s ease-out !important;
+  animation: none !important;
+}
+
+/* Ocultar rápido al bajar la cámara para no dejar restos sobre el tablero */
+.front:not(.show) .q-opt-btn {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.12s ease-out !important;
+  animation: none !important;
+}
+
+
 .q-opt-btn:disabled { cursor: default; }
 .q-opt-btn:disabled:not(.correct):not(.wrong) { animation: none; opacity: .3; }
 .q-opt-btn.correct { color: #b8f08c; text-shadow: 0 0 16px rgba(120, 220, 80, .9), 0 2px 8px #000; }
@@ -1407,3 +1535,56 @@ button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 .ember.limbo-ember { background: radial-gradient(circle, #dedad2, #7a7772 60%, transparent 72%); box-shadow: 0 0 12px 3px rgba(222, 218, 210, .85); }
 
 .timer-track { contain: layout paint; }
+
+/* ---- Giro a la izquierda en las preguntas (normales y Limbo) ---- */
+#game.to-front.scene-Q #roomBox,
+#game.to-front.scene-limbo #roomBox {
+  transform: rotateX(-46deg) rotateY(-36deg) translateX(40px);
+}
+
+/* El fondo con los pergaminos entra desde la izquierda */
+.front.fx-Q::before,
+.front.fx-limbo::before {
+  transform: scale(1.03) translateX(-65px);
+}
+.front.fx-Q.show::before,
+.front.fx-limbo.show::before {
+  transform: scale(1) translateX(0);
+}
+
+/* La pregunta entra desde el mismo lado */
+.front.fx-Q .front-card,
+.front.fx-limbo .front-card {
+  transform: translateX(-60px) scale(0.97);
+}
+/* IMPORTANTE: debe ser "none" para que las respuestas queden en los pergaminos */
+.front.fx-Q.show .front-card,
+.front.fx-limbo.show .front-card {
+  transform: none;
+}
+
+/* ---------------- Fondos de beneficios y castigos ---------------- */
+
+/* Beneficio: se oscurece el centro para que se lea el texto */
+.front.fx-B::before,
+.front.fx-B.show::before {
+  background:
+    radial-gradient(ellipse 55% 55% at 50% 50%, rgba(12, 7, 2, .74) 0%, rgba(12, 7, 2, .5) 55%, rgba(12, 7, 2, .12) 100%),
+    url("assets/fondo-beneficio.webp") center 45% / cover no-repeat;
+}
+/* Reemplaza el brillo central anterior, que quedaría sobre el texto */
+.front.fx-B::after {
+  background: radial-gradient(circle at 50% 12%, rgba(255, 225, 150, .18), transparent 60%);
+}
+
+/* Castigo */
+.front.fx-P::before,
+.front.fx-P.show::before {
+  background:
+    radial-gradient(ellipse 55% 55% at 50% 50%, rgba(8, 2, 3, .6) 0%, rgba(8, 2, 3, .3) 60%, transparent 100%),
+    url("assets/fondo-castigo.webp") center 25% / cover no-repeat;
+}
+/* Borde rojo más suave para que se vea la habitación */
+.front.fx-P::after {
+  background: radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(150, 10, 25, .35) 100%);
+}
