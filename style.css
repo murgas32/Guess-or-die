@@ -668,10 +668,7 @@ button {
     radial-gradient(circle at calc(100% - 3px) 3px, var(--acc) 0 1.4px, transparent 1.9px),
     radial-gradient(circle at 3px calc(100% - 3px), var(--acc) 0 1.4px, transparent 1.9px),
     radial-gradient(circle at calc(100% - 3px) calc(100% - 3px), var(--acc) 0 1.4px, transparent 1.9px);
-}.t-Q { --acc: #b7a4e0; background: radial-gradient(circle, rgba(120, 80, 200, .18), transparent 62%), linear-gradient(145deg, #1b1620, #070509); }.t-B { --acc: #e7b552; background: radial-gradient(circle at 50% 70%, rgba(230, 160, 50, .2), transparent 62%), linear-gradient(145deg, #1a1510, #080605); }.t-P { --acc: #c2323e; background: radial-gradient(circle, rgba(190, 30, 40, .22), transparent 62%), linear-gradient(145deg, #1c1012, #070405); }.t-L { --acc: #dedad2; background: radial-gradient(circle, rgba(222, 218, 210, .22), transparent 62%), linear-gradient(145deg, #232225, #0a090b); }.t-P::before { /* cracks */
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(115deg, transparent 46.5%, rgba(180, 40, 50, .55) 47% 48%, transparent 48.5%), linear-gradient(62deg, transparent 69.5%, rgba(180, 40, 50, .4) 70% 71%, transparent 71.5%);
-}.t-S { --acc: #8a2330; background: radial-gradient(circle, rgba(160, 30, 40, .3), transparent 58%), linear-gradient(145deg, #1a1614, #060505); }.t-M { --acc: #52c48a; background: radial-gradient(circle, rgba(82, 196, 138, .3), transparent 58%), linear-gradient(145deg, #132418, #040805); }
+}.t-Q { --acc: #b7a4e0; background: radial-gradient(circle, rgba(120, 80, 200, .18), transparent 62%), linear-gradient(145deg, #1b1620, #070509); }.t-B { --acc: #e7b552; background: radial-gradient(circle at 50% 70%, rgba(230, 160, 50, .2), transparent 62%), linear-gradient(145deg, #1a1510, #080605); }.t-P { --acc: #c2323e; background: radial-gradient(circle, rgba(190, 30, 40, .22), transparent 62%), linear-gradient(145deg, #1c1012, #070405); }.t-L { --acc: #dedad2; background: radial-gradient(circle, rgba(222, 218, 210, .22), transparent 62%), linear-gradient(145deg, #232225, #0a090b); }.t-S { --acc: #8a2330; background: radial-gradient(circle, rgba(160, 30, 40, .3), transparent 58%), linear-gradient(145deg, #1a1614, #060505); }.t-M { --acc: #52c48a; background: radial-gradient(circle, rgba(82, 196, 138, .3), transparent 58%), linear-gradient(145deg, #132418, #040805); }
 /* Question: the lens of a planchette */
 .g-q { position: relative; width: 54px; height: 54px; border-radius: 50%; border: 2px solid rgba(220, 210, 190, .85); display: grid; place-items: center;
   background: radial-gradient(circle at 35% 30%, rgba(190, 160, 255, .28), rgba(18, 10, 32, .9) 70%);
@@ -687,10 +684,9 @@ button {
 .g-p { position: relative; width: 56px; height: 52px; }.tri { position: absolute; inset: 0; background: linear-gradient(#e03a46, #6a0f1a); clip-path: polygon(50% 100%, 0 0, 100% 0); }.tri::after { content: ""; position: absolute; inset: 5px 8px 10px; background: #0a0405; clip-path: polygon(50% 100%, 0 0, 100% 0); }.eye {
   position: absolute; left: 19px; top: 12px; width: 18px; height: 10px; border-radius: 50%;
   background: radial-gradient(circle, #1a0003 0 24%, #e0303c 26% 58%, #f1e6d0 60%);
-  box-shadow: 0 0 8px rgba(224, 48, 60, .8);
   animation: eyePulse 2.6s ease-in-out infinite;
 }@keyframes eyePulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(224, 48, 60, .8); transform: scale(1); }  50% { box-shadow: 0 0 14px rgba(255, 40, 60, 1); transform: scale(1.08); }}
+  0%, 100% { transform: scale(1); }  50% { transform: scale(1.08); }}
 /* Limbo: a ritual skull seal in neutral white */
 .g-l {
   position: relative; width: 54px; height: 54px; border-radius: 50%;
@@ -3085,7 +3081,7 @@ button {
 /* Continue: plain text, no button box */
 #frontBtn, #frontBtn:hover:not(:disabled) { background: none; border: 0; box-shadow: none; }#frontBtn { font-size: 1.1rem; letter-spacing: .14em; text-transform: uppercase; color: var(--bone); padding: .5rem 1rem; text-shadow: 0 0 12px #000; }#frontBtn::after { content: " \2192"; }#frontBtn:hover:not(:disabled) { color: #fff; text-shadow: 0 0 16px rgba(230, 220, 203, .8); }
 @media (prefers-reduced-motion: reduce) {
-  .w, .q-opt-btn { animation: none; opacity: 1; transform: none; }  .ember, .front::after, .front-card, .win-flare, .window-beam, .win-shadow { animation: none !important; }  .front, .front-card { transition-duration: .01s; }}
+  .w, .q-opt-btn { animation: none; opacity: 1; transform: none; }  .ember, .front::after, .front-card, .win-flare, .window-beam, .win-shadow, .wall-eye::after { animation: none !important; }  .front, .front-card { transition-duration: .01s; }}
 /* ---------- The room: one 3D world. Camera = the player's head, at the origin. ----------
    Eye-relative units: x right, y down, z = 1000px - distance ahead (perspective is 1000px).
    Floor at y=1270, table top at y=760, ceiling at y=-570. Only one light: the lamp above the table. */
@@ -3107,8 +3103,8 @@ button {
   box-sizing: border-box; border-bottom: 50px solid #0b0605;
   background:
     radial-gradient(ellipse 1500px 900px at 50% 5%, rgba(255, 190, 120, .10), transparent 100%),
-    linear-gradient(rgba(4, 2, 2, .64), rgba(4, 2, 2, .80)),
-    var(--plaster) 0 0 / 512px, #5c4a3c;
+    linear-gradient(rgba(4, 2, 2, .28), rgba(4, 2, 2, .48)),
+    url("assets/wall-brick.jpg") 0 0 / 800px repeat, #141212;
 }.back::before, .side::before {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 620px; border-top: 10px solid rgba(0, 0, 0, .6);
   background: repeating-linear-gradient(90deg, transparent 0 420px, rgba(0, 0, 0, .5) 420px 428px), linear-gradient(rgba(3, 2, 2, .6), rgba(3, 2, 2, .6)), var(--wood) 0 0 / 700px;
@@ -3155,10 +3151,25 @@ button {
   transform-origin: 50% 100%;
   transition: opacity var(--head-turn-dur) var(--head-turn-ease), transform var(--head-turn-dur) var(--head-turn-ease);
 }
-.win-shadow svg {
-  width: 100%;
-  height: 100%;
+.win-shadow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(2, 2, 4, 0.92) 0%, rgba(2, 2, 4, 0.35) 14%, transparent 34%),
+    radial-gradient(ellipse 72% 66% at 50% 46%, transparent 36%, rgba(2, 2, 5, 0.72) 94%);
+}
+.win-shadow .win-entity {
+  position: absolute;
+  bottom: -16px;
+  left: 47%;
+  transform: translateX(-50%);
+  height: 92%;
+  width: auto;
+  max-width: none;
   display: block;
+  filter: brightness(0.74) contrast(1.32) drop-shadow(0 0 36px rgba(0, 0, 0, 1)) drop-shadow(0 0 12px rgba(0, 0, 0, 0.95));
 }
 .win-mullions {
   background:
@@ -3208,17 +3219,97 @@ button {
   animation: winBeamPulse 3.6s ease-in-out infinite alternate;
 }
 
-/* Punishment tile: silhouette of a shadow standing on the other side of the window */
+/* Punishment tile: disturbing face looming in the dark window + watching wall eyes */
 #game.scene-P .window {
-  box-shadow: 0 0 130px rgba(145, 170, 210, .38), inset 0 0 42px rgba(0, 0, 0, .55);
+  box-shadow: 0 0 120px rgba(90, 108, 136, .28), inset 0 0 70px rgba(0, 0, 0, .85);
 }
 #game.scene-P .win-sky {
-  background: radial-gradient(circle at 50% 46%, #9fb3cc 0%, #566882 48%, #161d2b 100%);
+  background: radial-gradient(circle at 50% 42%, #68788c 0%, #232c39 46%, #05070b 100%);
 }
 #game.scene-P .win-shadow {
   opacity: 1;
   transform: translateY(0) scale(1);
   animation: winShadowLoom 4.4s ease-in-out infinite alternate;
+}
+#game.scene-P .back {
+  background:
+    radial-gradient(ellipse 1600px 1000px at 50% 42%, rgba(0, 0, 0, .25), rgba(2, 0, 2, .78) 100%),
+    linear-gradient(rgba(4, 1, 2, .42), rgba(2, 0, 1, .62)),
+    url("assets/wall-brick.jpg") 0 0 / 800px repeat, #100e0e;
+}
+
+/* Disturbing eyes embedded across the back wall (punishment scene only) */
+.wall-eyes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity var(--head-turn-dur) var(--head-turn-ease), filter var(--head-turn-dur) var(--head-turn-ease);
+}
+#game.scene-Q .wall-eyes,
+#game.scene-B .wall-eyes {
+  opacity: 0;
+}
+#game.scene-P .wall-eyes {
+  opacity: 1;
+}
+.wall-eye {
+  position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  width: var(--w, 220px);
+  aspect-ratio: 194 / 128;
+  transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scaleX(var(--sx, 1));
+  pointer-events: none;
+}
+.wall-eye::before {
+  content: "";
+  position: absolute;
+  inset: -55% -45%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, .34) 10%, rgba(0, 0, 0, .14) 44%, transparent 76%);
+  filter: blur(18px);
+}
+.wall-eye::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("assets/wall-eye.png") center / contain no-repeat;
+  filter: brightness(0.76) contrast(1.2) drop-shadow(0 2px 6px rgba(0, 0, 0, .45));
+  transform-origin: 50% 52%;
+  animation: wallEyeStare var(--dur, 5.5s) ease-in-out var(--d, 0s) infinite;
+}
+.wall-eye:nth-child(3n)::after {
+  animation-name: wallEyeTwitch;
+}
+.wall-eye:nth-child(5n)::after {
+  animation-name: wallEyeBlink;
+}
+#game.scene-P .wall-eye::before {
+  background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, .38) 12%, rgba(0, 0, 0, .16) 46%, transparent 78%);
+}
+#game.scene-P .wall-eye::after {
+  filter: brightness(0.88) contrast(1.28) drop-shadow(0 2px 8px rgba(0, 0, 0, .5));
+}
+
+@keyframes wallEyeStare {
+  0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.92; }
+  38% { transform: scale(1.03, 0.98) translate(1.5px, -1px); opacity: 0.98; }
+  62% { transform: scale(0.99, 1.04) translate(-1.5px, 1px); opacity: 0.88; }
+  85% { transform: scale(1.04, 1.02) translate(0.5px, 0); opacity: 1; }
+}
+@keyframes wallEyeTwitch {
+  0%, 72%, 100% { transform: scale(1) translate(0, 0); }
+  74% { transform: scale(1.06, 0.92) translate(-3px, 1.5px); }
+  76% { transform: scale(0.96, 1.08) translate(3px, -2px); }
+  78% { transform: scale(1.02, 0.98) translate(-1px, 0); }
+  80% { transform: scale(1) translate(0, 0); }
+}
+@keyframes wallEyeBlink {
+  0%, 86%, 94%, 100% { transform: scaleY(1) scaleX(1); }
+  89% { transform: scaleY(0.12) scaleX(1.04); }
+  91% { transform: scaleY(1.08) scaleX(0.98); }
 }
 
 @keyframes winLightPulse {
@@ -3231,7 +3322,7 @@ button {
 }
 @keyframes winShadowLoom {
   from { transform: translateY(6px) scale(0.99); }
-  to { transform: translateY(-4px) scale(1.025); }
+  to { transform: translateY(-4px) scale(1.03); }
 }
 .curtain { top: 270px; width: 230px; height: 1150px; box-shadow: inset 0 -60px 90px rgba(0, 0, 0, .6), 0 0 30px #000; background: repeating-linear-gradient(90deg, #35101a 0 20px, #210a10 20px 44px); }.curtain.a { left: 1540px; }
 

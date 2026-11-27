@@ -404,53 +404,54 @@ function getCasilla1Path() {
   return "M " + pts.join(" L ") + " Z";
 }
 
-// White-pencil on black hand-drawn SVG emblems for each tile type (matching logo style)
+// White dry-brush SVG emblems for each tile type
 const GLYPHS = {
   Q: `<span class="pencil-glyph pg-q" aria-hidden="true">
         <svg viewBox="0 0 48 48" width="44" height="44">
-          <circle cx="24" cy="24" r="18" fill="none" stroke="#e8e4dc" stroke-width="1.6" stroke-dasharray="38 4 28 3" stroke-linecap="round"/>
-          <circle cx="24" cy="24" r="15.2" fill="none" stroke="#e8e4dc" stroke-width="0.9" stroke-opacity="0.55" stroke-dasharray="18 5 22 4" stroke-linecap="round"/>
-          <path d="M19.5 18.5 C19.5 14.2 28.5 13.8 28.5 18.5 C28.5 22 24 22.8 24 26.5" fill="none" stroke="#f0ece4" stroke-width="2.4" stroke-linecap="round"/>
-          <circle cx="24" cy="32.2" r="1.7" fill="#f0ece4"/>
+          <g filter="url(#brushDry)" fill="#f5f3ee">
+            <path d="M14.2 21.8 C12.6 15.2 17.8 7.8 26.4 8.2 C34.2 8.6 37.6 15.2 34.4 21.2 C32.2 25.3 27.6 26.8 26.6 31.2 L20.4 31.4 C20.6 25.6 25.2 23.4 27.2 20.2 C29.0 17.3 27.8 14.0 24.4 13.8 C20.8 13.6 18.8 17.0 19.4 21.4 Z"/>
+            <path d="M18.6 10.6 C22.5 7.4 29.2 7.5 33.2 11.4" fill="none" stroke="#f5f3ee" stroke-width="1.3" stroke-dasharray="6 2.5 4 2" stroke-linecap="round"/>
+            <path d="M20.4 35.4 C22.8 34.8 26.0 34.9 27.8 35.6 C28.2 37.4 28.0 39.4 27.2 40.8 C24.8 41.2 22.0 41.0 20.2 40.3 C19.8 38.6 19.9 36.8 20.4 35.4 Z"/>
+          </g>
         </svg>
       </span>`,
   B: `<span class="pencil-glyph pg-b" aria-hidden="true">
         <svg viewBox="0 0 48 48" width="44" height="44">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="#e8e4dc" stroke-width="1.4" stroke-dasharray="2.5 4.5" stroke-linecap="round" stroke-opacity="0.78"/>
-          <path d="M24 8 C26.8 12.5 28 15.8 26.8 18.8 C25.9 20.8 22.1 20.8 21.2 18.8 C20 15.8 21.2 12.5 24 8 Z" fill="none" stroke="#f2eee6" stroke-width="1.7" stroke-linejoin="round"/>
-          <path d="M24 12.5 C24.8 14.5 25.1 16.2 24 17.6" fill="none" stroke="#f2eee6" stroke-width="1.1" stroke-linecap="round"/>
-          <line x1="24" y1="19.5" x2="24" y2="22" stroke="#e8e4dc" stroke-width="1.3" stroke-linecap="round"/>
-          <path d="M19.5 22 L28.5 22 L28.2 37.5 L19.8 37.5 Z" fill="none" stroke="#e8e4dc" stroke-width="1.7" stroke-linejoin="round"/>
-          <path d="M21 22 C21.2 26 22.8 26 23 22 M25.5 22 C25.7 28 27 28 27.2 22" fill="none" stroke="#e8e4dc" stroke-width="1.1" stroke-linecap="round" stroke-opacity="0.8"/>
-          <line x1="16.5" y1="37.8" x2="31.5" y2="37.8" stroke="#e8e4dc" stroke-width="1.5" stroke-linecap="round"/>
+          <g filter="url(#brushDry)" fill="#f5f3ee">
+            <path d="M24 6.5 C27.8 11.8 29.2 16.0 27.6 19.6 C26.4 22.0 21.6 22.0 20.4 19.6 C18.8 16.0 20.2 11.8 24 6.5 Z"/>
+            <path d="M18.2 23.2 L29.8 23.0 L29.2 39.2 L18.8 39.2 Z"/>
+            <path d="M14.5 39.5 L33.5 39.5" fill="none" stroke="#f5f3ee" stroke-width="3.2" stroke-linecap="round"/>
+          </g>
         </svg>
       </span>`,
   P: `<span class="pencil-glyph pg-p" aria-hidden="true">
         <svg viewBox="0 0 48 48" width="44" height="44">
-          <polygon points="8,12 40,12 24,39" fill="none" stroke="#e8e4dc" stroke-width="1.8" stroke-linejoin="round"/>
-          <polygon points="12.5,14.5 35.5,14.5 24,34.5" fill="none" stroke="#e8e4dc" stroke-width="0.9" stroke-opacity="0.55" stroke-linejoin="round"/>
-          <path d="M16 20.5 Q24 14.5 32 20.5 Q24 26.5 16 20.5 Z" fill="none" stroke="#f0ece4" stroke-width="1.5" stroke-linejoin="round"/>
-          <circle cx="24" cy="20.5" r="2.7" fill="#f0ece4"/>
-          <circle cx="23.2" cy="19.7" r="0.8" fill="#000000"/>
+          <g filter="url(#brushDry)">
+            <polygon points="7.5,11.5 40.5,11.5 24,40.5" fill="none" stroke="#f5f3ee" stroke-width="4.2" stroke-linejoin="round"/>
+            <path d="M15.8 20.5 Q24 14.5 32.2 20.5 Q24 26.5 15.8 20.5 Z" fill="none" stroke="#f5f3ee" stroke-width="2.6" stroke-linejoin="round"/>
+            <circle cx="24" cy="20.5" r="3.2" fill="#f5f3ee"/>
+          </g>
         </svg>
       </span>`,
   L: `<span class="pencil-glyph pg-l" aria-hidden="true">
         <svg viewBox="0 0 48 48" width="44" height="44">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="#e8e4dc" stroke-width="1.4" stroke-dasharray="14 4 22 4" stroke-linecap="round"/>
-          <path d="M15.5 23 C15.5 15.5 32.5 15.5 32.5 23 C32.5 26.8 30.2 28.8 29 30.2 L29 34.5 L19 34.5 L19 30.2 C17.8 28.8 15.5 26.8 15.5 23 Z" fill="none" stroke="#f0ece4" stroke-width="1.6" stroke-linejoin="round"/>
-          <circle cx="20.2" cy="22.8" r="2.3" fill="none" stroke="#f0ece4" stroke-width="1.4"/>
-          <circle cx="27.8" cy="22.8" r="2.3" fill="none" stroke="#f0ece4" stroke-width="1.4"/>
-          <path d="M24 26.2 L22.7 28.8 L25.3 28.8 Z" fill="none" stroke="#f0ece4" stroke-width="1.1" stroke-linejoin="round"/>
-          <line x1="21.5" y1="31.5" x2="21.5" y2="34.5" stroke="#f0ece4" stroke-width="1.2"/>
-          <line x1="24" y1="31.5" x2="24" y2="34.5" stroke="#f0ece4" stroke-width="1.2"/>
-          <line x1="26.5" y1="31.5" x2="26.5" y2="34.5" stroke="#f0ece4" stroke-width="1.2"/>
+          <g filter="url(#brushDry)" fill="#f5f3ee">
+            <path d="M13.5 22.5 C13.5 12.8 34.5 12.8 34.5 22.5 C34.5 27.2 31.6 29.8 30.2 31.4 L30.2 37.5 L17.8 37.5 L17.8 31.4 C16.4 29.8 13.5 27.2 13.5 22.5 Z"/>
+            <circle cx="19.5" cy="22.5" r="3.0" fill="#0a090b"/>
+            <circle cx="28.5" cy="22.5" r="3.0" fill="#0a090b"/>
+            <path d="M24 26.8 L22.2 30.2 L25.8 30.2 Z" fill="#0a090b"/>
+            <line x1="21.0" y1="33.2" x2="21.0" y2="37.5" stroke="#0a090b" stroke-width="1.6"/>
+            <line x1="24.0" y1="33.2" x2="24.0" y2="37.5" stroke="#0a090b" stroke-width="1.6"/>
+            <line x1="27.0" y1="33.2" x2="27.0" y2="37.5" stroke="#0a090b" stroke-width="1.6"/>
+          </g>
         </svg>
       </span>`,
   M: `<span class="pencil-glyph pg-m" aria-hidden="true">
         <svg viewBox="0 0 48 48" width="44" height="44">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="#f0ece4" stroke-width="1.5" stroke-dasharray="28 4 18 4" stroke-linecap="round"/>
-          <polygon points="24,8.5 27.6,18.2 38,18.6 29.8,25 32.6,35 24,29.2 15.4,35 18.2,25 10,18.6 20.4,18.2" fill="none" stroke="#f2eee6" stroke-width="1.7" stroke-linejoin="round"/>
-          <circle cx="24" cy="23.5" r="3.2" fill="none" stroke="#f2eee6" stroke-width="1.2"/>
+          <g filter="url(#brushDry)">
+            <polygon points="24,7.5 28.4,18.4 40.2,19.0 31.0,26.4 34.2,37.8 24,31.2 13.8,37.8 17.0,26.4 7.8,19.0 19.6,18.4" fill="#f5f3ee" stroke="#f5f3ee" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="24" cy="23.8" r="3.5" fill="#040805"/>
+          </g>
         </svg>
       </span>`,
   S: "",
@@ -490,6 +491,10 @@ function buildBoard() {
       <filter id="chalkStroke" x="-5%" y="-5%" width="110%" height="110%">
         <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="2" result="noise" seed="7" />
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <filter id="brushDry" x="-15%" y="-15%" width="130%" height="130%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.18 0.06" numOctaves="3" seed="11" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.6" xChannelSelector="R" yChannelSelector="G" />
       </filter>
       <path id="arcTop" d="M 16,340 A 324,324 0 0 1 664,340" />
       <path id="arcBottom" d="M 664,340 A 324,324 0 0 1 16,340" />
