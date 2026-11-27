@@ -1,0 +1,20 @@
+/* Mesa ilustrada. Todo son imagenes fijas ya preparadas: sin filtros ni animaciones.
+   Para volver a la mesa anterior, usa tu index.html anterior. */
+.p.tabletop {
+  border-color: #150a05;
+  background: url("assets/mesa.jpg") 0 0 / 100% 100% no-repeat, #2c180d;
+}
+/* La imagen ya trae su propia luz: se suaviza la sombra anterior para que no la tape. */
+.p.tablelight { opacity: .4; }
+
+/* Velas y calavera: de pie sobre la mesa, algo inclinadas hacia la camara. */
+.p.adorno {
+  pointer-events: none;
+  background: var(--img) 0 0 / 100% 100% no-repeat;
+  transform-origin: 50% 100%;
+  --r: rotateX(28deg);
+}
+.adorno.vela-izq { --img: url("assets/vela-izq.png"); }
+.adorno.vela-der { --img: url("assets/vela-der.png"); }
+.adorno.craneo   { --img: url("assets/craneo.png"); }
+#game.lite .adorno { display: none; }

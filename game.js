@@ -1,3 +1,4 @@
+/* OPTIMIZADO */
 // Guess or Die - Atmospheric 3D Turn-based Horror Trivia Game
 
 const BOARD_SIZE = 50;
@@ -62,7 +63,7 @@ let menuAudio = null;
 let diceBuffer = null;
 let fichaBuffer = null;
 let screamerBuffer = null;
-let buffersLoading = false;
+let buffersRequested = false;
 
 function audio() {
   if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { /* no audio */ } }
@@ -70,16 +71,53 @@ function audio() {
   return audioCtx;
 }
 
+const sfxPools = {};
+function getSfxPool(src) {
+  if (!sfxPools[src]) {
+    sfxPools[src] = {
+      next: 0,
+      items: Array.from({ length: 4 }, () => {
+        const a = new Audio(src);
+        a.preload = "auto";
+        return a;
+      })
+    };
+  }
+  return sfxPools[src];
+}
+
+function playFallback(src, volume) {
+  const pool = getSfxPool(src);
+  const a = pool.items[pool.next];
+  pool.next = (pool.next + 1) % pool.items.length;
+  a.volume = volume;
+  a.currentTime = 0;
+  a.play().catch(() => {});
+}
+
+let noiseBuffer = null;
+function getNoiseBuffer(c) {
+  if (!noiseBuffer) {
+    noiseBuffer = c.createBuffer(1, Math.floor(c.sampleRate * 0.35), c.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (c.sampleRate * 0.08));
+    }
+  }
+  return noiseBuffer;
+}
+
 function loadSoundBuffers() {
-  if (buffersLoading || diceBuffer) return;
+  if (buffersRequested) return;
   const c = audio();
   if (!c) return;
-  buffersLoading = true;
+  buffersRequested = true;
+  getNoiseBuffer(c);
   Promise.all([
     fetch(SOUND_FILES.dice).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { diceBuffer = decoded; }).catch(() => {}),
     fetch(SOUND_FILES.ficha).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { fichaBuffer = decoded; }).catch(() => {}),
     fetch(SOUND_FILES.screamer).then(r => r.arrayBuffer()).then(b => c.decodeAudioData(b)).then(decoded => { screamerBuffer = decoded; }).catch(() => {})
-  ]).finally(() => { buffersLoading = false; });
+  ]);
 }
 
 function initAudioSystem() {
@@ -133,9 +171,7 @@ function playDiceSound() {
       return;
     } catch (e) {}
   }
-  const a = new Audio(SOUND_FILES.dice);
-  a.volume = 0.95;
-  a.play().catch(() => {});
+  playFallback(SOUND_FILES.dice, 0.95);
 }
 
 function playFichaSound() {
@@ -153,9 +189,7 @@ function playFichaSound() {
       return;
     } catch (e) {}
   }
-  const a = new Audio(SOUND_FILES.ficha);
-  a.volume = 0.85;
-  a.play().catch(() => {});
+  playFallback(SOUND_FILES.ficha, 0.85);
 }
 
 // ---- Question Countdown Audios by Category ----
@@ -358,13 +392,9 @@ function playScream() {
       subOsc.stop(t + 0.75);
 
       // Desgarro ruidoso de choque transitorio
-      const buf = c.createBuffer(1, Math.floor(c.sampleRate * 0.35), c.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < data.length; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (c.sampleRate * 0.08));
-      }
+      
       const noise = c.createBufferSource();
-      noise.buffer = buf;
+      noise.buffer = getNoiseBuffer(c);
       const band = c.createBiquadFilter();
       band.type = "bandpass";
       band.frequency.setValueAtTime(3400, t);
@@ -1528,7 +1558,8 @@ async function askQuestion(p, isLimbo = false) {
       timerInterval = setInterval(() => {
         const remainingMs = Math.max(0, totalMs - (performance.now() - startAt));
         timerBar.style.width = `${(remainingMs / totalMs) * 100}%`;
-        timerText.textContent = `${Math.ceil(remainingMs / 1000)}s`;
+        const label = `${Math.ceil(remainingMs / 1000)}s`;
+        if (timerText.textContent !== label) timerText.textContent = label;
         if (remainingMs <= 5000 || isPressured) timerWrap.classList.add("urgent");
         if (remainingMs <= 0) handleTimeout();
       }, 100);
@@ -1901,18 +1932,31 @@ function finishLastSurvivor(winner) {
   playWinCinematic(winner, explanation);
 }
 
+const IMAGE_ASSETS = [
+  "assets/wall-brick.jpg", "assets/wall-eye.png", "assets/win-entity.png",
+  "assets/eye-sclera.png", "assets/eye-pupil.png",
+  "assets/eye-eyelids.png", "assets/eye-blink.png"
+];
+const preloadedImages = [];
+const imagesReady = Promise.all(IMAGE_ASSETS.concat(SCREAMER_IMAGES).map((src) => {
+  const img = new Image();
+  img.src = src;
+  preloadedImages.push(img);
+  return img.decode ? img.decode().catch(() => {}) : Promise.resolve();
+}));
+
 async function warmUp() {
   const game = $("game"), cover = $("cover"), scare = $("screamerOverlay");
   $("coverText").textContent = I18N[gameLang].preparing;
   cover.hidden = false;
-  game.classList.add("warm");
+  game.classList.add("warm", "scene-P");
   scare.hidden = false; // drawn once behind the cover so the first scare does not stutter
   await sleep(500);
   scare.hidden = true;
   game.classList.add("to-front");
   await sleep(700);
-  game.classList.remove("to-front");
-  await sleep(500);
+  game.classList.remove("to-front", "scene-P");
+  await Promise.all([sleep(700), Promise.race([imagesReady, sleep(1500)])]);
   game.classList.remove("warm");
   cover.hidden = true;
 }
@@ -2251,3 +2295,5 @@ function bakeTextures() {
 }
 bakeTextures();
 initAudioSystem();
+getSfxPool(SOUND_FILES.dice);
+getSfxPool(SOUND_FILES.ficha);

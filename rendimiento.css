@@ -1,0 +1,66 @@
+/* ========== Rendimiento (no cambia el diseno) ==========
+   1) Paredes y luces difusas: se dibujan a la mitad y se amplian x2 (4 veces menos pixeles).
+   2) Cambios de escena: capas ya preparadas que solo cambian de opacidad,
+      en lugar de volver a pintar la pared mientras la camara se mueve. */
+
+/* ---- Paredes ---- */
+.p.back { --w: 2400px !important; --h: 1110px !important; --r: scale(2) !important; }
+.p.side { --w: 2300px !important; --h: 1110px !important; }
+.p.side.izq { --r: rotateY(90deg) scale(2) !important; }
+.p.side.der { --r: rotateY(-90deg) scale(2) !important; }
+/* Los objetos de la pared conservan sus medidas originales; zoom los reduce a la mitad. */
+.p > .medio { position: absolute; display: block; left: 0; top: 0; width: 4800px; height: 2170px; zoom: .5; }
+.p.side > .medio { width: 4600px; }
+.back, .side, #game.scene-P .back {
+  border-bottom-width: 25px;
+  background:
+    radial-gradient(ellipse 750px 450px at 50% 5%, rgba(255, 190, 120, .10), transparent 100%),
+    linear-gradient(rgba(4, 2, 2, .28), rgba(4, 2, 2, .48)),
+    url("assets/wall-brick.jpg") 0 0 / 400px repeat, #141212;
+}
+.back::before, .side::before {
+  height: 310px; border-top-width: 5px;
+  background: repeating-linear-gradient(90deg, transparent 0 210px, rgba(0, 0, 0, .5) 210px 214px), linear-gradient(rgba(3, 2, 2, .6), rgba(3, 2, 2, .6)), var(--wood) 0 0 / 350px;
+}
+
+/* ---- Pared oscura del castigo: ya dibujada, solo se muestra ---- */
+.p > .pared-castigo {
+  position: absolute; display: block; inset: 0; z-index: -1; opacity: 0; will-change: opacity;
+  background:
+    radial-gradient(ellipse 800px 500px at 50% 42%, rgba(0, 0, 0, .25), rgba(2, 0, 2, .78) 100%),
+    linear-gradient(rgba(4, 1, 2, .42), rgba(2, 0, 1, .62)),
+    url("assets/wall-brick.jpg") 0 0 / 400px repeat, #100e0e;
+}
+#game.scene-P .pared-castigo { opacity: 1; }
+
+/* ---- Brillo de la ventana: tres capas que se funden, sin recalcular sombras gigantes ---- */
+.window, #game.scene-B .window, #game.scene-P .window { box-shadow: none; transition: none; }
+.brillo {
+  position: absolute; display: block; left: 1800px; top: 330px; width: 1200px; height: 1000px;
+  pointer-events: none; will-change: opacity;
+  transition: opacity var(--head-turn-dur) var(--head-turn-ease);
+}
+.brillo.normal { box-shadow: 0 0 80px rgba(120, 150, 200, .24); }
+.brillo.beneficio { opacity: 0; box-shadow: 0 0 180px rgba(255, 224, 145, .82), 0 0 380px rgba(255, 185, 85, .48); }
+.brillo.castigo { opacity: 0; box-shadow: 0 0 120px rgba(90, 108, 136, .28); }
+#game.scene-B .brillo.normal, #game.scene-P .brillo.normal { opacity: 0; }
+#game.scene-B .brillo.beneficio, #game.scene-P .brillo.castigo { opacity: 1; }
+.win-sky { will-change: transform; transition: none; }
+
+/* ---- Ojos: siempre con el mismo filtro, para no repintar los 37 al cambiar de escena ---- */
+.wall-eye::before { background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, .38) 12%, rgba(0, 0, 0, .16) 46%, transparent 78%); }
+.wall-eye::after { filter: brightness(0.88) contrast(1.28) drop-shadow(0 2px 8px rgba(0, 0, 0, .5)); }
+
+/* ---- Luces de la lampara (degradados suaves) ---- */
+.p.cone { --w: 800px !important; --h: 510px !important; --r: scale(2) !important; }
+.p.bloom { --w: 450px !important; --h: 450px !important; --r: scale(2) !important; }
+.p.tablelight {
+  --w: 680px !important; --h: 560px !important; --r: rotateX(90deg) scale(2) !important; border-radius: 4px;
+}
+
+/* ---- Modo "Calidad: baja" ---- */
+#game.lite .brillo, #game.lite .pared-castigo { display: none; }
+
+/* La pantalla de carga es casi opaca (no del todo) para que Chrome si dibuje la sala
+   que hay detras mientras se prepara. A simple vista es igual. */
+#cover { background: rgba(5, 3, 3, .996); }
